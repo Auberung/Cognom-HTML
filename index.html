@@ -1428,7 +1428,11 @@ function showTree() {
   setupTreePanZoom();
   requestAnimationFrame(() => requestAnimationFrame(() => {
     renderTree();
+    // multiple fit attempts — mobile layouts settle asynchronously after
+    // address bars hide, fonts load, and the viewport finalises its size
     setTimeout(treeResetView, 60);
+    setTimeout(treeResetView, 250);
+    setTimeout(treeResetView, 600);
   }));
 }
 
@@ -2855,7 +2859,7 @@ function renderTree() {
   const friendRows = Math.max(1, Math.ceil(friends.length/4));
   const crownH = 330;
   const trunkTop = crownTop + crownH;
-  const trunkH = partners.length ? 280 : 130;
+  const trunkH = partners.length ? 340 : 130;
   const trunkBot = trunkTop + trunkH;
   const rootRows = Math.max(1, Math.ceil(family.length/4));
   const rootH = family.length ? 260 : 110;
@@ -2978,11 +2982,11 @@ function renderTree() {
   }
 
   // ---- PARTNER (on the trunk, above you) ----
-  // Partner sits in the upper quarter of the trunk, leaving clear space below for "you"
+  // Partner sits high on the trunk, clear of the foliage drape, with generous space below for "you"
   let pBranch='', pLeaves='', pBub='';
   const hasPartner = partners.length > 0;
   if(hasPartner){
-    const px=cx, py=trunkTop + trunkH*0.22;
+    const px=cx, py=trunkTop + 110;   // clear of the foliage drape (which extends ~85px below trunkTop)
     pBub=bubble(partners[0],px,py,30,{color:COL.partner});
   }
 
