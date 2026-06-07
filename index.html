@@ -689,8 +689,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="topbar-sub">Friends in the crown · partner above you · family at the roots</div>
         </div>
         <div class="topbar-actions">
-          <button class="btn-ghost" onclick="treeZoom(1.2)" title="Zoom in">+</button>
-          <button class="btn-ghost" onclick="treeZoom(0.8)" title="Zoom out">&minus;</button>
           <button class="btn-ghost" onclick="treeResetView()" title="Fit to screen">Fit</button>
           <button class="btn-ghost" onclick="openAddPerson()">+ Add person</button>
         </div>
@@ -3270,22 +3268,35 @@ function applyTreeTransform() {
   const vp  = document.getElementById('tree-viewport');
   if(!pan || !vp) return;
 
-  // clamp pan so the tree can never be dragged fully off screen.
-  // at least 20% of the scaled tree width/height must remain visible.
+  // clamp pan so the tree's edges pin to the viewport edges — no panning out into empty sky/earth
   const vw = vp.clientWidth  || window.innerWidth  || 800;
   const vh = vp.clientHeight || window.innerHeight || 600;
-  const sw = treeView.w * treeView.scale;   // scaled tree width
-  const sh = treeView.h * treeView.scale;   // scaled tree height
-  const margin = 80;                        // minimum px of tree that must stay on screen
-  treeView.x = Math.min(vw - margin, Math.max(margin - sw, treeView.x));
-  treeView.y = Math.min(vh - margin, Math.max(margin - sh, treeView.y));
+  const sw = treeView.w * treeView.scale;
+  const top = treeView.contentTop * treeView.scale;
+  const bot = treeView.contentBottom * treeView.scale;
+  const sh = bot - top;   // scaled height of the actual tree content (not the full SVG)
+
+  // horizontal: if the tree fits, center it; otherwise pin its edges to the viewport edges
+  if(sw <= vw) {
+    treeView.x = (vw - sw) / 2;
+  } else {
+    if(treeView.x > 0) treeView.x = 0;
+    if(treeView.x < vw - sw) treeView.x = vw - sw;
+  }
+  // vertical: same idea, but measured against the content region (foliage top → ground bottom)
+  if(sh <= vh) {
+    treeView.y = (vh - sh) / 2 - top;
+  } else {
+    if(treeView.y + top > 0) treeView.y = -top;
+    if(treeView.y + bot < vh) treeView.y = vh - bot;
+  }
 
   pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px)`;
   // apply zoom by resizing the SVG itself so it re-renders as crisp vectors (no bitmap scaling)
   const svg = pan.querySelector('svg');
   if(svg) {
     svg.setAttribute('width',  sw.toFixed(1));
-    svg.setAttribute('height', sh.toFixed(1));
+    svg.setAttribute('height', (treeView.h * treeView.scale).toFixed(1));
   }
 }
 
