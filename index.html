@@ -189,9 +189,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .tree-svg { display: block; overflow: visible; }
 .tree-viewport { position: relative; width: 100%; height: 100%; overflow: hidden; cursor: grab; touch-action: none; background: #AECFE6; }
 .tree-viewport.grabbing { cursor: grabbing; }
-.tree-pan { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
-.tree-pan .tree-wrap { padding: 0; }
-.tree-pan .tree-svg { width: auto; max-width: none; height: auto; }
+.tree-pan { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+.tree-pan .tree-wrap { width: 100%; height: 100%; padding: 0; }
+.tree-pan .tree-svg { width: 100%; height: 100%; max-width: none; display: block; }
 .tree-hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--ink-light); background: rgba(253,250,244,0.8); padding: 5px 12px; border-radius: 20px; pointer-events: none; }
 .tree-legend-overlay { position: absolute; top: 14px; left: 14px; background: rgba(253,250,244,0.82); border-radius: 10px; padding: 10px 12px; pointer-events: none; }
 .tree-legend-overlay .tree-legend { display: flex; flex-direction: column; gap: 6px; }
@@ -1430,26 +1430,8 @@ function showTree() {
   document.getElementById('welcome-state').style.display = 'none';
   document.getElementById('tree-view').style.display = 'flex';
   setupTreePanZoom();
-  // render once layout has had a chance to settle
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    renderTree();
-    // Aggressive retry: mobile browsers (esp. iOS Safari on reload) finalise their
-    // layout asynchronously as the address bar settles and fonts load. Re-fit on every
-    // animation frame for ~1.5s and on each successive load event, so the tree always
-    // ends up correctly positioned no matter when the viewport stabilises.
-    let attempts = 0;
-    const tick = () => {
-      if(attempts++ > 90) return;   // ~1.5s at 60fps
-      treeResetView();
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-    // also re-fit on these late-firing events that often change mobile viewport size
-    const refit = () => { if(CURRENT_VIEW === 'tree') treeResetView(); };
-    window.addEventListener('load', refit, { once: true });
-    window.addEventListener('orientationchange', refit);
-    if(window.visualViewport) window.visualViewport.addEventListener('resize', refit);
-  }));
+  // CSS sizes the SVG to fill the viewport — no measurement needed, can't go wrong on reload.
+  renderTree();
 }
 
 function closePersonCard() {
@@ -3219,7 +3201,7 @@ function renderTree() {
     : '';
 
   const svg = `
-  <svg class="tree-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+  <svg class="tree-svg" width="${W}" height="${H}" viewBox="${-W*0.09} ${-H*0.09} ${W*1.18} ${H*1.18}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
     <defs>
       <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#AECFE6"/>
@@ -3263,7 +3245,7 @@ function renderTree() {
   container.innerHTML = svg;
   const legendEl = document.getElementById('tree-legend-overlay');
   if(legendEl) legendEl.innerHTML = legend;
-  fitTreeToViewport(W, H, foliageTop, H);
+  fitTreeToViewport();
 }
 
 function escapeXML(s) {
@@ -3280,79 +3262,51 @@ function jumpToPerson(pid) {
 }
 
 // ---- TREE ZOOM & PAN ----
-let treeView = { scale: 1, x: 0, y: 0, w: 760, h: 600, contentTop: 0, contentBottom: 600, minScale: 0.1 };
+// The SVG fills the viewport via CSS (width/height 100%). treeView.scale is a
+// multiplier on top of that — 1 = "tree fills viewport" (the base/Fit state),
+// >1 = zoomed in. treeView.x/y are pan offsets in viewport pixels. This means
+// the tree can NEVER end up off-screen on reload — CSS guarantees the base state.
+let treeView = { scale: 1, x: 0, y: 0, minScale: 1, pinching: false };
 
 function applyTreeTransform() {
   const pan = document.getElementById('tree-pan');
   const vp  = document.getElementById('tree-viewport');
   if(!pan || !vp) return;
 
-  // clamp pan so the tree stays in view — never re-center here (fit does that).
-  // this only constrains x/y to a valid range so the tree can't be dragged off-screen.
-  // when a pinch gesture is active we skip clamping so focal-point zoom can shift
-  // the tree freely under the user's fingers; we snap back into bounds on touchend.
-  let vw = vp.clientWidth  || window.innerWidth  || 800;
-  let vh = vp.clientHeight || window.innerHeight || 600;
-  // sanity cap (mobile browsers can briefly report vp larger than the real window)
-  if(window.innerWidth)  vw = Math.min(vw, window.innerWidth);
-  if(window.innerHeight) vh = Math.min(vh, window.innerHeight);
-  const sw = treeView.w * treeView.scale;
-  const top = treeView.contentTop * treeView.scale;
-  const bot = treeView.contentBottom * treeView.scale;
-  const sh = bot - top;
+  // clamp scale
+  if(treeView.scale < treeView.minScale) treeView.scale = treeView.minScale;
+  if(treeView.scale > 5) treeView.scale = 5;
 
+  // bound the pan so we never expose sky/earth past the tree's edges.
+  // when scale > 1 the canvas is enlarged — valid translate range is
+  // [vw*(1-s), 0] horizontally and [vh*(1-s), 0] vertically. when scale = 1,
+  // the only valid translate is (0, 0). pinching gestures temporarily skip the
+  // clamp so focal-point zoom can shift freely; we snap back on touchend.
   if(!treeView.pinching) {
-    // horizontal bounds
-    if(sw <= vw) {
-      treeView.x = Math.max(0, Math.min(vw - sw, treeView.x));
-    } else {
-      treeView.x = Math.max(vw - sw, Math.min(0, treeView.x));
-    }
-    // vertical bounds (against the content region, not full SVG height)
-    if(sh <= vh) {
-      treeView.y = Math.max(-top, Math.min(vh - bot, treeView.y));
-    } else {
-      treeView.y = Math.max(vh - bot, Math.min(-top, treeView.y));
-    }
+    const vw = vp.clientWidth  || window.innerWidth  || 700;
+    const vh = vp.clientHeight || window.innerHeight || 600;
+    const minX = vw * (1 - treeView.scale);
+    const minY = vh * (1 - treeView.scale);
+    if(treeView.x > 0) treeView.x = 0;
+    if(treeView.x < minX) treeView.x = minX;
+    if(treeView.y > 0) treeView.y = 0;
+    if(treeView.y < minY) treeView.y = minY;
   }
 
-  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px)`;
-  // apply zoom by resizing the SVG itself so it re-renders as crisp vectors (no bitmap scaling)
-  const svg = pan.querySelector('svg');
-  if(svg) {
-    svg.setAttribute('width',  sw.toFixed(1));
-    svg.setAttribute('height', (treeView.h * treeView.scale).toFixed(1));
-  }
+  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
 }
 
-function fitTreeToViewport(w, h, contentTop, contentBottom) {
-  treeView.w = w; treeView.h = h;
-  treeView.contentTop = (contentTop !== undefined) ? contentTop : 0;
-  treeView.contentBottom = (contentBottom !== undefined) ? contentBottom : h;
-  const vp = document.getElementById('tree-viewport');
-  if(!vp) return;
-  // measure the actual on-screen rect of the viewport. getBoundingClientRect is
-  // the most reliable measurement on mobile — clientWidth/Height can lag during
-  // reload while the layout settles.
-  const r = vp.getBoundingClientRect();
-  let vw = r.width  || vp.clientWidth  || window.innerWidth  || 700;
-  let vh = r.height || vp.clientHeight || window.innerHeight || 600;
-  // hard cap to the visible window — nothing inside it can be larger than the screen
-  if(window.innerWidth)  vw = Math.min(vw, window.innerWidth);
-  if(window.innerHeight) vh = Math.min(vh, window.innerHeight);
-  // if everything's degenerate (page still loading), bail — a deferred fit will retry
-  if(vw < 50 || vh < 50) return;
-  const top = treeView.contentTop, bottom = treeView.contentBottom;
-  const contentH = bottom - top;
-  const scale = Math.min(vw / w, vh / contentH) * 0.82;
-  treeView.scale = scale;
-  treeView.minScale = scale;   // this fit-to-screen scale is the minimum — can't zoom out further
-  treeView.x = (vw - w * scale) / 2;
-  treeView.y = (vh - contentH * scale) / 2 - top * scale;
+function fitTreeToViewport() {
+  // "Fit" is now trivial: reset to the base CSS state. scale = 1 means the SVG
+  // fills the viewport via CSS, so this can't go wrong on reload.
+  treeView.scale = 1;
+  treeView.minScale = 1;
+  treeView.x = 0;
+  treeView.y = 0;
   applyTreeTransform();
 }
 
-function treeResetView() { fitTreeToViewport(treeView.w, treeView.h, treeView.contentTop, treeView.contentBottom); }
+function treeResetView() { fitTreeToViewport(); }
 
 function treeZoom(factor, cxp, cyp) {
   const vp = document.getElementById('tree-viewport');
@@ -3360,7 +3314,9 @@ function treeZoom(factor, cxp, cyp) {
   const rect = vp.getBoundingClientRect();
   const fx = (cxp === undefined) ? rect.width/2 : cxp;
   const fy = (cyp === undefined) ? rect.height/2 : cyp;
-  const newScale = Math.max(treeView.minScale, Math.min(4, treeView.scale * factor));
+  const newScale = Math.max(treeView.minScale, Math.min(5, treeView.scale * factor));
+  if(newScale === treeView.scale) return;
+  // keep the world point under (fx, fy) anchored during the zoom
   treeView.x = fx - (fx - treeView.x) * (newScale / treeView.scale);
   treeView.y = fy - (fy - treeView.y) * (newScale / treeView.scale);
   treeView.scale = newScale;
