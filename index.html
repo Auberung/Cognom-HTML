@@ -357,6 +357,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .self-modal { width: 100%; max-width: 600px; background: var(--warm-white); border-radius: 20px 20px 0 0; padding: 0 0 32px; box-shadow: 0 -12px 60px rgba(0,0,0,0.25); max-height: 92vh; display: flex; flex-direction: column; }
 .self-modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border-strong); margin: 12px auto 0; flex-shrink: 0; }
 .self-modal-header { padding: 18px 28px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.self-identity { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--cream); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 18px; cursor: pointer; transition: all 0.15s; }
+.self-identity:hover { background: var(--warm-white); border-color: var(--gold); }
+.self-identity-av { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--cream); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500; background-size: cover; background-position: center; flex-shrink: 0; }
+.self-identity-info { flex: 1; min-width: 0; }
+.self-identity-name { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--ink); line-height: 1.2; margin-bottom: 3px; }
+.self-identity-about { font-size: 12px; color: var(--ink-light); line-height: 1.5; }
 .self-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: var(--ink); }
 .self-modal-sub { font-size: 12px; color: var(--ink-light); margin-top: 3px; line-height: 1.5; }
 .self-modal-body { flex: 1; overflow-y: auto; padding: 20px 28px 0; }
@@ -647,7 +653,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="logo-sub">Endless Stories</div>
         </div>
       </div>
-      <button class="account-row" onclick="openSelfEdit()" id="account-row" title="Your account">
+      <button class="account-row" onclick="openSelfModal()" id="account-row" title="Your inner portrait">
         <div class="account-av" id="account-av">Y</div>
         <div class="account-info">
           <div class="account-name" id="account-name">Set up your account</div>
@@ -994,7 +1000,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <!-- YOUR ACCOUNT (self) MODAL -->
-<div class="modal-overlay" id="self-overlay" onclick="if(event.target===this)closeSelf()">
+<div class="modal-overlay" id="self-overlay" style="z-index:380;" onclick="if(event.target===this)closeSelf()">
   <div class="modal">
     <div class="modal-title">You</div>
     <div class="modal-sub">This is you — the root of your tree. Your name and a few notes about yourself. (Accounts and sign-in are coming later.)</div>
@@ -1161,19 +1167,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="self-modal-handle"></div>
     <div class="self-modal-header">
       <div class="self-modal-title">Your inner portrait</div>
-      <div class="self-modal-sub" id="self-modal-sub">Record a thought — Cognom will listen and learn what matters to you.</div>
+      <div class="self-modal-sub" id="self-modal-sub">Record a thought or write what's on your mind — Cognom will quietly weave it into who you are.</div>
     </div>
     <div class="self-modal-body">
 
       <div class="self-modal-tabs">
-        <button class="self-modal-tab active" onclick="switchSelfTab('record')">Record thought</button>
-        <button class="self-modal-tab" onclick="switchSelfTab('portrait')">My portrait</button>
+        <button class="self-modal-tab active" onclick="switchSelfTab('portrait')">My portrait</button>
         <button class="self-modal-tab" onclick="switchSelfTab('journal')">Journal</button>
       </div>
 
-      <!-- RECORD TAB -->
-      <div id="self-tab-record">
-        <div class="thought-recorder">
+      <!-- PORTRAIT TAB (record/type input sits at the top, always available) -->
+      <div id="self-tab-portrait">
+
+        <!-- Identity header: who you are at a glance, with edit pencil for name/photo/about -->
+        <div class="self-identity" id="self-identity" onclick="openSelfEdit()" title="Edit your name, photo, and statement">
+          <div class="self-identity-av" id="self-identity-av">Y</div>
+          <div class="self-identity-info">
+            <div class="self-identity-name" id="self-identity-name">Set up your account</div>
+            <div class="self-identity-about" id="self-identity-about">Tap to add a short statement about yourself.</div>
+          </div>
+          <i class="ti ti-pencil" style="font-size:15px;color:var(--ink-light);flex-shrink:0;"></i>
+        </div>
+
+        <!-- always-available recorder + text drop -->
+        <div class="thought-recorder" style="margin-bottom:22px;">
           <div class="thought-rec-row">
             <div class="thought-mic-wrap">
               <div class="thought-ring" id="t-ring1"></div>
@@ -1225,12 +1242,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
             <button class="btn-gold" style="margin-top:10px;width:100%;" onclick="submitThoughtText()"><i class="ti ti-sparkles" style="font-size:13px;vertical-align:-1px;margin-right:5px;"></i>Reflect on this</button>
           </div>
         </div>
-      </div>
 
-      <!-- PORTRAIT TAB -->
-      <div id="self-tab-portrait" style="display:none;">
+        <!-- the portrait itself, built from everything you've shared -->
         <div id="self-portrait-empty" class="sp-empty">
-          Record a few thoughts and Cognom will build a quiet portrait of who you are — your values, needs, the patterns you live by.
+          Record a few thoughts above and Cognom will build a quiet portrait of who you are — your values, needs, the patterns you live by.
         </div>
         <div id="self-portrait-content" style="display:none;">
           <div class="sp-section"><div class="sp-label">Core values</div><div class="sp-value" id="sp-values"></div></div>
@@ -1336,6 +1351,7 @@ function saveSelf() {
   SELF.photo = selfPhotoPending || '';
   saveSelfData();
   renderAccountRow();
+  if(typeof renderSelfIdentity === 'function') renderSelfIdentity();
   closeSelf();
   if(document.getElementById('tree-view').style.display !== 'none') renderTree();
   showNotif(SELF.name ? 'Saved.' : 'Account updated.');
@@ -3514,7 +3530,7 @@ document.addEventListener('click', (e) => {
 // =========================================================
 
 function openSelfModal() {
-  switchSelfTab('record');
+  switchSelfTab('portrait');
   document.getElementById('self-modal-overlay').classList.add('open');
 }
 
@@ -3523,14 +3539,35 @@ function closeSelfModal() {
 }
 
 function switchSelfTab(name) {
-  ['record','portrait','journal'].forEach(t => {
-    document.getElementById('self-tab-' + t).style.display = t === name ? 'block' : 'none';
+  ['portrait','journal'].forEach(t => {
+    const el = document.getElementById('self-tab-' + t);
+    if(el) el.style.display = t === name ? 'block' : 'none';
   });
   document.querySelectorAll('.self-modal-tab').forEach((b, i) => {
-    b.classList.toggle('active', ['record','portrait','journal'][i] === name);
+    b.classList.toggle('active', ['portrait','journal'][i] === name);
   });
-  if(name === 'portrait') renderSelfPortrait();
+  if(name === 'portrait') { renderSelfIdentity(); renderSelfPortrait(); }
   if(name === 'journal')  renderSelfJournal();
+}
+
+// keep the identity block (avatar + name + optional statement) in sync with SELF
+function renderSelfIdentity() {
+  const av = document.getElementById('self-identity-av');
+  const nm = document.getElementById('self-identity-name');
+  const ab = document.getElementById('self-identity-about');
+  if(!av || !nm || !ab) return;
+  if(SELF.photo) { av.textContent = ''; av.style.backgroundImage = 'url(' + SELF.photo + ')'; }
+  else { av.textContent = (SELF.name || 'Y').charAt(0).toUpperCase(); av.style.backgroundImage = ''; }
+  nm.textContent = SELF.name || 'Set up your account';
+  if(SELF.about && SELF.about.trim()) {
+    ab.textContent = SELF.about;
+    ab.style.fontStyle = 'normal';
+    ab.style.opacity = '1';
+  } else {
+    ab.textContent = 'Tap to add a short statement about yourself.';
+    ab.style.fontStyle = 'italic';
+    ab.style.opacity = '0.8';
+  }
 }
 
 // ---- Thought recorder state (separate from the conversation mic) ----
