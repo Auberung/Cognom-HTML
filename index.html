@@ -2862,7 +2862,7 @@ function renderTree() {
   const trunkH = partners.length ? 340 : 130;
   const trunkBot = trunkTop + trunkH;
   const rootRows = Math.max(1, Math.ceil(family.length/4));
-  const rootH = family.length ? 260 : 110;
+  const rootH = 340;   // mirror of the crown — always full and substantial
   const H = trunkBot + rootH + 30;
 
   const skyBottom = trunkBot - 20;
@@ -2968,8 +2968,7 @@ function renderTree() {
       const y = arcTop + (1 - Math.cos(ox * Math.PI/2)) * arcDepth;
       const sideAbs = Math.abs(ox);
       const forkY = fork + sideAbs * (trunkH * 0.30);
-      const w = 5.5 - Math.min(3, sideAbs*3);
-      fBranch += branch(cx, forkY, x, y+30, w, COL.branch, false);
+      // branches removed for cleaner look — positions retained for layout
       fLeaves += leavesAlong(cx, forkY, x, y+30, 11, 9);
       if(k < realN){
         const item = friends[k];
@@ -3000,26 +2999,196 @@ function renderTree() {
     <text x="${cx}" y="${youY+48}" text-anchor="middle" class="tree-node-rel" font-style="italic" fill="#8A7A68">${SELF.name ? 'you' : 'account holder'}</text>
   </g>`;
 
-  // ---- FAMILY ROOTS: a non-crossing fan downward (always at least 5 root slots) ----
+  // ---- ROOT MASS: filled tapered shapes like a real tree of life ----
+  // Key technique: each root is a FILLED PATH with two curved edges that converge to a sharp tip.
+  // Stroked lines force round caps (= bulbous tips) — only filled paths give real tapered roots.
+  const rootStroke = '#4A3826';   // warm dark brown outline (not harsh black)
+  const rootBody   = '#8C6E48';   // mid-tone wood (slightly warmer)
+  const rootHilite = '#C9A876';   // light wood catch
+  const rootShadow = '#5C4329';   // deep shadow side
+  let rootMass = '';
+  const rootSpread = (Math.max(5, family.length) - 1) / 2 * 150;
+  const rootRx = rootSpread + 160;
+  const rootRy = rootH * 0.7;
+  let rseed = 13;
+  function rPrng() { rseed = (rseed * 9301 + 49297) % 233280; return rseed / 233280; }
+
+  // Tapered root with woody dimensional shading.
+  // Now accepts TWO independent curve params so roots can be S-shaped:
+  //   curve1, side1 — first control point's pull
+  //   curve2, side2 — second control point's pull (can be opposite direction → S-curve)
+  function taperedRoot(x1, y1, x2, y2, startW, curve1, side1, curve2, side2, noOutline) {
+    // backward-compat: if curve2 not provided, mirror curve1 for a single-direction bend
+    if(curve2 === undefined) { curve2 = curve1 * 0.5; side2 = side1; }
+    const dx = x2 - x1, dy = y2 - y1;
+    const dist = Math.hypot(dx, dy) || 1;
+    const c1x = x1 + dx * 0.3 + (-dy / dist) * curve1 * side1;
+    const c1y = y1 + dy * 0.3 + ( dx / dist) * curve1 * side1;
+    const c2x = x1 + dx * 0.7 + (-dy / dist) * curve2 * side2;
+    const c2y = y1 + dy * 0.7 + ( dx / dist) * curve2 * side2;
+    const N = 22;
+    const upper = [], lower = [], hiUpper = [], shLower = [];
+    for(let i = 0; i <= N; i++) {
+      const t = i / N;
+      const u = 1 - t;
+      const mx = u*u*u*x1 + 3*u*u*t*c1x + 3*u*t*t*c2x + t*t*t*x2;
+      const my = u*u*u*y1 + 3*u*u*t*c1y + 3*u*t*t*c2y + t*t*t*y2;
+      const tx = 3*u*u*(c1x-x1) + 6*u*t*(c2x-c1x) + 3*t*t*(x2-c2x);
+      const ty = 3*u*u*(c1y-y1) + 6*u*t*(c2y-c1y) + 3*t*t*(y2-c2y);
+      const tLen = Math.hypot(tx, ty) || 1;
+      const pnx = -ty / tLen, pny = tx / tLen;
+      // Brushstroke taper: stays thick most of the way, narrows sharply to a fine tip
+      const halfW = (startW / 2) * Math.pow(1 - t, 0.55);
+      upper.push({ x: mx + pnx * halfW, y: my + pny * halfW });
+      lower.push({ x: mx - pnx * halfW, y: my - pny * halfW });
+      hiUpper.push({ x: mx + pnx * halfW * 0.40, y: my + pny * halfW * 0.40 });
+      shLower.push({ x: mx - pnx * halfW * 0.40, y: my - pny * halfW * 0.40 });
+    }
+    let bodyD = `M ${upper[0].x.toFixed(1)} ${upper[0].y.toFixed(1)} `;
+    for(let i = 1; i < upper.length; i++) bodyD += `L ${upper[i].x.toFixed(1)} ${upper[i].y.toFixed(1)} `;
+    for(let i = lower.length - 1; i >= 0; i--) bodyD += `L ${lower[i].x.toFixed(1)} ${lower[i].y.toFixed(1)} `;
+    bodyD += 'Z';
+    let shadowD = `M ${shLower[0].x.toFixed(1)} ${shLower[0].y.toFixed(1)} `;
+    for(let i = 1; i < shLower.length; i++) shadowD += `L ${shLower[i].x.toFixed(1)} ${shLower[i].y.toFixed(1)} `;
+    for(let i = lower.length - 1; i >= 0; i--) shadowD += `L ${lower[i].x.toFixed(1)} ${lower[i].y.toFixed(1)} `;
+    shadowD += 'Z';
+    let hiD = `M ${upper[0].x.toFixed(1)} ${upper[0].y.toFixed(1)} `;
+    for(let i = 1; i < upper.length; i++) hiD += `L ${upper[i].x.toFixed(1)} ${upper[i].y.toFixed(1)} `;
+    for(let i = hiUpper.length - 1; i >= 0; i--) hiD += `L ${hiUpper[i].x.toFixed(1)} ${hiUpper[i].y.toFixed(1)} `;
+    hiD += 'Z';
+    let s = '';
+    s += `<path d="${bodyD}" fill="${rootBody}"${noOutline ? '' : ` stroke="${rootStroke}" stroke-width="0.6" stroke-linejoin="round"`}/>`;
+    s += `<path d="${shadowD}" fill="${rootShadow}" opacity="0.6"/>`;
+    s += `<path d="${hiD}" fill="${rootHilite}" opacity="0.5"/>`;
+    return { svg: s, c1x, c1y, c2x, c2y };
+  }
+
+  // Helper: compute a point AND tangent ALONG a cubic Bezier at parameter t.
+  // Used so forks can emerge from the actual curved midline of their parent (not a straight line).
+  function bezierPoint(x1, y1, c1x, c1y, c2x, c2y, x2, y2, t) {
+    const u = 1 - t;
+    return {
+      x: u*u*u*x1 + 3*u*u*t*c1x + 3*u*t*t*c2x + t*t*t*x2,
+      y: u*u*u*y1 + 3*u*u*t*c1y + 3*u*t*t*c2y + t*t*t*y2,
+      tx: 3*u*u*(c1x-x1) + 6*u*t*(c2x-c1x) + 3*t*t*(x2-c2x),
+      ty: 3*u*u*(c1y-y1) + 6*u*t*(c2y-c1y) + 3*t*t*(y2-c2y)
+    };
+  }
+
+  // FLOWING TENDRIL ROOTS — long curves fanning to distinct angles (no collisions),
+  // each with small branchlets growing organically OUT of its body.
+  const baseX = cx, baseY = trunkBot - 5;
+  const fractalSlots = Math.max(5, family.length);
+  const targetReach = (fractalSlots - 1) / 2 * 150;
+  const fullReach = Math.max(rootRx * 1.05, targetReach * 1.35);
+  const scale = Math.max(0.85, Math.min(1.6, targetReach / 280));
+
+  // THINNER widths so primaries don't pile up at the trunk base where they all converge.
+  // 11 angular slots from -82° to +82°.
+  const primarySlots = [
+    // [angle, lengthFactor, width, c1mag, c2mag]
+    [-1.43, 0.78, 10, 40, 30],
+    [-1.15, 0.92, 14, 55, 45],
+    [-0.85, 1.00, 15, 50, 40],
+    [-0.55, 1.08, 14, 35, 28],
+    [-0.25, 1.16, 12, 22, 18],
+    [ 0.00, 1.20, 13, 14, 14],
+    [ 0.25, 1.16, 12, 22, 18],
+    [ 0.55, 1.08, 14, 35, 28],
+    [ 0.85, 1.00, 15, 50, 40],
+    [ 1.15, 0.92, 14, 55, 45],
+    [ 1.43, 0.78, 10, 40, 30],
+  ];
+
+  // Helper: get point + tangent on a cubic Bezier at parameter t
+  function bezTangent(x1, y1, c1x, c1y, c2x, c2y, x2, y2, t) {
+    const u = 1 - t;
+    const x = u*u*u*x1 + 3*u*u*t*c1x + 3*u*t*t*c2x + t*t*t*x2;
+    const y = u*u*u*y1 + 3*u*u*t*c1y + 3*u*t*t*c2y + t*t*t*y2;
+    const tx = 3*u*u*(c1x-x1) + 6*u*t*(c2x-c1x) + 3*t*t*(x2-c2x);
+    const ty = 3*u*u*(c1y-y1) + 6*u*t*(c2y-c1y) + 3*t*t*(y2-c2y);
+    return { x, y, tx, ty };
+  }
+
+  // PASS 1: Compute primary geometry AND their SVG, but hold the SVG aside.
+  // We'll draw branchlets first (back), then primaries on top — so primaries cover
+  // every branchlet join automatically. No visible seams.
+  let primariesSvg = '';
+  const primaries = [];
+  primarySlots.forEach(([angle, lenF, w, c1mag, c2mag]) => {
+    const reach = fullReach * lenF;
+    const tipX = baseX + Math.sin(angle) * reach;
+    const tipY = baseY + Math.cos(angle) * reach;
+    const side = angle < 0 ? -1 : (angle > 0 ? 1 : 1);
+    const dx = tipX - baseX, dy = tipY - baseY;
+    const dist = Math.hypot(dx, dy) || 1;
+    const c1x = baseX + dx * 0.3 + (-dy / dist) * c1mag * side;
+    const c1y = baseY + dy * 0.3 + ( dx / dist) * c1mag * side;
+    const c2x = baseX + dx * 0.7 + (-dy / dist) * c2mag * (-side);
+    const c2y = baseY + dy * 0.7 + ( dx / dist) * c2mag * (-side);
+    primariesSvg += taperedRoot(baseX, baseY, tipX, tipY, w * scale, c1mag, side, c2mag, -side).svg;
+    primaries.push({ baseX, baseY, tipX, tipY, c1x, c1y, c2x, c2y, angle, w: w * scale, side });
+  });
+
+  // PASS 2: Draw branchlets FIRST (they go in the back).
+  primaries.forEach((p, idx) => {
+    // More branchlets per primary for richer texture (was 1-2, now 2-3)
+    const numBranchlets = p.w >= 14 ? 3 : (p.w >= 10 ? 2 : 1);
+    for(let i = 0; i < numBranchlets; i++) {
+      // Distribute along parent: spread between 25% and 70% along the length
+      const t = 0.25 + (i / Math.max(1, numBranchlets - 1)) * 0.45;
+      const pt = bezTangent(p.baseX, p.baseY, p.c1x, p.c1y, p.c2x, p.c2y, p.tipX, p.tipY, t);
+      const tLen = Math.hypot(pt.tx, pt.ty) || 1;
+      const parentTangentAngle = Math.atan2(pt.tx, pt.ty);
+      const parentHalfW = (p.w / 2) * Math.pow(1 - t, 0.55);
+      const outward = pt.x < baseX ? -1 : 1;
+      // Varied peel-off angles for natural feel
+      const peelOff = (0.40 + (i % 2) * 0.18 + (i * 0.06)) * outward;
+      const branchAngle = parentTangentAngle + peelOff;
+      const pnx = -pt.ty / tLen, pny = pt.tx / tLen;
+      // Push the branchlet base WELL INSIDE the parent body (was 0.9 = at the edge).
+      // 0.3 = inside the parent's midline area, fully covered by parent's fill.
+      const insetX = pt.x + pnx * parentHalfW * 0.3 * outward;
+      const insetY = pt.y + pny * parentHalfW * 0.3 * outward;
+      const parentLen = Math.hypot(p.tipX - p.baseX, p.tipY - p.baseY);
+      // Slightly varied lengths for natural variety
+      const branchLen = parentLen * (0.18 + i * 0.05 + ((idx + i) % 3) * 0.03);
+      const branchTipX = insetX + Math.sin(branchAngle) * branchLen;
+      const branchTipY = insetY + Math.cos(branchAngle) * branchLen;
+      if(branchTipY < trunkBot + 8) continue;
+      // Branchlet width slightly smaller than parent's local width — emerges naturally
+      const branchW = parentHalfW * 1.4;
+      const bSide = peelOff > 0 ? 1 : -1;
+      // Branchlet keeps its outline — the parent will be drawn on top, covering the join area
+      rootMass += taperedRoot(insetX, insetY, branchTipX, branchTipY,
+                              branchW, branchLen * 0.18, bSide, branchLen * 0.12, -bSide).svg;
+    }
+  });
+
+  // PASS 3: Draw all primaries on top of the branchlets. The primary's filled wood shape
+  // covers any branchlet base that pokes out from the parent's outline, hiding every join.
+  rootMass += primariesSvg;
+
+  // ---- FAMILY ROOTS: same style, terminating near family bubbles ----
   let rBranch='', rLeaves='', rBub='';
   {
     const realN = family.length;
-    const slots = Math.max(5, realN);
-    const maxSpread = (slots - 1) / 2 * 150;
-    const arcTop = trunkBot + 70;
-    const arcDepth = rootH * 0.32;
-    for(let k=0;k<slots;k++){
-      const t = slots === 1 ? 0.5 : k/(slots-1);
-      const ox = (t - 0.5) * 2;
-      const x = cx + ox * maxSpread;
-      const y = arcTop + (1 - Math.cos(ox * Math.PI/2)) * arcDepth;
-      const sideAbs = Math.abs(ox);
-      const forkY = (trunkBot - 4) - sideAbs * 26;
-      const w = 5.5 - Math.min(3, sideAbs*3);
-      rBranch += branch(cx, forkY, x, y-28, w, COL.family, false);
-      if(k < realN){
-        const item = family[k];
-        rBub += bubble(item, x, y, 28);
+    if(realN > 0) {
+      const maxSpread = (realN - 1) / 2 * 150;
+      const arcTop = trunkBot + 80;
+      const arcDepth = rootH * 0.32;
+      for(let k=0;k<realN;k++){
+        const t = realN === 1 ? 0.5 : k/(realN-1);
+        const ox = (t - 0.5) * 2;
+        const x = cx + ox * maxSpread;
+        const y = arcTop + (1 - Math.cos(ox * Math.PI/2)) * arcDepth;
+        const sideAbs = Math.abs(ox);
+        const forkY = (trunkBot - 6) - sideAbs * 18;
+        const baseWidth = 22 - Math.min(8, sideAbs * 6);
+        const curveSide = ox < 0 ? -1 : 1;
+        const curveStrength = 12 + sideAbs * 10;
+        rBranch += taperedRoot(cx, forkY, x, y - 28, baseWidth, curveStrength, curveSide).svg;
+        rBub += bubble(family[k], x, y, 28);
       }
     }
   }
@@ -3050,6 +3219,7 @@ function renderTree() {
     ${cloudsAcross(groundY)}
     ${sClouds}
     <line x1="${-W*2}" y1="${groundY}" x2="${W*3}" y2="${groundY}" stroke="${COL.grassDk}" stroke-width="1.5" opacity="0.3"/>
+    ${rootMass}
     ${sBranch}
     ${rBranch}
     ${trunk}
