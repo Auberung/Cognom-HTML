@@ -544,6 +544,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     max-height: 92vh;
     overflow-y: auto;
   }
+  /* Modal action buttons — center & widen so they don't hide under the floating brain */
+  .modal-actions { justify-content: center; flex-direction: column-reverse; gap: 10px; padding-right: 0; }
+  .modal-actions .btn-primary,
+  .modal-actions .btn-ghost,
+  .modal-actions .btn-danger { width: 100%; padding: 12px 16px; font-size: 14px; }
 
   /* Person overlay — card fills most of the screen */
   .person-overlay { padding: 0; }
@@ -1304,6 +1309,7 @@ function renderAccountRow() {
   }
 }
 function openSelfEdit() {
+  if(isMobile()) closeSidebar();
   selfPhotoPending = SELF.photo || '';
   document.getElementById('self-name').value = SELF.name || '';
   document.getElementById('self-about').value = SELF.about || '';
@@ -1335,9 +1341,9 @@ function saveSelf() {
   if(document.getElementById('tree-view').style.display !== 'none') renderTree();
   showNotif(SELF.name ? 'Saved.' : 'Account updated.');
 }
-function openSettings() { document.getElementById('settings-overlay').style.display = 'flex'; }
+function openSettings() { if(isMobile()) closeSidebar(); document.getElementById('settings-overlay').style.display = 'flex'; }
 function closeSettings() { document.getElementById('settings-overlay').style.display = 'none'; }
-function openPrivacyModal() { document.getElementById('privacy-overlay').classList.add('open'); }
+function openPrivacyModal() { if(isMobile()) closeSidebar(); document.getElementById('privacy-overlay').classList.add('open'); }
 function closePrivacyModal() { document.getElementById('privacy-overlay').classList.remove('open'); }
 function clearAllData() {
   if(!confirm('This erases everyone, all conversations, and your account from this device. This cannot be undone. Continue?')) return;
@@ -2989,13 +2995,14 @@ function renderTree() {
   }
 
   // ---- YOU (base of trunk — anchored at ground level, label below inside earth) ----
-  // youY is fixed at groundY so the circle sits right on the horizon line
+  // youY is fixed at groundY so the circle sits right on the horizon line.
+  // Clicking it opens the inner-portrait modal (record thoughts, see your portrait, journal).
   const youY = groundY - 2;
-  const youNode=`<g>
+  const youNode=`<g style="cursor:pointer;" onclick="openSelfModal()">
     <circle cx="${cx}" cy="${youY}" r="32" fill="#FDFAF4"/>
     <circle cx="${cx}" cy="${youY}" r="32" fill="${COL.trunk}" opacity="0.3" stroke="${COL.trunk}" stroke-width="2.5"/>
-    <text x="${cx}" y="${youY+7}" text-anchor="middle" font-family="'Cormorant Garamond',serif" font-size="20" font-weight="700" fill="#1A1A1A">${SELF.name ? escapeHTML(SELF.name.split(' ')[0]) : 'You'}</text>
-    <text x="${cx}" y="${youY+48}" text-anchor="middle" class="tree-node-rel" font-style="italic" fill="#8A7A68">${SELF.name ? 'you' : 'account holder'}</text>
+    <text x="${cx}" y="${youY+7}" text-anchor="middle" font-family="'Cormorant Garamond',serif" font-size="20" font-weight="700" fill="#1A1A1A" style="pointer-events:none;">${SELF.name ? escapeHTML(SELF.name.split(' ')[0]) : 'You'}</text>
+    <text x="${cx}" y="${youY+48}" text-anchor="middle" class="tree-node-rel" font-style="italic" fill="#8A7A68" style="pointer-events:none;">${SELF.name ? 'you' : 'account holder'}</text>
   </g>`;
 
   // ---- ROOT MASS: filled tapered shapes like a real tree of life ----
