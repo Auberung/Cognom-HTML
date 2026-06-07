@@ -3269,27 +3269,30 @@ function applyTreeTransform() {
   const vp  = document.getElementById('tree-viewport');
   if(!pan || !vp) return;
 
-  // clamp pan so the tree's edges pin to the viewport edges — no panning out into empty sky/earth
+  // clamp pan so the tree stays in view — never re-center here (fit does that).
+  // this only constrains x/y to a valid range so the tree can't be dragged off-screen.
+  // when a pinch gesture is active we skip clamping so focal-point zoom can shift
+  // the tree freely under the user's fingers; we snap back into bounds on touchend.
   const vw = vp.clientWidth  || window.innerWidth  || 800;
   const vh = vp.clientHeight || window.innerHeight || 600;
   const sw = treeView.w * treeView.scale;
   const top = treeView.contentTop * treeView.scale;
   const bot = treeView.contentBottom * treeView.scale;
-  const sh = bot - top;   // scaled height of the actual tree content (not the full SVG)
+  const sh = bot - top;
 
-  // horizontal: if the tree fits, center it; otherwise pin its edges to the viewport edges
-  if(sw <= vw) {
-    treeView.x = (vw - sw) / 2;
-  } else {
-    if(treeView.x > 0) treeView.x = 0;
-    if(treeView.x < vw - sw) treeView.x = vw - sw;
-  }
-  // vertical: same idea, but measured against the content region (foliage top → ground bottom)
-  if(sh <= vh) {
-    treeView.y = (vh - sh) / 2 - top;
-  } else {
-    if(treeView.y + top > 0) treeView.y = -top;
-    if(treeView.y + bot < vh) treeView.y = vh - bot;
+  if(!treeView.pinching) {
+    // horizontal bounds
+    if(sw <= vw) {
+      treeView.x = Math.max(0, Math.min(vw - sw, treeView.x));
+    } else {
+      treeView.x = Math.max(vw - sw, Math.min(0, treeView.x));
+    }
+    // vertical bounds (against the content region, not full SVG height)
+    if(sh <= vh) {
+      treeView.y = Math.max(-top, Math.min(vh - bot, treeView.y));
+    } else {
+      treeView.y = Math.max(vh - bot, Math.min(-top, treeView.y));
+    }
   }
 
   pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px)`;
@@ -3360,7 +3363,7 @@ function setupTreePanZoom() {
   }, { passive: false });
   vp.addEventListener('touchstart', (e) => {
     if(e.touches.length === 1){ dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }
-    else if(e.touches.length === 2){ dragging = false; pinchDist = touchDist(e); }
+    else if(e.touches.length === 2){ dragging = false; pinchDist = touchDist(e); treeView.pinching = true; }
   }, { passive: true });
   vp.addEventListener('touchmove', (e) => {
     if(e.touches.length === 1 && dragging){
@@ -3377,7 +3380,22 @@ function setupTreePanZoom() {
       pinchDist = d;
     }
   }, { passive: true });
-  vp.addEventListener('touchend', (e) => { if(e.touches.length === 0) dragging = false; pinchDist = 0; });
+  vp.addEventListener('touchend', (e) => {
+    if(e.touches.length === 0) dragging = false;
+    if(e.touches.length < 2 && treeView.pinching){
+      // gesture done — re-enable clamp and smoothly settle the tree back in bounds
+      treeView.pinching = false;
+      const pan = document.getElementById('tree-pan');
+      if(pan){
+        pan.style.transition = 'transform 180ms ease-out';
+        applyTreeTransform();
+        setTimeout(() => { if(pan) pan.style.transition = ''; }, 200);
+      } else {
+        applyTreeTransform();
+      }
+    }
+    if(e.touches.length === 0) pinchDist = 0;
+  });
 }
 function touchDist(e){
   const dx = e.touches[0].clientX - e.touches[1].clientX;
