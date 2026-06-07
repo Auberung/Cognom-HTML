@@ -3245,9 +3245,6 @@ function renderTree() {
   container.innerHTML = svg;
   const legendEl = document.getElementById('tree-legend-overlay');
   if(legendEl) legendEl.innerHTML = legend;
-  // hide until fit runs against a measured viewport (prevents flash at wrong position)
-  const _panEl = document.getElementById('tree-pan');
-  if(_panEl) _panEl.classList.remove('is-ready');
   fitTreeToViewport(W, H, foliageTop, H);
 }
 
@@ -3311,9 +3308,7 @@ function fitTreeToViewport(w, h, contentTop, contentBottom) {
   const vp = document.getElementById('tree-viewport');
   if(!vp) return;
   let vw = vp.clientWidth, vh = vp.clientHeight;
-  // if the viewport hasn't been laid out yet, hold off revealing the tree —
-  // a deferred treeResetView() will run again once layout settles.
-  const viewportReady = vw >= 50 && vh >= 50;
+  // if the viewport hasn't been laid out yet, fall back to its parent / window size
   if(!vw || vw < 50){ const r = vp.getBoundingClientRect(); vw = r.width || (vp.parentElement && vp.parentElement.clientWidth) || window.innerWidth || 700; }
   if(!vh || vh < 50){ const r = vp.getBoundingClientRect(); vh = r.height || (vp.parentElement && vp.parentElement.clientHeight) || window.innerHeight || 600; }
   const top = treeView.contentTop, bottom = treeView.contentBottom;
@@ -3324,12 +3319,10 @@ function fitTreeToViewport(w, h, contentTop, contentBottom) {
   treeView.x = (vw - w * scale) / 2;
   treeView.y = (vh - contentH * scale) / 2 - top * scale;
   applyTreeTransform();
-  // only reveal the tree once we've fit against a real measured viewport,
-  // so users never glimpse it positioned with fallback dimensions
-  if(viewportReady) {
-    const pan = document.getElementById('tree-pan');
-    if(pan) pan.classList.add('is-ready');
-  }
+  // reveal the tree (no gate — the deferred fits in showTreeView will keep
+  // correcting position as mobile layout settles)
+  const pan = document.getElementById('tree-pan');
+  if(pan) pan.classList.add('is-ready');
 }
 
 function treeResetView() { fitTreeToViewport(treeView.w, treeView.h, treeView.contentTop, treeView.contentBottom); }
