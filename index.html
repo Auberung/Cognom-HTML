@@ -189,8 +189,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .tree-svg { display: block; overflow: visible; }
 .tree-viewport { position: relative; width: 100%; height: 100%; overflow: hidden; cursor: grab; touch-action: none; background: #AECFE6; }
 .tree-viewport.grabbing { cursor: grabbing; }
-.tree-pan { position: absolute; top: 0; left: 0; transform-origin: 0 0; visibility: hidden; }
-.tree-pan.is-ready { visibility: visible; }
+.tree-pan { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
 .tree-pan .tree-wrap { padding: 0; }
 .tree-pan .tree-svg { width: auto; max-width: none; height: auto; }
 .tree-hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--ink-light); background: rgba(253,250,244,0.8); padding: 5px 12px; border-radius: 20px; pointer-events: none; }
@@ -3329,10 +3328,6 @@ function fitTreeToViewport(w, h, contentTop, contentBottom) {
   treeView.x = (vw - w * scale) / 2;
   treeView.y = (vh - contentH * scale) / 2 - top * scale;
   applyTreeTransform();
-  // reveal the tree (no gate — the deferred fits in showTreeView will keep
-  // correcting position as mobile layout settles)
-  const pan = document.getElementById('tree-pan');
-  if(pan) pan.classList.add('is-ready');
 }
 
 function treeResetView() { fitTreeToViewport(treeView.w, treeView.h, treeView.contentTop, treeView.contentBottom); }
