@@ -230,6 +230,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .photo-shared-from { font-size: 10.5px; color: var(--gold); margin-top: 4px; font-style: italic; }
 .self-moments-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 
+/* host-name pill on each moment card in the aggregated SELF Moments feed */
+.photo-card { position: relative; }
+.moment-host-tag { position: absolute; top: 8px; left: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 999px; background: rgba(28,28,26,0.78); color: var(--cream); font-size: 10.5px; font-weight: 500; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); letter-spacing: 0.02em; }
+.moment-host-tag.self { background: rgba(184,143,76,0.92); }
+
 /* First-thought welcome hint (shown in the portrait modal until the owner records their first thought) */
 .first-thought-hint { display: flex; gap: 12px; align-items: flex-start; background: linear-gradient(135deg, #FAF1DC 0%, #F5E9CC 100%); border: 1px solid #ECDDB8; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
 .fth-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
@@ -1371,14 +1376,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div id="self-tab-moments" style="display:none;">
         <div class="self-moments-toolbar">
           <input type="file" accept="image/*" multiple class="photo-upload-input" id="self-moment-upload-input" onchange="handleNewSelfEventUpload(event)" />
-          <button class="btn-gold" onclick="startNewSelfEvent()" style="padding:9px 18px;font-size:12px;">
-            <i class="ti ti-photo-plus" style="font-size:14px;vertical-align:-2px;margin-right:5px;"></i>New moment
+          <button class="btn-gold" onclick="startNewSelfEvent()" style="padding:9px 18px;font-size:12px;" title="Create a moment on your own page">
+            <i class="ti ti-photo-plus" style="font-size:14px;vertical-align:-2px;margin-right:5px;"></i>New moment of yours
           </button>
           <div style="flex:1;"></div>
           <div id="self-moments-count" style="font-size:11px;color:var(--ink-light);"></div>
         </div>
         <div id="self-moments-empty" class="sp-empty">
-          A place for the moments you want to keep — a sunrise, a dinner, a small win. Tag the people who were there and the moment shows up on their profiles too.
+          Every moment you save — yours and the ones on each person's page — gathers here. Add a moment with the button above, or save one from a friend's profile.
         </div>
         <div id="self-moments-grid" class="photo-grid" style="display:none;"></div>
       </div>
@@ -4298,15 +4303,34 @@ function ownerPid(owner) {
   return owner.pid;
 }
 
-// ---- SELF moments rendering ----
+// ---- SELF moments rendering: aggregated feed across PEOPLE + SELF.
+// Each card is tagged with whose profile it lives on; clicking opens the
+// moment on that person's page (or stays in SELF for self-hosted ones).
 function renderSelfMoments() {
   SELF.events = SELF.events || [];
-  const events = SELF.events.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  // gather every moment everywhere with its host info
+  const all = [];
+  const seen = new Set();
+  PEOPLE.forEach(host => {
+    (host.events || []).forEach(ev => {
+      if(seen.has(ev.id)) return;
+      seen.add(ev.id);
+      all.push({ ev, host, hostPid: host.pid });
+    });
+  });
+  SELF.events.forEach(ev => {
+    if(seen.has(ev.id)) return;
+    seen.add(ev.id);
+    all.push({ ev, host: SELF, hostPid: SELF_PID });
+  });
+  all.sort((a, b) => (b.ev.date || '').localeCompare(a.ev.date || ''));
+
   const empty = document.getElementById('self-moments-empty');
   const grid  = document.getElementById('self-moments-grid');
   const count = document.getElementById('self-moments-count');
   if(!empty || !grid) return;
-  if(!events.length) {
+
+  if(!all.length) {
     empty.style.display = 'block';
     grid.style.display  = 'none';
     if(count) count.textContent = '';
@@ -4314,28 +4338,52 @@ function renderSelfMoments() {
   }
   empty.style.display = 'none';
   grid.style.display  = 'grid';
-  if(count) count.textContent = events.length + (events.length === 1 ? ' moment' : ' moments');
-  grid.innerHTML = events.map(ev => {
+  if(count) count.textContent = all.length + (all.length === 1 ? ' moment' : ' moments');
+
+  grid.innerHTML = all.map(({ ev, host, hostPid }) => {
     const cover = (ev.photos || [])[0];
     if(!cover) return '';
     const date = eventSummaryDate(ev);
     const cap  = eventSummaryCaption(ev);
     const n    = (ev.photos || []).length;
-    const tags = (ev.taggedPeople || []).map(pid => {
-      const tp = PEOPLE.find(x => x.pid === pid);
-      return tp ? '@' + (tp.name || '').split(' ')[0] : '';
-    }).filter(Boolean).join(' · ');
-    return `<div class="photo-card" onclick="openEventEditor('${ev.id}')">
+    // top tag: whose profile this moment lives on
+    const isSelf  = hostPid === SELF_PID;
+    const hostName = isSelf ? (SELF.name ? SELF.name.split(' ')[0] : 'You') : (host.name || '').split(' ')[0];
+    const hostTag = `<div class="moment-host-tag ${isSelf ? 'self' : ''}">
+      <i class="ti ti-user" style="font-size:11px;"></i>${escapeHTML(hostName)}${isSelf ? '' : "'s page"}
+    </div>`;
+    return `<div class="photo-card" onclick="openMomentOnHostPage('${ev.id}')">
+      ${hostTag}
       <div class="photo-thumb" style="background-image:url('${cover}')">
         ${n > 1 ? `<div class="photo-count-badge"><i class="ti ti-stack-2" style="font-size:11px;"></i> ${n}</div>` : ''}
       </div>
       <div class="photo-info">
         <div class="photo-caption${cap ? '' : ' empty'}">${cap ? escapeHTML(cap) : 'Add a story…'}</div>
         ${date ? `<div class="photo-date">${escapeHTML(date)}</div>` : ''}
-        ${tags ? `<div class="photo-shared-from" style="color:var(--ink-light);font-style:normal;">${escapeHTML(tags)}</div>` : ''}
       </div>
     </div>`;
   }).join('');
+}
+
+// click handler for a moment card in the SELF feed: navigate to the host's
+// profile (or stay in SELF for self-hosted moments) and open the editor.
+function openMomentOnHostPage(eventId) {
+  const owner = findEventOwner(eventId);
+  if(!owner) return;
+  if(owner === SELF) {
+    // already in the SELF context — just open the editor
+    openEventEditor(eventId);
+    return;
+  }
+  // close the self modal, jump to that person's profile, then open the moment
+  closeSelfModal();
+  const idx = PEOPLE.findIndex(p => p.pid === owner.pid);
+  if(idx < 0) return;
+  selectPerson(idx);
+  // switch to the Moments tab on that person
+  if(typeof switchTab === 'function') switchTab('photos');
+  // small delay so the person card finishes opening before the editor stacks on top
+  setTimeout(() => openEventEditor(eventId), 220);
 }
 
 // ---- start a new SELF moment (pick photos, then open editor) ----
