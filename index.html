@@ -182,6 +182,60 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .mode-btn.active { border-color: var(--sage); background: rgba(122,140,114,0.06); color: var(--ink); }
 .text-drop { width: 100%; min-height: 160px; padding: 14px 16px; border-radius: 10px; border: 1.5px solid var(--border-strong); background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); outline: none; resize: vertical; line-height: 1.6; transition: border 0.15s; }
 .text-drop:focus { border-color: var(--sage); }
+
+/* Speaker-tagged turn builder for text conversations */
+.turn-builder { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.speaker-select { margin-bottom: 12px; }
+.speaker-label { font-size: 11px; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.speaker-pills { display: flex; gap: 8px; }
+.speaker-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--border-strong); background: var(--warm-white); color: var(--ink-light); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.speaker-pill .speaker-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+.speaker-pill.me .speaker-dot { background: var(--sage); }
+.speaker-pill.them .speaker-dot { background: var(--gold); }
+.speaker-pill.active { border-color: var(--ink); color: var(--ink); background: var(--warm-white); }
+.speaker-pill.active .speaker-dot { opacity: 1; }
+.turn-compose { display: flex; align-items: flex-start; gap: 8px; }
+.turn-compose .event-textarea { flex: 1; }
+.turn-add-btn { padding: 10px 14px; flex-shrink: 0; }
+.turn-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.turn-list:empty { display: none; }
+.turn-bubble { display: flex; gap: 8px; align-items: flex-start; max-width: 86%; }
+.turn-bubble.me { align-self: flex-end; flex-direction: row-reverse; }
+.turn-bubble .turn-bubble-body { background: var(--warm-white); border: 1px solid var(--border); border-radius: 14px; padding: 9px 13px; font-size: 13px; line-height: 1.5; color: var(--ink); position: relative; }
+.turn-bubble.me .turn-bubble-body { background: #EEF3E9; border-color: #D9E3CC; }
+.turn-bubble.them .turn-bubble-body { background: #FAF1DC; border-color: #ECDDB8; }
+.turn-bubble-speaker { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-light); margin-bottom: 3px; font-weight: 600; }
+.turn-bubble-remove { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; border: none; background: var(--ink); color: var(--cream); font-size: 11px; line-height: 1; cursor: pointer; opacity: 0; transition: opacity 0.15s; padding: 0; display: flex; align-items: center; justify-content: center; }
+.turn-bubble:hover .turn-bubble-remove { opacity: 1; }
+.text-mode-toggle { margin: 14px 0 12px; text-align: center; }
+.text-mode-toggle a { font-size: 12px; color: var(--ink-light); text-decoration: underline; }
+.text-mode-toggle a:hover { color: var(--ink); }
+
+/* @-mention field for tagging people in a Moment */
+.mention-field { position: relative; }
+.mention-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.mention-chips:empty { display: none; }
+.mention-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 10px; background: var(--cream); border: 1px solid var(--border); border-radius: 999px; font-size: 12px; color: var(--ink); }
+.mention-chip-rm { width: 16px; height: 16px; border-radius: 50%; border: none; background: var(--ink-light); color: var(--cream); font-size: 11px; line-height: 1; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+.mention-chip-rm:hover { background: var(--ink); }
+.mention-input { width: 100%; }
+.mention-hint { font-size: 11px; color: var(--ink-light); margin-top: 5px; }
+.mention-menu { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; max-height: 240px; overflow-y: auto; background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); z-index: 50; }
+.mention-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; transition: background 0.12s; }
+.mention-item:hover, .mention-item.active { background: var(--cream); }
+.mention-item-av { width: 28px; height: 28px; border-radius: 50%; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.mention-item-name { font-size: 13px; color: var(--ink); flex: 1; }
+.mention-item-rel { font-size: 11px; color: var(--ink-light); }
+.mention-empty { padding: 12px; font-size: 12px; color: var(--ink-light); text-align: center; font-style: italic; }
+.photo-shared-from { font-size: 10.5px; color: var(--gold); margin-top: 4px; font-style: italic; }
+.self-moments-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* First-thought welcome hint (shown in the portrait modal until the owner records their first thought) */
+.first-thought-hint { display: flex; gap: 12px; align-items: flex-start; background: linear-gradient(135deg, #FAF1DC 0%, #F5E9CC 100%); border: 1px solid #ECDDB8; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+.fth-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.fth-body { flex: 1; min-width: 0; }
+.fth-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--ink); margin-bottom: 4px; line-height: 1.2; }
+.fth-text { font-size: 12.5px; color: var(--ink-mid); line-height: 1.55; }
 .text-submit { margin-top: 12px; }
 
 /* TREE / CONNECTIONS SCREEN */
@@ -587,7 +641,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   .photo-grid { grid-template-columns: 1fr; }
 
   /* Self modal — already a bottom sheet, ensure full width */
-  .self-modal { max-width: 100%; border-radius: 18px 18px 0 0; }
+  .self-modal { max-width: 100%; border-radius: 18px 18px 0 0; max-height: 85vh; max-height: 85dvh; }
+  .self-modal-header { padding-top: max(18px, env(safe-area-inset-top)); }
+  .self-modal-close { top: max(10px, env(safe-area-inset-top)); }
   .self-modal-header { padding: 16px 20px 12px; }
   .self-modal-body { padding: 16px 20px 0; }
 
@@ -748,7 +804,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="tabs" id="tabs-row">
             <button class="tab-btn active" id="tab-portrait-btn" onclick="switchTab('portrait')">Portrait</button>
             <button class="tab-btn" id="tab-timeline-btn" onclick="switchTab('timeline')">Timeline</button>
-            <button class="tab-btn" id="tab-photos-btn" onclick="switchTab('photos')">Photos</button>
+            <button class="tab-btn" id="tab-photos-btn" onclick="switchTab('photos')">Moments</button>
             <button class="tab-btn" id="tab-gems-btn" onclick="switchTab('gems')">Memory gems</button>
             <button class="tab-btn" id="tab-aboutyou-btn" onclick="switchTab('aboutyou')" style="display:none;">About you</button>
             <button class="tab-btn" id="tab-capsule-btn" onclick="switchTab('capsule')" style="display:none;">For them</button>
@@ -919,7 +975,35 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
             </div>
 
             <div id="text-input-area" style="display:none;">
-              <textarea class="text-drop" id="transcript-text" placeholder="Paste the transcript of your conversation here — Cognom will read it and build the portrait, exactly as it does with audio."></textarea>
+              <!-- Chat-style turn builder: speaker toggle + compose + running list -->
+              <div class="turn-builder" id="turn-builder">
+                <div class="speaker-select">
+                  <div class="speaker-label">Who's speaking?</div>
+                  <div class="speaker-pills">
+                    <button class="speaker-pill me active" id="speaker-pill-me" onclick="setActiveSpeaker('me')">
+                      <span class="speaker-dot"></span>You
+                    </button>
+                    <button class="speaker-pill them" id="speaker-pill-them" onclick="setActiveSpeaker('them')">
+                      <span class="speaker-dot"></span><span id="speaker-pill-them-name">Them</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="turn-compose">
+                  <textarea class="event-textarea" id="turn-text" placeholder="Type what was said, then tap +" rows="2"></textarea>
+                  <button class="btn-gold turn-add-btn" onclick="addTurn()" title="Add turn"><i class="ti ti-plus"></i></button>
+                </div>
+                <div class="turn-list" id="turn-list"></div>
+              </div>
+
+              <!-- Paste-plain-transcript fallback (hidden by default) -->
+              <div id="paste-mode" style="display:none;">
+                <textarea class="text-drop" id="transcript-text" placeholder="Paste the transcript of your conversation here — Cognom will read it and build the portrait, exactly as it does with audio."></textarea>
+              </div>
+
+              <div class="text-mode-toggle">
+                <a href="#" id="toggle-paste-link" onclick="event.preventDefault(); togglePasteMode();">Or paste a plain transcript</a>
+              </div>
+
               <button class="btn-gold text-submit" onclick="handleTextSubmit()">Analyze this conversation</button>
             </div>
 
@@ -1136,6 +1220,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <input type="text" class="event-input" id="event-where" placeholder="e.g. Santorini, our kitchen, the lake house…" />
     </div>
     <div class="event-field">
+      <div class="event-field-label">Who else was there?</div>
+      <div class="mention-field" id="event-tagged-wrap">
+        <div class="mention-chips" id="event-tagged-chips"></div>
+        <input type="text" class="event-input mention-input" id="event-tagged-input" placeholder="Type @ to tag someone…" autocomplete="off" />
+        <div class="mention-menu" id="event-tagged-menu" style="display:none;"></div>
+      </div>
+      <div class="mention-hint">Tag a person and this moment will also appear on their profile.</div>
+    </div>
+    <div class="event-field">
       <div class="event-field-label">What does this moment make you feel?</div>
       <textarea class="event-textarea" id="event-feeling" placeholder="Joy, calm, gratitude, the kind of warmth that stays with you…"></textarea>
     </div>
@@ -1176,6 +1269,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
       <div class="self-modal-tabs">
         <button class="self-modal-tab active" onclick="switchSelfTab('portrait')">My portrait</button>
+        <button class="self-modal-tab" onclick="switchSelfTab('moments')">Moments</button>
         <button class="self-modal-tab" onclick="switchSelfTab('journal')">Journal</button>
       </div>
 
@@ -1194,6 +1288,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
         <!-- always-available recorder + text drop -->
         <div class="thought-recorder" style="margin-bottom:22px;">
+          <!-- shown only until the very first thought is recorded -->
+          <div class="first-thought-hint" id="first-thought-hint" style="display:none;">
+            <div class="fth-icon"><i class="ti ti-sparkles"></i></div>
+            <div class="fth-body">
+              <div class="fth-title">Start with a note to yourself</div>
+              <div class="fth-text">Say your name and a few important things about you — what matters, what you care about, where you're from. This first recording also teaches Cognom your voice, so it can tell you apart from others in future conversations.</div>
+            </div>
+          </div>
           <div class="thought-rec-row">
             <div class="thought-mic-wrap">
               <div class="thought-ring" id="t-ring1"></div>
@@ -1265,6 +1367,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         </div>
       </div>
 
+      <!-- MOMENTS TAB (your own moments — moments you want to remember) -->
+      <div id="self-tab-moments" style="display:none;">
+        <div class="self-moments-toolbar">
+          <input type="file" accept="image/*" multiple class="photo-upload-input" id="self-moment-upload-input" onchange="handleNewSelfEventUpload(event)" />
+          <button class="btn-gold" onclick="startNewSelfEvent()" style="padding:9px 18px;font-size:12px;">
+            <i class="ti ti-photo-plus" style="font-size:14px;vertical-align:-2px;margin-right:5px;"></i>New moment
+          </button>
+          <div style="flex:1;"></div>
+          <div id="self-moments-count" style="font-size:11px;color:var(--ink-light);"></div>
+        </div>
+        <div id="self-moments-empty" class="sp-empty">
+          A place for the moments you want to keep — a sunrise, a dinner, a small win. Tag the people who were there and the moment shows up on their profiles too.
+        </div>
+        <div id="self-moments-grid" class="photo-grid" style="display:none;"></div>
+      </div>
+
       <!-- JOURNAL TAB -->
       <div id="self-tab-journal" style="display:none;">
         <div id="self-journal-empty" class="sp-empty">
@@ -1302,9 +1420,13 @@ function loadSelf() {
       spEnergizes:[], spDrains:[],
       spTensions:'', spGrowing:'',
       spThoughtCount:0, spJournal:[],
+      events:[],
       ...JSON.parse(raw)
     };
   } catch(e) {}
+  if(!Array.isArray(SELF.events)) SELF.events = [];
+  // back-fill taggedPeople on any existing SELF events
+  SELF.events.forEach(ev => { if(!Array.isArray(ev.taggedPeople)) ev.taggedPeople = []; });
 }
 function saveSelfData() {
   try { localStorage.setItem(SELF_KEY, JSON.stringify(SELF)); } catch(e) {}
@@ -1412,11 +1534,16 @@ function loadData() {
               where: '',
               feeling: '',
               favorite: old.caption || '',
+              taggedPeople: [],
               photos: [old.src]
             });
           });
           p.photos = [];     // clear after migrating
         }
+        // back-fill taggedPeople on any existing events
+        (p.events || []).forEach(ev => {
+          if(!Array.isArray(ev.taggedPeople)) ev.taggedPeople = [];
+        });
       });
     }
   } catch(e) { PEOPLE = []; }
@@ -1738,6 +1865,9 @@ function selectPerson(idx) {
 
   // open the card as an overlay on top of the tree (tree stays mounted underneath)
   document.getElementById('person-overlay').style.display = 'flex';
+  // reset the conversation turn builder for this person
+  if(typeof resetTurnBuilder === 'function') resetTurnBuilder();
+  if(typeof syncSpeakerPillName === 'function') syncSpeakerPillName();
 
   const hasConvs = hasConversations(p);
 
@@ -2403,14 +2533,110 @@ async function submitRecording() {
   }
 }
 
+// ---- Chat-style turn builder for typed conversations ----
+let convTurns = [];          // [{ speaker: 'me' | 'them', text: '...' }, ...]
+let activeSpeaker = 'them';  // default: the other person spoke first
+
+function setActiveSpeaker(s) {
+  activeSpeaker = s;
+  document.getElementById('speaker-pill-me').classList.toggle('active', s === 'me');
+  document.getElementById('speaker-pill-them').classList.toggle('active', s === 'them');
+}
+
+function addTurn() {
+  const ta = document.getElementById('turn-text');
+  const txt = (ta.value || '').trim();
+  if(!txt) { ta.focus(); return; }
+  convTurns.push({ speaker: activeSpeaker, text: txt });
+  ta.value = '';
+  renderTurnList();
+  // auto-flip to the other speaker so building a back-and-forth is fast
+  setActiveSpeaker(activeSpeaker === 'me' ? 'them' : 'me');
+  ta.focus();
+}
+
+function removeTurn(i) {
+  convTurns.splice(i, 1);
+  renderTurnList();
+}
+
+function renderTurnList() {
+  const wrap = document.getElementById('turn-list');
+  if(!wrap) return;
+  const personLabel = (currentIdx >= 0 && PEOPLE[currentIdx])
+    ? (PEOPLE[currentIdx].name || 'Them').split(' ')[0]
+    : 'Them';
+  const meLabel = (SELF.name || 'You').split(' ')[0];
+  wrap.innerHTML = convTurns.map((t, i) => {
+    const who = t.speaker === 'me' ? meLabel : personLabel;
+    return `<div class="turn-bubble ${t.speaker}">
+      <div class="turn-bubble-body">
+        <div class="turn-bubble-speaker">${escapeHTML(who)}</div>
+        <div>${escapeHTML(t.text)}</div>
+        <button class="turn-bubble-remove" onclick="removeTurn(${i})" title="Remove">&times;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetTurnBuilder() {
+  convTurns = [];
+  activeSpeaker = 'them';
+  const ta = document.getElementById('turn-text'); if(ta) ta.value = '';
+  setActiveSpeaker('them');
+  renderTurnList();
+}
+
+function togglePasteMode() {
+  const builder = document.getElementById('turn-builder');
+  const paste   = document.getElementById('paste-mode');
+  const link    = document.getElementById('toggle-paste-link');
+  if(!builder || !paste || !link) return;
+  const onPaste = paste.style.display !== 'none';
+  if(onPaste) {
+    paste.style.display = 'none';
+    builder.style.display = 'block';
+    link.textContent = 'Or paste a plain transcript';
+  } else {
+    paste.style.display = 'block';
+    builder.style.display = 'none';
+    link.textContent = 'Use the conversation builder instead';
+  }
+}
+
+// keep the "Them" pill labeled with the active person's first name when a
+// person card is open; called from selectPerson / refreshPersonTabs.
+function syncSpeakerPillName() {
+  const el = document.getElementById('speaker-pill-them-name');
+  if(!el) return;
+  if(currentIdx >= 0 && PEOPLE[currentIdx] && PEOPLE[currentIdx].name) {
+    el.textContent = PEOPLE[currentIdx].name.split(' ')[0];
+  } else {
+    el.textContent = 'Them';
+  }
+}
+
 async function handleTextSubmit() {
   if(currentIdx < 0) return;
-  const text = document.getElementById('transcript-text').value.trim();
+  // gather text: prefer the turn builder; if user pasted plain text, use that
+  const builder = document.getElementById('turn-builder');
+  const paste   = document.getElementById('paste-mode');
+  const onPaste = paste && paste.style.display !== 'none';
+  let text = '';
+  if(onPaste) {
+    text = (document.getElementById('transcript-text').value || '').trim();
+  } else {
+    const personLabel = (PEOPLE[currentIdx].name || 'Them').split(' ')[0];
+    const meLabel = (SELF.name || 'You').split(' ')[0];
+    text = convTurns.map(t => `${t.speaker === 'me' ? meLabel : personLabel}: ${t.text}`).join('\n');
+  }
   const errBox = document.getElementById('upload-error');
   errBox.style.display = 'none';
   if(text.length < 20) {
     errBox.style.display='block';
-    errBox.textContent='Please paste a bit more of the conversation so Cognom has something to work with.';
+    errBox.textContent = onPaste
+      ? 'Please paste a bit more of the conversation so Cognom has something to work with.'
+      : 'Add a few more turns so Cognom has something to work with.';
     return;
   }
   const p = PEOPLE[currentIdx];
@@ -2438,6 +2664,7 @@ async function handleTextSubmit() {
     setStep(4,'done');
     applyAnalysis(p, r);
     document.getElementById('transcript-text').value = '';
+    resetTurnBuilder();
     saveData();
     renderSidebar();
     refreshPersonTabs(p);
@@ -3542,14 +3769,15 @@ function closeSelfModal() {
 }
 
 function switchSelfTab(name) {
-  ['portrait','journal'].forEach(t => {
+  ['portrait','moments','journal'].forEach(t => {
     const el = document.getElementById('self-tab-' + t);
     if(el) el.style.display = t === name ? 'block' : 'none';
   });
   document.querySelectorAll('.self-modal-tab').forEach((b, i) => {
-    b.classList.toggle('active', ['portrait','journal'][i] === name);
+    b.classList.toggle('active', ['portrait','moments','journal'][i] === name);
   });
   if(name === 'portrait') { renderSelfIdentity(); renderSelfPortrait(); }
+  if(name === 'moments')  renderSelfMoments();
   if(name === 'journal')  renderSelfJournal();
 }
 
@@ -3571,6 +3799,9 @@ function renderSelfIdentity() {
     ab.style.fontStyle = 'italic';
     ab.style.opacity = '0.8';
   }
+  // first-thought hint: shown only until the very first voice recording is made
+  const hint = document.getElementById('first-thought-hint');
+  if(hint) hint.style.display = SELF.voiceSample ? 'none' : 'flex';
 }
 
 // ---- Thought recorder state (separate from the conversation mic) ----
@@ -3627,6 +3858,22 @@ function onThoughtFinished() {
   tBlob = new Blob(tChunks, { type: mime });
   tUrl  = URL.createObjectURL(tBlob);
 
+  // If the owner doesn't have a reference voice yet, take this first thought
+  // recording as it — Cognom will use it to recognise their voice in future
+  // conversations vs the other speakers'.
+  if(!SELF.voiceSample) {
+    const fr = new FileReader();
+    fr.onloadend = () => {
+      SELF.voiceSample = fr.result;
+      SELF.voiceSampleMime = mime;
+      saveSelfData();
+      // hide the welcome hint immediately
+      const hint = document.getElementById('first-thought-hint');
+      if(hint) hint.style.display = 'none';
+    };
+    fr.readAsDataURL(tBlob);
+  }
+
   tAudio = new Audio(tUrl);
   tAudio.ontimeupdate = () => {
     if(!tAudio.duration) return;
@@ -3643,7 +3890,9 @@ function onThoughtFinished() {
 function updateThoughtUI(rec) {
   const btn = document.getElementById('thought-mic-btn');
   const icon = document.getElementById('thought-mic-icon');
-  document.getElementById('thought-status').textContent = rec ? 'Recording… tap to stop' : 'Tap to record a thought';
+  const isFirst = !SELF.voiceSample;
+  const idleLabel = isFirst ? 'Tap to record your first note' : 'Tap to record a thought';
+  document.getElementById('thought-status').textContent = rec ? 'Recording… tap to stop' : idleLabel;
   btn.classList.toggle('recording', rec);
   icon.className = rec ? 'ti ti-player-stop' : 'ti ti-microphone';
   document.getElementById('t-ring1').classList.toggle('pulse', rec);
@@ -3893,9 +4142,106 @@ function renderSelfJournal() {
 
 let currentEventId = null;       // event currently open in the editor
 let currentEventSlide = 0;       // which photo within the event is shown
+let eventTaggedPids = [];        // pids of people tagged in the currently-open event
 const MAX_PHOTOS_PER_EVENT = 4;
 const MAX_LONG_SIDE = 1400;
 const JPEG_QUALITY  = 0.82;
+
+// ---- @-mention picker for tagging people in a Moment ----
+function renderMentionChips() {
+  const wrap = document.getElementById('event-tagged-chips');
+  if(!wrap) return;
+  wrap.innerHTML = eventTaggedPids.map(pid => {
+    const p = PEOPLE.find(x => x.pid === pid);
+    if(!p) return '';
+    return `<span class="mention-chip">@${escapeHTML((p.name || '').split(' ')[0])}<button type="button" class="mention-chip-rm" onclick="removeTaggedPid('${pid}')" title="Remove">&times;</button></span>`;
+  }).join('');
+}
+
+function removeTaggedPid(pid) {
+  eventTaggedPids = eventTaggedPids.filter(x => x !== pid);
+  renderMentionChips();
+}
+
+function avatarHtmlForMention(p) {
+  if(p.photo) return `<div class="mention-item-av" style="background-image:url('${p.photo}')"></div>`;
+  const av = avatarBg(p.avClass), col = avatarColor(p.avClass);
+  return `<div class="mention-item-av" style="background:${av};color:${col}">${escapeHTML(p.initial || (p.name||'?').charAt(0))}</div>`;
+}
+
+function openMentionMenu(query) {
+  const menu = document.getElementById('event-tagged-menu');
+  if(!menu) return;
+  const q = (query || '').toLowerCase().trim();
+  const owner = findEventOwner(currentEventId);
+  const hostPid = ownerPid(owner);
+  // candidates: every person except the host and already-tagged
+  const candidates = PEOPLE.filter(p => {
+    if(hostPid && p.pid === hostPid) return false;
+    if(eventTaggedPids.indexOf(p.pid) >= 0) return false;
+    if(!q) return true;
+    return (p.name || '').toLowerCase().includes(q);
+  });
+  if(!candidates.length) {
+    menu.innerHTML = `<div class="mention-empty">${PEOPLE.length === 0 ? 'Add people first, then come back to tag them.' : 'No match.'}</div>`;
+  } else {
+    menu.innerHTML = candidates.slice(0, 8).map((p, i) => `
+      <div class="mention-item ${i === 0 ? 'active' : ''}" data-pid="${p.pid}" onclick="addTaggedPidFromMenu('${p.pid}')">
+        ${avatarHtmlForMention(p)}
+        <div class="mention-item-name">${escapeHTML(p.name || '')}</div>
+        <div class="mention-item-rel">${escapeHTML(p.who || (p.chips && p.chips[0]) || '')}</div>
+      </div>
+    `).join('');
+  }
+  menu.style.display = 'block';
+}
+
+function closeMentionMenu() {
+  const menu = document.getElementById('event-tagged-menu');
+  if(menu) menu.style.display = 'none';
+}
+
+function addTaggedPidFromMenu(pid) {
+  if(eventTaggedPids.indexOf(pid) < 0) eventTaggedPids.push(pid);
+  renderMentionChips();
+  const inp = document.getElementById('event-tagged-input');
+  if(inp) { inp.value = ''; inp.focus(); }
+  closeMentionMenu();
+}
+
+// keyboard + input wiring for the mention field — set up once on load
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('event-tagged-input');
+  if(!inp) return;
+  inp.addEventListener('input', () => {
+    const v = inp.value;
+    // open the menu when the input starts with @ or has any text
+    if(v.startsWith('@')) openMentionMenu(v.slice(1));
+    else if(v.length > 0) openMentionMenu(v);
+    else closeMentionMenu();
+  });
+  inp.addEventListener('focus', () => {
+    if(inp.value.startsWith('@') || inp.value.length > 0) openMentionMenu(inp.value.replace(/^@/, ''));
+  });
+  inp.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') { closeMentionMenu(); return; }
+    if(e.key === 'Backspace' && !inp.value && eventTaggedPids.length) {
+      eventTaggedPids.pop();
+      renderMentionChips();
+      return;
+    }
+    if(e.key === 'Enter') {
+      e.preventDefault();
+      const first = document.querySelector('#event-tagged-menu .mention-item.active') || document.querySelector('#event-tagged-menu .mention-item');
+      if(first) addTaggedPidFromMenu(first.getAttribute('data-pid'));
+    }
+  });
+  // click-outside closes the menu
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('event-tagged-wrap');
+    if(wrap && !wrap.contains(e.target)) closeMentionMenu();
+  });
+});
 
 function newEventId()  { return 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function eventSummaryDate(ev) {
@@ -3910,8 +4256,119 @@ function eventSummaryCaption(ev) {
   return '';
 }
 
+const SELF_PID = '__self__';   // magic pid so SELF can host events like any person
+
+// ---- Moments: aggregate across people (an event lives on its host person,
+// but also surfaces on every tagged person's profile via event.taggedPeople[]).
+function collectEventsForPerson(p) {
+  if(!p) return [];
+  const out = [];
+  const seen = new Set();
+  const visit = (host, hostPid) => {
+    (host.events || []).forEach(ev => {
+      if(seen.has(ev.id)) return;
+      const isHost   = hostPid === p.pid;
+      const isTagged = Array.isArray(ev.taggedPeople) && ev.taggedPeople.indexOf(p.pid) >= 0;
+      if(isHost || isTagged) {
+        ev._hostPid = hostPid;
+        out.push(ev);
+        seen.add(ev.id);
+      }
+    });
+  };
+  PEOPLE.forEach(host => visit(host, host.pid));
+  // also surface SELF-hosted moments where this person is tagged
+  visit(SELF, SELF_PID);
+  return out;
+}
+
+// find the person (or SELF) who owns (hosts) a given event id
+function findEventOwner(eventId) {
+  for(const host of PEOPLE) {
+    if((host.events || []).some(ev => ev.id === eventId)) return host;
+  }
+  if((SELF.events || []).some(ev => ev.id === eventId)) return SELF;
+  return null;
+}
+
+// helper: which pid does this owner have? (people have p.pid; SELF uses SELF_PID)
+function ownerPid(owner) {
+  if(!owner) return null;
+  if(owner === SELF) return SELF_PID;
+  return owner.pid;
+}
+
+// ---- SELF moments rendering ----
+function renderSelfMoments() {
+  SELF.events = SELF.events || [];
+  const events = SELF.events.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const empty = document.getElementById('self-moments-empty');
+  const grid  = document.getElementById('self-moments-grid');
+  const count = document.getElementById('self-moments-count');
+  if(!empty || !grid) return;
+  if(!events.length) {
+    empty.style.display = 'block';
+    grid.style.display  = 'none';
+    if(count) count.textContent = '';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.style.display  = 'grid';
+  if(count) count.textContent = events.length + (events.length === 1 ? ' moment' : ' moments');
+  grid.innerHTML = events.map(ev => {
+    const cover = (ev.photos || [])[0];
+    if(!cover) return '';
+    const date = eventSummaryDate(ev);
+    const cap  = eventSummaryCaption(ev);
+    const n    = (ev.photos || []).length;
+    const tags = (ev.taggedPeople || []).map(pid => {
+      const tp = PEOPLE.find(x => x.pid === pid);
+      return tp ? '@' + (tp.name || '').split(' ')[0] : '';
+    }).filter(Boolean).join(' · ');
+    return `<div class="photo-card" onclick="openEventEditor('${ev.id}')">
+      <div class="photo-thumb" style="background-image:url('${cover}')">
+        ${n > 1 ? `<div class="photo-count-badge"><i class="ti ti-stack-2" style="font-size:11px;"></i> ${n}</div>` : ''}
+      </div>
+      <div class="photo-info">
+        <div class="photo-caption${cap ? '' : ' empty'}">${cap ? escapeHTML(cap) : 'Add a story…'}</div>
+        ${date ? `<div class="photo-date">${escapeHTML(date)}</div>` : ''}
+        ${tags ? `<div class="photo-shared-from" style="color:var(--ink-light);font-style:normal;">${escapeHTML(tags)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---- start a new SELF moment (pick photos, then open editor) ----
+function startNewSelfEvent() {
+  document.getElementById('self-moment-upload-input').click();
+}
+
+async function handleNewSelfEventUpload(event) {
+  const files = Array.from(event.target.files || []).slice(0, MAX_PHOTOS_PER_EVENT);
+  if(!files.length) { event.target.value = ''; return; }
+  if(event.target.files.length > MAX_PHOTOS_PER_EVENT) {
+    showNotif('A moment holds up to 4 photos — used the first 4.');
+  }
+  const photos = (await Promise.all(files.map(processImageFile))).filter(Boolean);
+  if(!photos.length) { showNotif('Could not read those photos.'); event.target.value = ''; return; }
+
+  SELF.events = SELF.events || [];
+  const newEvent = {
+    id: newEventId(),
+    date: new Date().toISOString().slice(0, 10),
+    title: '', where: '', feeling: '', favorite: '',
+    taggedPeople: [],
+    photos
+  };
+  SELF.events.push(newEvent);
+  try { saveSelfData(); } catch(e) { showNotif('Storage limit reached — try fewer or smaller photos.'); }
+  renderSelfMoments();
+  event.target.value = '';
+  openEventEditor(newEvent.id);
+}
+
 function renderEvents(p) {
-  const events = (p.events || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const events = collectEventsForPerson(p).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const empty  = document.getElementById('photos-empty');
   const grid   = document.getElementById('photos-grid');
   const share  = document.getElementById('photos-share-btn');
@@ -3935,6 +4392,13 @@ function renderEvents(p) {
     const date = eventSummaryDate(ev);
     const cap  = eventSummaryCaption(ev);
     const n    = (ev.photos || []).length;
+    // show a small "shared from {host}" hint when this moment was tagged in by someone else
+    let fromHost = '';
+    if(ev._hostPid && ev._hostPid !== p.pid) {
+      if(ev._hostPid === SELF_PID) fromHost = (SELF.name || 'you').split(' ')[0];
+      else fromHost = (PEOPLE.find(x => x.pid === ev._hostPid)?.name || '').split(' ')[0];
+    }
+    const sharedBadge = fromHost ? `<div class="photo-shared-from">tagged in by ${escapeHTML(fromHost)}</div>` : '';
     return `<div class="photo-card" onclick="openEventEditor('${ev.id}')">
       <div class="photo-thumb" style="background-image:url('${cover}')">
         ${n > 1 ? `<div class="photo-count-badge"><i class="ti ti-stack-2" style="font-size:11px;"></i> ${n}</div>` : ''}
@@ -3942,6 +4406,7 @@ function renderEvents(p) {
       <div class="photo-info">
         <div class="photo-caption${cap ? '' : ' empty'}">${cap ? escapeHTML(cap) : 'Add a story…'}</div>
         ${date ? `<div class="photo-date">${escapeHTML(date)}</div>` : ''}
+        ${sharedBadge}
       </div>
     </div>`;
   }).join('');
@@ -3996,6 +4461,7 @@ async function handleNewEventUpload(event) {
     where: '',
     feeling: '',
     favorite: '',
+    taggedPeople: [],
     photos
   };
   p.events.push(newEvent);
@@ -4008,9 +4474,10 @@ async function handleNewEventUpload(event) {
 
 // ---- add MORE photos to an event already open in the editor ----
 async function handleAddPhotosToEvent(event) {
-  if(currentIdx < 0 || !currentEventId) return;
-  const p = PEOPLE[currentIdx];
-  const ev = (p.events || []).find(x => x.id === currentEventId);
+  if(!currentEventId) return;
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === currentEventId);
   if(!ev) return;
   const remaining = MAX_PHOTOS_PER_EVENT - ev.photos.length;
   if(remaining <= 0) { showNotif('Maximum 4 photos per moment.'); event.target.value = ''; return; }
@@ -4019,7 +4486,7 @@ async function handleAddPhotosToEvent(event) {
 
   const newPhotos = (await Promise.all(files.map(processImageFile))).filter(Boolean);
   ev.photos.push(...newPhotos);
-  try { saveData(); } catch(e) { showNotif('Storage limit reached.'); }
+  try { if(owner === SELF) saveSelfData(); else saveData(); } catch(e) { showNotif('Storage limit reached.'); }
   currentEventSlide = ev.photos.length - 1;
   renderEventEditor();
   event.target.value = '';
@@ -4027,9 +4494,9 @@ async function handleAddPhotosToEvent(event) {
 
 // ---- editor open/close ----
 function openEventEditor(eventId) {
-  if(currentIdx < 0) return;
-  const p = PEOPLE[currentIdx];
-  const ev = (p.events || []).find(x => x.id === eventId);
+  const owner = findEventOwner(eventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === eventId);
   if(!ev) return;
   currentEventId = eventId;
   currentEventSlide = 0;
@@ -4039,6 +4506,12 @@ function openEventEditor(eventId) {
   document.getElementById('event-where').value       = ev.where || '';
   document.getElementById('event-feeling').value     = ev.feeling || '';
   document.getElementById('event-favorite').value    = ev.favorite || '';
+  // mention chips: people tagged in this moment (excluding the host)
+  eventTaggedPids = Array.isArray(ev.taggedPeople) ? ev.taggedPeople.slice() : [];
+  renderMentionChips();
+  closeMentionMenu();
+  const inp = document.getElementById('event-tagged-input');
+  if(inp) inp.value = '';
   document.getElementById('photo-viewer').classList.add('open');
   renderEventEditor();
 }
@@ -4051,8 +4524,10 @@ function closeEventEditor() {
 
 // ---- carousel rendering ----
 function renderEventEditor() {
-  if(currentIdx < 0 || !currentEventId) return;
-  const ev = (PEOPLE[currentIdx].events || []).find(x => x.id === currentEventId);
+  if(!currentEventId) return;
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === currentEventId);
   if(!ev) return;
   const photos = ev.photos || [];
   const total  = photos.length;
@@ -4095,7 +4570,9 @@ function renderEventEditor() {
 
 function setEventSlide(i) { currentEventSlide = i; renderEventEditor(); }
 function eventStep(delta) {
-  const ev = (PEOPLE[currentIdx].events || []).find(x => x.id === currentEventId);
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === currentEventId);
   if(!ev) return;
   const total = (ev.photos || []).length;
   if(!total) return;
@@ -4104,9 +4581,10 @@ function eventStep(delta) {
 }
 
 function removePhotoFromEvent(i) {
-  if(currentIdx < 0 || !currentEventId) return;
-  const p = PEOPLE[currentIdx];
-  const ev = (p.events || []).find(x => x.id === currentEventId);
+  if(!currentEventId) return;
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === currentEventId);
   if(!ev) return;
   if(ev.photos.length <= 1) {
     showNotif('A moment needs at least one photo. Delete the whole moment instead.');
@@ -4114,35 +4592,42 @@ function removePhotoFromEvent(i) {
   }
   ev.photos.splice(i, 1);
   if(currentEventSlide >= ev.photos.length) currentEventSlide = ev.photos.length - 1;
-  saveData();
+  if(owner === SELF) saveSelfData(); else saveData();
   renderEventEditor();
-  renderEvents(p);
+  if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  if(document.getElementById('self-modal-overlay')?.classList.contains('open')) renderSelfMoments();
 }
 
 // ---- save / delete the event ----
 function saveCurrentEvent() {
-  if(currentIdx < 0 || !currentEventId) return;
-  const p = PEOPLE[currentIdx];
-  const ev = (p.events || []).find(x => x.id === currentEventId);
+  if(!currentEventId) return;
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === currentEventId);
   if(!ev) return;
   ev.date     = document.getElementById('event-date-input').value || ev.date;
   ev.title    = document.getElementById('event-title-input').value.trim();
   ev.where    = document.getElementById('event-where').value.trim();
   ev.feeling  = document.getElementById('event-feeling').value.trim();
   ev.favorite = document.getElementById('event-favorite').value.trim();
-  saveData();
-  renderEvents(p);
+  ev.taggedPeople = eventTaggedPids.filter(pid => pid !== ownerPid(owner));
+  if(owner === SELF) saveSelfData(); else saveData();
+  // refresh whichever grid is visible
+  if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  if(document.getElementById('self-modal-overlay')?.classList.contains('open')) renderSelfMoments();
   closeEventEditor();
   showNotif('Moment saved.');
 }
 
 function deleteCurrentEvent() {
-  if(currentIdx < 0 || !currentEventId) return;
+  if(!currentEventId) return;
   if(!confirm("Delete this moment? This can't be undone.")) return;
-  const p = PEOPLE[currentIdx];
-  p.events = (p.events || []).filter(x => x.id !== currentEventId);
-  saveData();
-  renderEvents(p);
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  owner.events = (owner.events || []).filter(x => x.id !== currentEventId);
+  if(owner === SELF) saveSelfData(); else saveData();
+  if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  if(document.getElementById('self-modal-overlay')?.classList.contains('open')) renderSelfMoments();
   closeEventEditor();
   showNotif('Moment deleted.');
 }
@@ -4277,13 +4762,16 @@ function shareAllPhotos() {
 }
 
 function shareCurrentEvent() {
-  if(currentIdx < 0 || !currentEventId) return;
-  const p = PEOPLE[currentIdx];
-  const ev = (p.events || []).find(x => x.id === currentEventId);
+  if(!currentEventId) return;
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === currentEventId);
   if(!ev) return;
   // pick up any unsaved field edits first
-  if(syncEditorFieldsToEvent(ev)) renderEvents(p);
-  buildAndOpenMemoryPage(p, [ev], { single: true });
+  if(syncEditorFieldsToEvent(ev)) {
+    if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  }
+  buildAndOpenMemoryPage(owner, [ev], { single: true });
 }
 
 init();
