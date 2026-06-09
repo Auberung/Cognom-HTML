@@ -680,6 +680,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   touch-action: pan-y;
 }
 
+/* iOS auto-zooms when focusing any input with font-size < 16px, and the
+   unzoom can fail when navigation happens during focus (e.g. tapping Call
+   right after editing a person). Force 16px on touch devices to prevent this. */
+@media (max-width: 760px) {
+  .field-input,
+  .person-search,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 @media (max-width: 760px) {
   /* App becomes a single column; sidebar slides in from the left */
   .app { grid-template-columns: 1fr; }
@@ -2067,7 +2078,7 @@ function snoozePerson(idx) {
 // returns to Cognom, gently prompt them to capture what came up.
 
 const CALL_RETURN_KEY = 'cognom_pending_call_v1';
-const CALL_MIN_WAIT_MS = 60 * 1000;        // don't prompt if they tapped & canceled
+const CALL_MIN_WAIT_MS = 20 * 1000;        // 20s — past the iOS confirm-dialog window, into a real call attempt
 const CALL_MAX_WAIT_MS = 30 * 60 * 1000;   // expire after 30 min — calls don't last that long here
 
 function loadPendingCall() {
@@ -2088,12 +2099,24 @@ function initiateCall(idx) {
   if(!p || !p.phone) return;
   // record the intent so the return-from-call prompt can fire when they come back
   savePendingCall({ pid: p.pid, name: p.name, startedAt: Date.now() });
+  // reset the session guard so a fresh call always gets a fresh prompt
+  postCallShownThisSession = false;
   // open the system dialer — works on iOS and Android, no-ops on desktop
   // (desktop may show "open in FaceTime" or similar)
   const tel = (p.phone || '').replace(/[^\d+]/g, '');
   if(tel) window.location.href = 'tel:' + tel;
   // also stamp a soft notification — the user might dismiss the iOS confirm dialog
   showNotif("Dialing " + (p.name || '').split(' ')[0] + " — Cognom will be here when you're back.");
+}
+
+// Opens the edit-person modal and lands the cursor in the phone field —
+// used when the user taps the "Add phone to call" entry point.
+function openEditPersonFocusPhone(idx) {
+  openEditPerson(idx);
+  setTimeout(() => {
+    const phoneEl = document.getElementById('new-phone');
+    if(phoneEl) { phoneEl.focus(); phoneEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }, 160);
 }
 
 let postCallShownThisSession = false;
@@ -2135,6 +2158,17 @@ function capturePostCall() {
     switchTab('upload');
     if(typeof setConvIntent === 'function') setConvIntent('conversation');
     if(typeof setInputMode === 'function') setInputMode('record');
+    // start the mic right away — the tap on "Capture what came up" is a valid
+    // user gesture for mic permission, so this chain works. The user doesn't
+    // need to hunt for the record button after a call.
+    setTimeout(() => {
+      if(typeof startRecording === 'function' && !micRecording) {
+        startRecording().catch(() => {
+          // permission denied or other failure — the in-app notif from
+          // startRecording already explains; nothing to do here
+        });
+      }
+    }, 200);
   }, 120);
 }
 
@@ -2147,12 +2181,15 @@ function dismissPostCall(didntHappen) {
 }
 
 // Wire visibility — when the user returns to the tab, check if there's a pending call.
+// We listen to multiple events because iOS Safari doesn't always fire visibilitychange
+// reliably after returning from a tel: link (especially across Safari versions).
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible') {
-    // small delay so the page is fully back before we open a modal
     setTimeout(checkPostCallReturn, 350);
   }
 });
+window.addEventListener('focus',    () => setTimeout(checkPostCallReturn, 350));
+window.addEventListener('pageshow', () => setTimeout(checkPostCallReturn, 350));
 // Also check at init (in case they reloaded the page after the call)
 setTimeout(checkPostCallReturn, 500);
 
@@ -2459,7 +2496,10 @@ function selectPerson(idx) {
     ${p.who ? `<div class="info-row"><div class="info-label">Who they are to you</div><div class="info-value">${escapeHTML(p.who)}</div></div>` : (p.relation ? `<div class="info-row"><div class="info-label">Relationship</div><div class="info-value"><span class="info-rel-chip">${escapeHTML(p.relation)}</span></div></div>` : '')}
     <div class="info-actions">
       <button class="btn-edit" onclick="openEditPerson(currentIdx)"><i class="ti ti-edit" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Edit</button>
-      ${p.phone ? `<button class="btn-edit" onclick="initiateCall(currentIdx)" title="${escapeHTML(p.phone)}"><i class="ti ti-phone" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Call</button>` : ''}
+      ${p.phone
+        ? `<button class="btn-edit" onclick="initiateCall(currentIdx)" title="${escapeHTML(p.phone)}"><i class="ti ti-phone" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Call</button>`
+        : `<button class="btn-edit" style="opacity:0.75;font-style:italic;" onclick="openEditPersonFocusPhone(currentIdx)" title="Add their number so you can call from Cognom"><i class="ti ti-phone-plus" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Add phone to call</button>`
+      }
       <button class="btn-addconv" id="info-addconv-btn" onclick="toggleUpload()">+ Add conversation</button>
     </div>`;
 
