@@ -677,6 +677,119 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .event-actions-left { display: flex; gap: 8px; }
 .event-actions-bar { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 
+/* ===== ONBOARDING — first-visit orientation, 3 slides, skippable ===== */
+.onboard-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 600;
+  background: var(--cream);
+  align-items: center; justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.onboard-overlay.open { display: flex; }
+.onboard-overlay::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at top, rgba(184,154,90,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at bottom, rgba(122,140,114,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.onboard-card {
+  position: relative;
+  width: 100%; max-width: 460px;
+  text-align: center;
+  padding: 12px;
+  z-index: 1;
+}
+.onboard-skip {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: 18px;
+  background: transparent; border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; color: var(--ink-light);
+  cursor: pointer; padding: 8px 12px;
+  z-index: 2;
+}
+.onboard-skip:hover { color: var(--ink); }
+.onboard-slide { display: none; animation: onboard-fade 0.4s ease; }
+.onboard-slide.active { display: block; }
+@keyframes onboard-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.onboard-brand {
+  width: 64px; height: 64px;
+  margin: 0 auto 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+.onboard-brand svg { width: 100%; height: 100%; }
+.onboard-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px; font-weight: 400;
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: 14px;
+  letter-spacing: -0.5px;
+}
+.onboard-sub {
+  font-size: 15px; color: var(--ink-mid);
+  line-height: 1.6;
+  margin-bottom: 32px;
+  max-width: 380px;
+  margin-left: auto; margin-right: auto;
+  font-weight: 300;
+}
+.onboard-loop { display: flex; flex-direction: column; gap: 18px; margin: 4px 0 32px; text-align: left; }
+.onboard-loop-row {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 14px 16px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.onboard-loop-icon {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(184,154,90,0.12);
+  color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.onboard-loop-text { flex: 1; font-size: 13.5px; color: var(--ink); line-height: 1.5; font-weight: 300; }
+.onboard-loop-text b { font-weight: 500; color: var(--ink); }
+.onboard-privacy {
+  font-size: 12px; color: var(--ink-light);
+  font-style: italic;
+  margin-bottom: 28px;
+  line-height: 1.55;
+  max-width: 360px;
+  margin-left: auto; margin-right: auto;
+}
+.onboard-cta {
+  padding: 14px 32px;
+  font-size: 14px;
+  background: var(--ink); color: var(--cream);
+  border: none; border-radius: 12px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  letter-spacing: 0.2px;
+}
+.onboard-cta:hover { background: var(--sage-dark); transform: translateY(-1px); }
+.onboard-dots {
+  display: flex; justify-content: center; gap: 7px;
+  margin-top: 28px;
+}
+.onboard-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  transition: all 0.2s;
+}
+.onboard-dot.active { background: var(--gold); width: 22px; border-radius: 4px; }
+
 /* ===== CADENCE LOOP — "On your mind" surface ===== */
 .on-mind-section { margin-bottom: 20px; }
 .on-mind-empty { font-size: 11.5px; color: var(--ink-light); padding: 6px 4px; line-height: 1.5; font-style: italic; }
@@ -871,7 +984,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   .photo-viewer-close { top: 12px; right: 12px; }
 
   /* Tree topbar — make Fit/+/- buttons compact */
-  #tree-view .topbar { padding: 10px 14px; }
+  /* Make room for the floating hamburger at left:14 (40px wide + breathing). */
+  #tree-view .topbar { padding: 10px 14px 10px 64px; }
   #tree-view .topbar > div:first-child { flex: 1; min-width: 0; }
   #tree-view .topbar-name { font-size: 16px; }
   #tree-view .topbar-sub { font-size: 10.5px; }
@@ -1436,12 +1550,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div id="settings-gemini-field" class="api-field">
       <div class="field-label" style="margin-bottom:6px;">Gemini API key — get one free at aistudio.google.com</div>
       <input type="password" class="api-input" id="api-key" placeholder="AIza... or AQ...." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" />
-      <div class="prov-note" style="margin-top:7px;">Used for all recordings and thought reflections. Free tier — no cost to get started.</div>
+      <div class="prov-note" style="margin-top:7px;">Free tier — no cost to get started. <b>Note:</b> Google may use your prompts to train their models. If that matters to you for the people in your tree, use OpenAI instead.</div>
     </div>
     <div id="settings-openai-field" class="api-field" style="display:none;">
       <div class="field-label" style="margin-bottom:6px;">OpenAI API key</div>
       <input type="password" class="api-input" id="api-key-openai" placeholder="sk-..." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" />
-      <div class="prov-note" style="margin-top:7px;">Used for all recordings and thought reflections. ~2¢ per analysis call.</div>
+      <div class="prov-note" style="margin-top:7px;">~2¢ per analysis call. OpenAI doesn't train on API data — your conversations stay yours.</div>
     </div>
 
     <div class="settings-section" style="margin-top:18px;">
@@ -1576,19 +1690,74 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           </div>
         </div>
       </button>
-
-      <button class="share-option" id="share-opt-page" onclick="executeShareViaPage()">
-        <div class="share-option-icon"><i class="ti ti-file-export"></i></div>
-        <div class="share-option-body">
-          <div class="share-option-title">Open as a memory page</div>
-          <div class="share-option-sub">Build a printable web page with this moment that you can save, send, or hand to someone offline.</div>
-        </div>
-      </button>
     </div>
 
     <div class="share-history" id="share-history" style="display:none;">
       <div class="share-section-label">Already shared</div>
       <div id="share-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING — first-visit orientation, 3 slides, skippable -->
+<div class="onboard-overlay" id="onboard-overlay">
+  <button class="onboard-skip" onclick="finishOnboarding()">Skip</button>
+  <div class="onboard-card">
+
+    <!-- Slide 1: Welcome -->
+    <div class="onboard-slide active" data-slide="1">
+      <div class="onboard-brand">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="24" cy="13" r="6.5" fill="#8A9A7E"/>
+          <circle cx="15" cy="17" r="5.5" fill="#A8B89F"/>
+          <circle cx="33" cy="17" r="5.5" fill="#BBA071"/>
+          <circle cx="11" cy="23" r="4.5" fill="#C9AE78"/>
+          <circle cx="37" cy="23" r="4.5" fill="#8A9A7E"/>
+          <circle cx="19" cy="22" r="5" fill="#9CB389"/>
+          <circle cx="29" cy="22" r="5" fill="#A8B89F"/>
+          <circle cx="24" cy="20" r="5.5" fill="#7E9576"/>
+          <rect x="22.6" y="24" width="2.8" height="15" rx="1.2" fill="#6E5238"/>
+          <path d="M24 30 L18 27 M24 33 L30 29 M24 27 L28 24" stroke="#6E5238" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="onboard-title">Welcome to Cognom</div>
+      <div class="onboard-sub">A quiet space for the people you love. Stop scrolling — call your mom.</div>
+      <button class="onboard-cta" onclick="onboardNext()">Continue</button>
+    </div>
+
+    <!-- Slide 2: How it works -->
+    <div class="onboard-slide" data-slide="2">
+      <div class="onboard-title">How it works</div>
+      <div class="onboard-sub">Three small motions, repeated quietly over time.</div>
+      <div class="onboard-loop">
+        <div class="onboard-loop-row">
+          <div class="onboard-loop-icon"><i class="ti ti-microphone"></i></div>
+          <div class="onboard-loop-text"><b>Record a conversation, or a thought.</b><br>Audio, paste, or type. Cognom listens for what matters — not everything.</div>
+        </div>
+        <div class="onboard-loop-row">
+          <div class="onboard-loop-icon"><i class="ti ti-tree"></i></div>
+          <div class="onboard-loop-text"><b>Cognom learns who they are.</b><br>The shape of them grows — their topics, what matters to them, what's unsaid.</div>
+        </div>
+        <div class="onboard-loop-row">
+          <div class="onboard-loop-icon"><i class="ti ti-phone"></i></div>
+          <div class="onboard-loop-text"><b>Before your next call, you'll know what to ask.</b><br>One thoughtful question, ready when you tap their name.</div>
+        </div>
+      </div>
+      <button class="onboard-cta" onclick="onboardNext()">Continue</button>
+    </div>
+
+    <!-- Slide 3: Begin -->
+    <div class="onboard-slide" data-slide="3">
+      <div class="onboard-title">Your tree, yours alone</div>
+      <div class="onboard-sub">Everything stays on this device. Nothing is sent to a Cognom server.</div>
+      <div class="onboard-privacy">When you're ready, you'll start by recording a short note about yourself — that's how Cognom learns your voice, so it can tell you apart from the people you talk with.</div>
+      <button class="onboard-cta" onclick="finishOnboarding()">Start with someone you love</button>
+    </div>
+
+    <div class="onboard-dots">
+      <span class="onboard-dot active" data-dot="1"></span>
+      <span class="onboard-dot" data-dot="2"></span>
+      <span class="onboard-dot" data-dot="3"></span>
     </div>
   </div>
 </div>
@@ -1921,6 +2090,54 @@ function init() {
     document.getElementById('welcome-state').style.display = 'none';
     showTree();
   }
+  // Onboarding — show on first ever visit, before they've added anyone or set up self
+  maybeShowOnboarding();
+}
+
+// =========================================================
+// ONBOARDING — first-visit orientation
+// =========================================================
+const ONBOARDED_KEY = 'cognom_onboarded_v1';
+
+function maybeShowOnboarding() {
+  // Only first-time, truly-empty users — don't re-show to anyone who has data
+  if(localStorage.getItem(ONBOARDED_KEY)) return;
+  if(PEOPLE.length > 0) {
+    // returning user with data, just mark them as onboarded silently
+    try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(_) {}
+    return;
+  }
+  if(SELF && (SELF.name || SELF.voiceSample || SELF.spThoughtCount)) {
+    try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(_) {}
+    return;
+  }
+  document.getElementById('onboard-overlay')?.classList.add('open');
+}
+
+let onboardSlide = 1;
+
+function onboardNext() {
+  const total = 3;
+  onboardSlide = Math.min(onboardSlide + 1, total);
+  document.querySelectorAll('.onboard-slide').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.slide, 10) === onboardSlide);
+  });
+  document.querySelectorAll('.onboard-dot').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.dot, 10) === onboardSlide);
+  });
+}
+
+function finishOnboarding() {
+  try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(_) {}
+  document.getElementById('onboard-overlay')?.classList.remove('open');
+  // Reset slide state in case they re-open via some future "Show again" path
+  onboardSlide = 1;
+  document.querySelectorAll('.onboard-slide').forEach(el => {
+    el.classList.toggle('active', el.dataset.slide === '1');
+  });
+  document.querySelectorAll('.onboard-dot').forEach(el => {
+    el.classList.toggle('active', el.dataset.dot === '1');
+  });
 }
 
 let CURRENT_VIEW = 'tree';
@@ -2532,9 +2749,9 @@ function importData(event) {
 function refreshPersonTabs(p) {
   const hasConvs = hasConversations(p);
   const row = document.getElementById('tabs-row');
-  // show tabs row if they have conversations OR photos — photos work on their own
-  const hasPhotos = (p.photos || []).length > 0;
-  if(row) row.style.display = (hasConvs || true) ? '' : 'none';
+  // Tabs row is always visible — Moments and Add conversation are available
+  // even without prior conversations. Portrait/Timeline/Memory gems gate on conv.
+  if(row) row.style.display = '';
   ['tab-portrait-btn','tab-timeline-btn','tab-gems-btn'].forEach(id => {
     const b = document.getElementById(id);
     if(b) b.style.display = hasConvs ? '' : 'none';
@@ -4547,7 +4764,7 @@ function setProvider(prov) {
   if(of) of.style.display = prov==='openai' ? 'block' : 'none';
   // upload tab label
   const lbl = document.getElementById('upload-provider-label');
-  if(lbl) lbl.textContent = prov==='gemini' ? 'Using Google Gemini (free)' : 'Using OpenAI (~2¢ / call)';
+  if(lbl) lbl.textContent = prov==='gemini' ? 'Using Google Gemini (free, but Google may use it for training)' : 'Using OpenAI (~2¢ / call, kept private)';
 }
 
 function friendlyError(err) {
@@ -5908,12 +6125,9 @@ function selectShareRecipient(pid) {
 function renderShareModalState() {
   const optCognom = document.getElementById('share-opt-cognom');
   const optInvite = document.getElementById('share-opt-invite');
-  const optPage   = document.getElementById('share-opt-page');
   const hasRecipient = !!shareCtx.recipientPid;
   if(optCognom) optCognom.disabled = !hasRecipient;
   if(optInvite) optInvite.disabled = !hasRecipient;
-  // page export works even with no specific recipient — we have an event
-  if(optPage)   optPage.disabled = false;
 }
 
 function getCurrentShareEvent() {
@@ -6010,17 +6224,6 @@ function fallbackCopy(text) {
   try { document.execCommand('copy'); showNotif('Link copied.'); }
   catch(_) { showNotif('Couldn\'t copy — select and copy the link manually.'); }
   document.body.removeChild(ta);
-}
-
-function executeShareViaPage() {
-  const { owner, ev } = getCurrentShareEvent();
-  if(!owner || !ev) return;
-  recordShare('page');
-  // build the recipient's view — for the page header, prefer the chosen recipient,
-  // fall back to the event's host
-  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid) || owner;
-  buildAndOpenMemoryPage(recipient, [ev], { single: true });
-  closeShareModal();
 }
 
 function renderShareHistory() {
