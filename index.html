@@ -997,8 +997,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   .modal-title { font-size: 20px; }
 }
 </style>
-<!-- Supabase JS SDK (v2) — auth and data sync -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase JS SDK (v2) — loaded async with onload/onerror signals -->
+<script>
+(function(){
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  s.async = true;
+  s.onload  = function(){ if(typeof window._sbResolve === 'function') window._sbResolve(true);  };
+  s.onerror = function(){ if(typeof window._sbResolve === 'function') window._sbResolve(false); };
+  window._sbReady = new Promise(function(res){ window._sbResolve = res; });
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 
@@ -2106,44 +2116,43 @@ function init() {
 // =========================================================
 // SUPABASE — auth (today) + data sync (next phase)
 // =========================================================
-const SUPABASE_URL  = 'https://hkgoqcpetlzjrdhqxmae.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_rTLehkFS3vaui2I2Ug4xDg_P6VEE6Yo';
-let sb = null;             // the Supabase client
-let CURRENT_USER = null;   // { id, email } when signed in
+const SUPABASE_URL = 'https://hkgoqcpetlzjrdhqxmae.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_rTLehkFS3vaui2I2Ug4xDg_P6VEE6Yo';
+let sb = null;           // the Supabase client instance
+let CURRENT_USER = null; // { id, email } when signed in
 
-// Lazy + retrying initialization. The SDK is loaded from a CDN; if the page
-// network was slow or the script tag missed, this function waits up to 3
-// seconds for the global to appear before giving up.
+// ensureSupabase: waits for the async SDK script to load (via the _sbReady
+// promise set by the loader), then creates the client once. Returns null if
+// the SDK failed to load (network error, CDN down, ad-blocker, etc.) —
+// callers handle null gracefully instead of showing a hard error.
 async function ensureSupabase() {
   if(sb) return sb;
-  // Wait briefly for the SDK to be available on window
-  for(let i = 0; i < 30; i++) {
-    if(window.supabase && window.supabase.createClient) break;
-    await new Promise(r => setTimeout(r, 100));
-  }
-  if(!window.supabase || !window.supabase.createClient) {
-    console.error('Supabase SDK did not load. Check network and that <script> tag for @supabase/supabase-js is in the page.');
+  // _sbReady resolves true on load, false on error (set by the loader script)
+  const loaded = await Promise.race([
+    window._sbReady || Promise.resolve(false),
+    new Promise(r => setTimeout(() => r(false), 8000))  // 8s hard timeout
+  ]);
+  if(!loaded || !window.supabase?.createClient) {
+    console.warn('Supabase SDK did not load — cloud sync unavailable.');
     return null;
   }
   try {
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    // Initial session check (covers magic-link return when the URL has the token)
     const { data } = await sb.auth.getSession();
     CURRENT_USER = data?.session?.user || null;
     renderAuthState();
-    // React to sign-in / sign-out / refresh events
     sb.auth.onAuthStateChange((_evt, session) => {
       CURRENT_USER = session?.user || null;
       renderAuthState();
     });
     return sb;
   } catch(err) {
-    console.error('Supabase init failed:', err);
+    console.warn('Supabase init failed:', err);
     return null;
   }
 }
 
-function initSupabase() { ensureSupabase(); }   // fire-and-forget at startup
+function initSupabase() { ensureSupabase(); }  // fire-and-forget at startup
 
 function renderAuthState() {
   const out = document.getElementById('auth-signed-out');
@@ -2165,7 +2174,7 @@ async function sendMagicLink() {
   if(msgEl) msgEl.textContent = 'Connecting…';
   const client = await ensureSupabase();
   if(!client) {
-    if(msgEl) msgEl.textContent = "Couldn't reach Supabase. Check your internet, then hard-refresh the page (hold reload → Request Without Cache).";
+    if(msgEl) msgEl.textContent = "Could not connect to the sign-in service. Check your internet connection and try again.";
     return;
   }
   const emailEl = document.getElementById('auth-email');
