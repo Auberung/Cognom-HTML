@@ -373,6 +373,80 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .settings-row-sub { font-size: 11.5px; color: var(--ink-light); margin-top: 2px; }
 .settings-row.danger .settings-row-title, .settings-row.danger i { color: #9a3b32; }
 
+/* SHARE MOMENT MODAL */
+.share-overlay { display: none; position: fixed; inset: 0; z-index: 520; background: rgba(28,28,26,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+.share-overlay.open { display: flex; }
+.share-modal { width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; background: var(--warm-white); border-radius: 18px; padding: 28px 28px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
+.share-close { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent; color: var(--ink-light); font-size: 26px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.15s; }
+.share-close:hover { background: rgba(0,0,0,0.06); color: var(--ink); }
+.share-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--ink); margin-bottom: 6px; line-height: 1.2; padding-right: 30px; }
+.share-sub { font-size: 12.5px; color: var(--ink-light); line-height: 1.6; margin-bottom: 20px; }
+.share-preview { display: flex; gap: 14px; align-items: center; background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
+.share-preview-img { width: 64px; height: 64px; border-radius: 10px; background-size: cover; background-position: center; flex-shrink: 0; background-color: var(--cream-dark); }
+.share-preview-body { flex: 1; min-width: 0; }
+.share-preview-cap { font-size: 13px; color: var(--ink); line-height: 1.4; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.share-preview-date { font-size: 11px; color: var(--ink-light); letter-spacing: 1px; text-transform: uppercase; }
+.share-section-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; margin-top: 4px; }
+.share-recipients { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+.share-recipient { display: flex; align-items: center; gap: 7px; padding: 6px 12px 6px 6px; background: var(--cream); border: 1px solid var(--border); border-radius: 18px; cursor: pointer; transition: all 0.15s; font-size: 12.5px; color: var(--ink-mid); }
+.share-recipient:hover { border-color: var(--gold); }
+.share-recipient.selected { background: rgba(184,154,90,0.15); border-color: var(--gold); color: var(--ink); }
+.share-recipient-av { width: 26px; height: 26px; border-radius: 50%; font-family: 'Cormorant Garamond', serif; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background-size: cover; background-position: center; }
+.share-options { display: flex; flex-direction: column; gap: 10px; }
+.share-option { display: flex; align-items: flex-start; gap: 14px; padding: 16px 16px; background: var(--cream); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.15s; text-align: left; font-family: 'DM Sans', sans-serif; }
+.share-option:hover:not(:disabled) { border-color: var(--gold); background: rgba(184,154,90,0.06); transform: translateY(-1px); }
+.share-option:disabled { opacity: 0.55; cursor: not-allowed; }
+.share-option-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--warm-white); border: 1px solid var(--border); color: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
+.share-option.primary .share-option-icon { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+.share-option-body { flex: 1; min-width: 0; }
+.share-option-title { font-size: 13.5px; color: var(--ink); font-weight: 400; margin-bottom: 3px; }
+.share-option-sub { font-size: 11.5px; color: var(--ink-light); line-height: 1.55; }
+.share-option-status { font-size: 10.5px; color: var(--sage-dark); letter-spacing: 0.5px; margin-top: 6px; display: none; }
+.share-option-status.visible { display: block; }
+.share-invite-preview { margin-top: 14px; padding: 12px 14px; background: var(--cream-dark); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; color: var(--ink-mid); line-height: 1.55; display: none; }
+.share-invite-preview.visible { display: block; }
+.share-invite-link { display: block; word-break: break-all; font-family: 'DM Mono', 'SF Mono', Monaco, monospace; font-size: 11px; color: var(--ink); margin-top: 6px; padding: 7px 9px; background: var(--warm-white); border-radius: 6px; border: 1px solid var(--border); }
+.share-invite-copy { margin-top: 8px; padding: 7px 14px; background: var(--ink); color: var(--cream); border: none; border-radius: 7px; font-size: 11.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.share-invite-copy:hover { background: var(--sage-dark); }
+.share-history { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+.share-history-item { display: flex; align-items: center; gap: 9px; font-size: 11.5px; color: var(--ink-light); padding: 4px 0; }
+.share-history-item i { font-size: 13px; color: var(--sage); }
+
+/* Tiny "shared" badge on the moment thumbnail */
+.photo-shared-badge { position: absolute; bottom: 8px; right: 8px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: rgba(28,28,26,0.7); color: var(--cream); border-radius: 12px; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; backdrop-filter: blur(4px); }
+.photo-shared-badge i { font-size: 11px; }
+
+/* INTENT TOGGLE — conversation with them vs a thought about them */
+.intent-toggle { display: flex; gap: 0; margin-bottom: 16px; background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+.intent-btn { flex: 1; padding: 11px 14px; font-size: 12.5px; color: var(--ink-mid); background: transparent; border: none; border-radius: 9px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 7px; line-height: 1.3; }
+.intent-btn i { font-size: 14px; }
+.intent-btn:hover { color: var(--ink); }
+.intent-btn.active { background: var(--cream); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.intent-btn.active.reflection { color: var(--sage-dark); }
+.intent-sub { font-size: 11.5px; color: var(--ink-light); font-style: italic; margin: -6px 0 14px; line-height: 1.5; }
+
+/* UPLOAD GATE — shown when no self-voice recorded yet */
+.upload-gate { padding: 28px 22px; background: linear-gradient(135deg, #FAF1DC 0%, #F5E9CC 100%); border: 1px solid #ECDDB8; border-radius: 14px; text-align: center; }
+.upload-gate-icon { width: 52px; height: 52px; border-radius: 50%; background: var(--warm-white); border: 1px solid #E8D9B5; color: var(--gold); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 22px; }
+.upload-gate-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 8px; line-height: 1.25; }
+.upload-gate-text { font-size: 13px; color: var(--ink-mid); line-height: 1.6; margin-bottom: 18px; max-width: 380px; margin-left: auto; margin-right: auto; }
+.upload-gate-text b { color: var(--ink); font-weight: 500; }
+.upload-gate-cta { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; background: var(--ink); color: var(--cream); border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.upload-gate-cta:hover { background: var(--sage-dark); transform: translateY(-1px); }
+
+/* YOUR VIEW tab — your reflections about them */
+.yv-section { margin-bottom: 22px; }
+.yv-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 8px; font-weight: 400; }
+.yv-value { font-size: 14px; line-height: 1.65; color: var(--ink); font-weight: 300; }
+.yv-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.yv-tag { display: inline-flex; align-items: center; padding: 5px 11px; background: var(--cream-dark); border: 1px solid var(--border); border-radius: 14px; font-size: 12px; color: var(--ink-mid); }
+.yv-tag.warm { background: rgba(184,154,90,0.14); border-color: rgba(184,154,90,0.3); color: #8a6d2f; }
+.yv-tag.cool { background: rgba(122,140,114,0.14); border-color: rgba(122,140,114,0.3); color: var(--sage-dark); }
+.yv-reflections { margin-top: 10px; }
+.yv-reflection { padding: 12px 14px; background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; }
+.yv-reflection-date { font-size: 10.5px; color: var(--ink-light); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+.yv-reflection-text { font-size: 13px; color: var(--ink); line-height: 1.6; font-weight: 300; }
+
 /* MIC RECORDER */
 .mic-area { display: none; flex-direction: column; align-items: center; gap: 0; padding: 8px 0 4px; }
 .mic-area.visible { display: flex; }
@@ -541,9 +615,70 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .event-actions-left { display: flex; gap: 8px; }
 .event-actions-bar { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 
+/* ===== CADENCE LOOP — "On your mind" surface ===== */
+.on-mind-section { margin-bottom: 20px; }
+.on-mind-empty { font-size: 11.5px; color: var(--ink-light); padding: 6px 4px; line-height: 1.5; font-style: italic; }
+.on-mind-list { display: flex; flex-direction: column; gap: 4px; }
+.on-mind-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: linear-gradient(135deg, rgba(184,154,90,0.10) 0%, rgba(184,154,90,0.04) 100%); border: 1px solid rgba(184,154,90,0.25); border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+.on-mind-item:hover { border-color: var(--gold); transform: translateX(2px); }
+.on-mind-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 14px; flex-shrink: 0; background-size: cover; background-position: center; position: relative; }
+.on-mind-av::after { content: ''; position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); border: 2px solid var(--cream); }
+.on-mind-body { flex: 1; min-width: 0; }
+.on-mind-name { font-size: 13px; color: var(--ink); font-weight: 400; line-height: 1.2; }
+.on-mind-sub { font-size: 10.5px; color: var(--ink-mid); margin-top: 2px; line-height: 1.3; }
+.on-mind-snooze { background: transparent; border: none; padding: 6px 7px; cursor: pointer; color: var(--ink-light); font-size: 14px; border-radius: 5px; opacity: 0.7; transition: all 0.15s; }
+.on-mind-snooze:hover { opacity: 1; background: rgba(0,0,0,0.05); color: var(--ink); }
+
+/* Due indicator on regular person items in the search results */
+.person-due-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); margin-left: auto; margin-right: 8px; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(184,154,90,0.2); }
+
+/* Banner shown at top of tree view when due-list isn't empty */
+.on-mind-banner { display: none; align-items: center; gap: 10px; padding: 10px 14px; margin: 10px 14px 0; background: linear-gradient(135deg, rgba(184,154,90,0.14) 0%, rgba(184,154,90,0.06) 100%); border: 1px solid rgba(184,154,90,0.3); border-radius: 12px; cursor: pointer; transition: all 0.15s; }
+.on-mind-banner:hover { border-color: var(--gold); }
+.on-mind-banner.visible { display: flex; }
+.on-mind-banner-icon { width: 30px; height: 30px; border-radius: 50%; background: var(--warm-white); border: 1px solid rgba(184,154,90,0.3); color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.on-mind-banner-text { flex: 1; min-width: 0; font-size: 12.5px; color: var(--ink); line-height: 1.35; }
+.on-mind-banner-text b { font-weight: 500; }
+.on-mind-banner-chev { color: var(--ink-light); font-size: 16px; flex-shrink: 0; }
+
+/* Cadence selector (chips) — used in add/edit person modal */
+.cadence-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cadence-chip { padding: 6px 12px; border-radius: 18px; border: 1px solid var(--border-strong); font-size: 11.5px; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; background: transparent; font-family: 'DM Sans', sans-serif; }
+.cadence-chip:hover { border-color: var(--gold); color: var(--ink); }
+.cadence-chip.selected { background: var(--gold); border-color: var(--gold); color: white; }
+.cadence-hint { font-size: 10.5px; color: var(--ink-light); margin-top: 7px; line-height: 1.5; font-style: italic; }
+
+/* Cadence line in person info card */
+.info-cadence { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; background: rgba(184,154,90,0.12); border: 1px solid rgba(184,154,90,0.3); border-radius: 12px; font-size: 11px; color: #8a6d2f; }
+.info-cadence i { font-size: 11px; }
+.info-cadence.due { background: rgba(184,154,90,0.22); border-color: var(--gold); color: #6e5520; font-weight: 500; }
+
 /* ===== MOBILE / RESPONSIVE ===== */
 .menu-btn { display: none; }
 .sidebar-backdrop { display: none; }
+
+/* iOS Safari momentum-scroll + overscroll containment for every scrollable
+   overlay. Without this, fixed-position panels with overflow:auto can feel
+   "stuck" — swipes don't move content, and any motion bleeds into the page
+   underneath, sometimes locking up the UI. */
+.person-card .content,
+.photo-viewer,
+.share-modal,
+.self-modal-body,
+.modal,
+.modal-overlay,
+.self-modal-overlay,
+.share-overlay {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.person-card .content,
+.photo-viewer,
+.share-modal,
+.self-modal-body,
+.modal {
+  touch-action: pan-y;
+}
 
 @media (max-width: 760px) {
   /* App becomes a single column; sidebar slides in from the left */
@@ -725,6 +860,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <i class="ti ti-chevron-right" style="font-size:15px;color:var(--ink-light);"></i>
       </button>
     </div>
+    <div class="sidebar-section on-mind-section" id="on-mind-section" style="display:none;">
+      <div class="sidebar-section-label">On your mind</div>
+      <div id="on-mind-list" class="on-mind-list"></div>
+    </div>
     <div class="sidebar-section">
       <div class="sidebar-section-label">Find someone</div>
       <input type="text" class="person-search" id="person-search" placeholder="Search your tree…" oninput="renderSearchResults()" autocomplete="off" />
@@ -766,6 +905,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <button class="btn-ghost" onclick="treeResetView()" title="Fit to screen">Fit</button>
           <button class="btn-ghost" onclick="openAddPerson()">+ Add person</button>
         </div>
+      </div>
+      <div class="on-mind-banner" id="on-mind-banner" onclick="openOnMindFromBanner()">
+        <div class="on-mind-banner-icon"><i class="ti ti-heart"></i></div>
+        <div class="on-mind-banner-text" id="on-mind-banner-text"></div>
+        <i class="ti ti-chevron-right on-mind-banner-chev"></i>
       </div>
       <div class="content" style="overflow:hidden;padding:0;">
         <div class="tree-viewport" id="tree-viewport">
@@ -813,6 +957,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
             <button class="tab-btn" id="tab-gems-btn" onclick="switchTab('gems')">Memory gems</button>
             <button class="tab-btn" id="tab-aboutyou-btn" onclick="switchTab('aboutyou')" style="display:none;">About you</button>
             <button class="tab-btn" id="tab-capsule-btn" onclick="switchTab('capsule')" style="display:none;">For them</button>
+            <button class="tab-btn" id="tab-yourview-btn" onclick="switchTab('yourview')" style="display:none;">Your view</button>
             <button class="tab-btn" id="tab-upload-btn" onclick="switchTab('upload')">Add conversation</button>
           </div>
 
@@ -911,10 +1056,49 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
             <div id="capsule-list" style="display:none;"></div>
           </div>
 
+          <!-- YOUR VIEW — your reflections about this person -->
+          <div class="tab-panel" id="tab-yourview">
+            <div class="section-title">How you see them</div>
+            <div class="section-sub" id="yv-sub">The other side of the relationship — what you feel about them, what you appreciate, what's unspoken. Built from your private reflections.</div>
+            <div id="yv-empty" class="person-empty" style="display:none;">
+              <div class="person-empty-title">Nothing here yet</div>
+              <div class="person-empty-sub">Open <b>Add conversation</b>, switch to <b>A thought about them</b>, and share how you're feeling about this person. It stays between you and Cognom.</div>
+              <button class="btn-ghost" onclick="switchTab('upload'); setConvIntent('reflection');">Reflect on them</button>
+            </div>
+            <div id="yv-content" style="display:none;">
+              <div class="yv-section"><div class="yv-label">How you feel about them</div><div class="yv-value" id="yv-feelings"></div></div>
+              <div class="yv-section"><div class="yv-label">The dynamic between you</div><div class="yv-value" id="yv-dynamic"></div></div>
+              <div class="yv-section" id="yv-appreciate-section"><div class="yv-label">What you appreciate</div><div class="yv-tags" id="yv-appreciate"></div></div>
+              <div class="yv-section" id="yv-frustrate-section"><div class="yv-label">What frustrates you</div><div class="yv-tags" id="yv-frustrate"></div></div>
+              <div class="yv-section" id="yv-unsaid-section"><div class="yv-label">What goes unspoken</div><div class="yv-value" id="yv-unsaid"></div></div>
+              <div class="yv-section" id="yv-reflections-section"><div class="yv-label">Your reflections over time</div><div class="yv-reflections" id="yv-reflections"></div></div>
+            </div>
+          </div>
+
           <!-- UPLOAD -->
           <div class="tab-panel" id="tab-upload">
+
+            <!-- GATE: shown until the user has recorded their first self-note -->
+            <div class="upload-gate" id="upload-gate" style="display:none;">
+              <div class="upload-gate-icon"><i class="ti ti-microphone"></i></div>
+              <div class="upload-gate-title">First, a note to yourself</div>
+              <div class="upload-gate-text">Before Cognom can listen to a conversation, it needs to <b>learn your voice</b> — so it can tell you apart from the people you talk with. Record a quick spoken note about yourself: your name, what matters to you, anything you'd like Cognom to know.</div>
+              <button class="upload-gate-cta" onclick="openSelfModalFromGate()"><i class="ti ti-sparkles"></i> Record a note about yourself</button>
+            </div>
+
+            <!-- NORMAL upload body (hidden when gate is active) -->
+            <div id="upload-body">
+
             <div class="section-title" id="upload-title"></div>
-            <div class="section-sub">Record right now, upload a file, or paste a transcript. Cognom will listen for what matters — not everything, just what's worth keeping.</div>
+            <div class="section-sub" id="upload-sub">Record right now, upload a file, or paste a transcript. Cognom will listen for what matters — not everything, just what's worth keeping.</div>
+
+            <!-- INTENT: conversation with them vs a thought about them -->
+            <div class="intent-toggle" id="intent-toggle">
+              <button class="intent-btn active" id="intent-conversation" onclick="setConvIntent('conversation')"><i class="ti ti-messages"></i> Conversation with them</button>
+              <button class="intent-btn reflection" id="intent-reflection" onclick="setConvIntent('reflection')"><i class="ti ti-bubble-text"></i> A thought about them</button>
+            </div>
+            <div class="intent-sub" id="intent-sub-conv">A conversation you had together — Cognom will separate your voice from theirs and build a portrait of who they are.</div>
+            <div class="intent-sub" id="intent-sub-refl" style="display:none;">Just you, reflecting — how you feel about them, what you appreciate, what's unspoken. Lives in <b>Your view</b>, never seen by them.</div>
 
             <div class="api-field" style="margin-bottom:14px;">
               <div class="prov-note" style="display:flex;align-items:center;justify-content:space-between;">
@@ -1019,6 +1203,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
               <div class="step-row"><div class="step-ind s-pending" id="si-4">4</div><div class="step-lbl" id="sl-4">Preparing your next question</div></div>
             </div>
             <div class="error-box" id="upload-error"></div>
+            </div><!-- /#upload-body -->
           </div>
         </div>
       </div>
@@ -1060,6 +1245,21 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="field-group">
       <div class="field-label">Who they are to you <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
       <input type="text" class="field-input" id="new-who" placeholder="e.g. Grandfather, Aunt, college roommate, mentor" onkeydown="if(event.key==='Enter')confirmAddPerson()" />
+    </div>
+    <div class="field-group">
+      <div class="field-label">Phone number <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
+      <input type="tel" class="field-input" id="new-phone" placeholder="So you can call them straight from Cognom" onkeydown="if(event.key==='Enter')confirmAddPerson()" autocomplete="tel" />
+    </div>
+    <div class="field-group">
+      <div class="field-label">A gentle rhythm <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
+      <div class="cadence-chips" id="cadence-chips">
+        <button class="cadence-chip" data-cadence="weekly"    onclick="toggleCadence(this)">Weekly</button>
+        <button class="cadence-chip" data-cadence="biweekly"  onclick="toggleCadence(this)">Every 2 weeks</button>
+        <button class="cadence-chip" data-cadence="monthly"   onclick="toggleCadence(this)">Monthly</button>
+        <button class="cadence-chip" data-cadence="quarterly" onclick="toggleCadence(this)">Quarterly</button>
+        <button class="cadence-chip selected" data-cadence=""  onclick="toggleCadence(this)">No rhythm</button>
+      </div>
+      <div class="cadence-hint">Cognom will gently remind you when it's been a while. No streaks, no shame — just a quiet nudge.</div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
@@ -1254,6 +1454,70 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <div class="notif" id="notif"></div>
+
+<!-- POST-CALL RETURN PROMPT — appears when user comes back from a tel: call -->
+<div class="modal-overlay" id="postcall-overlay" onclick="if(event.target===this)dismissPostCall(false)">
+  <div class="modal">
+    <div class="modal-title" id="postcall-title">How was your call?</div>
+    <div class="modal-sub" id="postcall-sub">Capture what stayed with you — the surprising thing, the small moment, the next thing to ask. A short voice memo is plenty.</div>
+    <div class="modal-actions" style="flex-direction:column;gap:8px;">
+      <button class="btn-primary" onclick="capturePostCall()" style="width:100%;"><i class="ti ti-microphone" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Capture what came up</button>
+      <button class="btn-ghost" onclick="dismissPostCall(false)" style="width:100%;">Not right now</button>
+      <button class="btn-ghost" onclick="dismissPostCall(true)" style="width:100%;font-size:11px;color:var(--ink-light);">The call didn't happen</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE MOMENT MODAL — pick a recipient and a channel -->
+<div class="share-overlay" id="share-overlay" onclick="if(event.target===this)closeShareModal()">
+  <div class="share-modal">
+    <button class="share-close" onclick="closeShareModal()" aria-label="Close">&times;</button>
+    <div class="share-title" id="share-title">Share this moment</div>
+    <div class="share-sub" id="share-sub">Send a moment from your Cognom to theirs — or invite them in if they aren't here yet.</div>
+
+    <div class="share-preview" id="share-preview"></div>
+
+    <div class="share-section-label" id="share-recipients-label">Share with</div>
+    <div class="share-recipients" id="share-recipients"></div>
+
+    <div class="share-options">
+      <button class="share-option primary" id="share-opt-cognom" onclick="executeShareViaCognom()">
+        <div class="share-option-icon"><i class="ti ti-send"></i></div>
+        <div class="share-option-body">
+          <div class="share-option-title">Send to their Cognom</div>
+          <div class="share-option-sub">If they're on Cognom, this moment will appear in their file with you. Direct sharing launches alongside accounts — until then, it sits in your share queue.</div>
+          <div class="share-option-status" id="share-cognom-status">Queued — will send when accounts launch.</div>
+        </div>
+      </button>
+
+      <button class="share-option" id="share-opt-invite" onclick="executeShareViaInvite()">
+        <div class="share-option-icon"><i class="ti ti-link"></i></div>
+        <div class="share-option-body">
+          <div class="share-option-title">Send them an invite</div>
+          <div class="share-option-sub">Get a personal link you can text or email. They'll see this moment when they open Cognom for the first time.</div>
+          <div class="share-invite-preview" id="share-invite-preview">
+            <div id="share-invite-msg"></div>
+            <code class="share-invite-link" id="share-invite-link"></code>
+            <button class="share-invite-copy" onclick="event.stopPropagation();copyInviteLink()"><i class="ti ti-copy" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Copy link</button>
+          </div>
+        </div>
+      </button>
+
+      <button class="share-option" id="share-opt-page" onclick="executeShareViaPage()">
+        <div class="share-option-icon"><i class="ti ti-file-export"></i></div>
+        <div class="share-option-body">
+          <div class="share-option-title">Open as a memory page</div>
+          <div class="share-option-sub">Build a printable web page with this moment that you can save, send, or hand to someone offline.</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="share-history" id="share-history" style="display:none;">
+      <div class="share-section-label">Already shared</div>
+      <div id="share-history-list"></div>
+    </div>
+  </div>
+</div>
 
 <!-- FLOATING THOUGHT BUTTON -->
 <button class="float-thought-btn" id="float-thought-btn" onclick="openSelfModal()" title="Record a thought">
@@ -1522,6 +1786,12 @@ function loadData() {
         orbit: [], topics: [], forget: [], links: [], echoes: [],
         aboutYou: [],
         capsule: [],
+        yourView: { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 },
+        cadence: '',
+        cadenceSetAt: '',
+        lastConvDate: '',
+        snoozedUntil: '',
+        phone: '',
         photos: [],     // legacy — kept for migration
         events: [],     // new: each event has 1-4 photos plus context
         ...p
@@ -1564,6 +1834,7 @@ function init() {
   loadSelf();
   renderAccountRow();
   renderSearchResults();
+  renderOnYourMind();
   if(PEOPLE.length === 0) {
     document.getElementById('welcome-state').style.display = 'flex';
     document.getElementById('tree-view').style.display = 'none';
@@ -1606,9 +1877,11 @@ function openAddPerson() {
   document.getElementById('new-name').value = '';
   document.getElementById('new-family-name').value = '';
   document.getElementById('new-who').value = '';
+  document.getElementById('new-phone').value = '';
   document.querySelectorAll('.rel-chip').forEach(c => c.classList.remove('selected'));
   selectedRel = '';
   pendingPhoto = '';
+  if(typeof preselectCadence === 'function') preselectCadence('');
   const prev = document.getElementById('modal-photo-preview');
   prev.style.backgroundImage = '';
   document.getElementById('modal-photo-initial').textContent = '';
@@ -1627,12 +1900,14 @@ function openEditPerson(idx, ev) {
   document.getElementById('new-name').value = p.name;
   document.getElementById('new-family-name').value = p.familyName || '';
   document.getElementById('new-who').value = p.who || '';
+  document.getElementById('new-phone').value = p.phone || '';
   const zone = toZone(p.relation);
   document.querySelectorAll('.rel-chip').forEach(c => {
     c.classList.toggle('selected', c.textContent === zone);
   });
   selectedRel = zone;
   pendingPhoto = p.photo || '';
+  if(typeof preselectCadence === 'function') preselectCadence(p.cadence || '');
   const prev = document.getElementById('modal-photo-preview');
   if(p.photo) {
     prev.style.backgroundImage = 'url(' + p.photo + ')';
@@ -1648,6 +1923,261 @@ function openEditPerson(idx, ev) {
 
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingIdx = -1; }
 function handleOverlayClick(e) { if(e.target === document.getElementById('modal-overlay')) closeModal(); }
+// =========================================================
+// CADENCE LOOP — gentle reminders when it's been a while
+// =========================================================
+
+const CADENCE_OPTIONS = [
+  { id: 'weekly',    label: 'weekly',         days: 7,  short: 'wk' },
+  { id: 'biweekly',  label: 'every 2 weeks',  days: 14, short: '2wk' },
+  { id: 'monthly',   label: 'monthly',        days: 30, short: 'mo' },
+  { id: 'quarterly', label: 'quarterly',      days: 90, short: 'qt' },
+];
+
+function cadenceDays(id) {
+  const opt = CADENCE_OPTIONS.find(o => o.id === id);
+  return opt ? opt.days : null;
+}
+function cadenceLabel(id) {
+  const opt = CADENCE_OPTIONS.find(o => o.id === id);
+  return opt ? opt.label : '';
+}
+
+function daysSince(dateStr) {
+  if(!dateStr) return Infinity;
+  const then = new Date(dateStr);
+  if(isNaN(then.getTime())) return Infinity;
+  return Math.floor((Date.now() - then.getTime()) / 86400000);
+}
+
+// Returns 'due', 'almost', or null
+function personDueState(p) {
+  if(!p.cadence) return null;
+  const target = cadenceDays(p.cadence);
+  if(!target) return null;
+  // honor an active snooze
+  if(p.snoozedUntil && new Date(p.snoozedUntil) > new Date()) return null;
+  const since = daysSince(p.lastConvDate);
+  // brand-new relationships with a cadence set but no conversations yet:
+  // start counting from when the rhythm was set (or today if missing)
+  const ref = p.lastConvDate || p.cadenceSetAt;
+  const days = ref ? daysSince(ref) : 0;
+  if(days >= target) return 'due';
+  if(days >= Math.floor(target * 0.85)) return 'almost';
+  return null;
+}
+
+function onYourMind() {
+  return PEOPLE
+    .map((p, i) => ({ p, i, state: personDueState(p) }))
+    .filter(x => x.state === 'due')
+    .sort((a, b) => {
+      const da = daysSince(a.p.lastConvDate || a.p.cadenceSetAt);
+      const db = daysSince(b.p.lastConvDate || b.p.cadenceSetAt);
+      return db - da;
+    });
+}
+
+function humanDaysAgo(dateStr) {
+  const d = daysSince(dateStr);
+  if(d === Infinity) return 'no conversations yet';
+  if(d === 0) return 'today';
+  if(d === 1) return 'yesterday';
+  if(d < 7) return d + ' days ago';
+  if(d < 14) return 'a week ago';
+  if(d < 30) return Math.floor(d / 7) + ' weeks ago';
+  if(d < 60) return 'a month ago';
+  if(d < 365) return Math.floor(d / 30) + ' months ago';
+  return Math.floor(d / 365) + (Math.floor(d / 365) === 1 ? ' year ago' : ' years ago');
+}
+
+function renderOnYourMind() {
+  const due = onYourMind();
+  const section = document.getElementById('on-mind-section');
+  const list = document.getElementById('on-mind-list');
+  const banner = document.getElementById('on-mind-banner');
+  const bannerText = document.getElementById('on-mind-banner-text');
+
+  if(!due.length) {
+    if(section) section.style.display = 'none';
+    if(banner)  banner.classList.remove('visible');
+    return;
+  }
+
+  // Sidebar section
+  if(section) section.style.display = '';
+  if(list) {
+    list.innerHTML = due.slice(0, 6).map(({ p, i }) => {
+      const since = p.lastConvDate ? humanDaysAgo(p.lastConvDate) : 'no conversations yet';
+      const avStyle = p.photo
+        ? `background-image:url(${p.photo})`
+        : `background:${avatarBg(p.avClass)};color:${avatarColor(p.avClass)}`;
+      const avInner = p.photo ? '' : escapeHTML(p.initial || p.name.charAt(0));
+      return `
+        <div class="on-mind-item" onclick="selectPerson(${i})">
+          <div class="on-mind-av" style="${avStyle}">${avInner}</div>
+          <div class="on-mind-body">
+            <div class="on-mind-name">${escapeHTML(p.name)}</div>
+            <div class="on-mind-sub">${escapeHTML(since)}</div>
+          </div>
+          <button class="on-mind-snooze" onclick="event.stopPropagation();snoozePerson(${i})" title="Not now — remind me in a week"><i class="ti ti-clock"></i></button>
+        </div>`;
+    }).join('');
+  }
+
+  // Tree-view banner — one-line summary
+  if(banner && bannerText) {
+    const top = due[0];
+    const firstName = (top.p.name || '').split(' ')[0];
+    const txt = due.length === 1
+      ? `<b>${escapeHTML(firstName)}</b> is on your mind — last conversation ${humanDaysAgo(top.p.lastConvDate)}.`
+      : `<b>${escapeHTML(firstName)}</b> and ${due.length - 1} other${due.length > 2 ? 's' : ''} are on your mind.`;
+    bannerText.innerHTML = txt;
+    banner.classList.add('visible');
+  }
+}
+
+function openOnMindFromBanner() {
+  const due = onYourMind();
+  if(due.length === 1) {
+    selectPerson(due[0].i);
+  } else if(due.length > 1) {
+    // open the sidebar on mobile so they can see the full list
+    if(isMobile()) openSidebar();
+    else selectPerson(due[0].i);
+  }
+}
+
+function snoozePerson(idx) {
+  const p = PEOPLE[idx];
+  if(!p) return;
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  p.snoozedUntil = d.toISOString();
+  saveData();
+  renderOnYourMind();
+  showNotif('Snoozed ' + p.name + ' for a week.');
+}
+
+// =========================================================
+// CALL NOW + POST-CALL CAPTURE
+// =========================================================
+// We don't (and can't) record the phone call itself — platform restrictions
+// and ethics rule that out. Instead: dial via tel:, then when the user
+// returns to Cognom, gently prompt them to capture what came up.
+
+const CALL_RETURN_KEY = 'cognom_pending_call_v1';
+const CALL_MIN_WAIT_MS = 60 * 1000;        // don't prompt if they tapped & canceled
+const CALL_MAX_WAIT_MS = 30 * 60 * 1000;   // expire after 30 min — calls don't last that long here
+
+function loadPendingCall() {
+  try {
+    const raw = localStorage.getItem(CALL_RETURN_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(_) { return null; }
+}
+function savePendingCall(obj) {
+  try {
+    if(obj) localStorage.setItem(CALL_RETURN_KEY, JSON.stringify(obj));
+    else    localStorage.removeItem(CALL_RETURN_KEY);
+  } catch(_) {}
+}
+
+function initiateCall(idx) {
+  const p = PEOPLE[idx];
+  if(!p || !p.phone) return;
+  // record the intent so the return-from-call prompt can fire when they come back
+  savePendingCall({ pid: p.pid, name: p.name, startedAt: Date.now() });
+  // open the system dialer — works on iOS and Android, no-ops on desktop
+  // (desktop may show "open in FaceTime" or similar)
+  const tel = (p.phone || '').replace(/[^\d+]/g, '');
+  if(tel) window.location.href = 'tel:' + tel;
+  // also stamp a soft notification — the user might dismiss the iOS confirm dialog
+  showNotif("Dialing " + (p.name || '').split(' ')[0] + " — Cognom will be here when you're back.");
+}
+
+let postCallShownThisSession = false;
+
+function checkPostCallReturn() {
+  const pending = loadPendingCall();
+  if(!pending) return;
+  const elapsed = Date.now() - (pending.startedAt || 0);
+  if(elapsed < CALL_MIN_WAIT_MS) return;     // they probably just canceled the call confirm
+  if(elapsed > CALL_MAX_WAIT_MS) {           // expired — clean up
+    savePendingCall(null);
+    return;
+  }
+  // find the person — they might have been deleted in the meantime
+  const idx = PEOPLE.findIndex(p => p.pid === pending.pid);
+  if(idx < 0) { savePendingCall(null); return; }
+  showPostCallPrompt(idx, pending.name);
+}
+
+function showPostCallPrompt(idx, name) {
+  if(postCallShownThisSession) return;       // don't re-prompt on every focus
+  postCallShownThisSession = true;
+  const titleEl = document.getElementById('postcall-title');
+  if(titleEl) titleEl.textContent = name ? ('How was your call with ' + name.split(' ')[0] + '?') : 'How was your call?';
+  // stash the idx on the overlay so the actions know who to capture for
+  document.getElementById('postcall-overlay').dataset.personIdx = String(idx);
+  document.getElementById('postcall-overlay').classList.add('open');
+}
+
+function capturePostCall() {
+  const overlay = document.getElementById('postcall-overlay');
+  const idx = parseInt(overlay.dataset.personIdx || '-1', 10);
+  overlay.classList.remove('open');
+  savePendingCall(null);
+  if(idx < 0 || idx >= PEOPLE.length) return;
+  // open their card, switch to Add conversation, default to record-mode
+  selectPerson(idx);
+  setTimeout(() => {
+    switchTab('upload');
+    if(typeof setConvIntent === 'function') setConvIntent('conversation');
+    if(typeof setInputMode === 'function') setInputMode('record');
+  }, 120);
+}
+
+function dismissPostCall(didntHappen) {
+  const overlay = document.getElementById('postcall-overlay');
+  overlay.classList.remove('open');
+  savePendingCall(null);
+  // "didn't happen" is a softer outcome — no toast.
+  // "not right now" just dismisses silently too.
+}
+
+// Wire visibility — when the user returns to the tab, check if there's a pending call.
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') {
+    // small delay so the page is fully back before we open a modal
+    setTimeout(checkPostCallReturn, 350);
+  }
+});
+// Also check at init (in case they reloaded the page after the call)
+setTimeout(checkPostCallReturn, 500);
+
+// Track the user's pending cadence pick while the add/edit modal is open
+let pendingCadence = '';
+
+function toggleCadence(el) {
+  document.querySelectorAll('#cadence-chips .cadence-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  pendingCadence = el.dataset.cadence || '';
+}
+
+function preselectCadence(cadence) {
+  pendingCadence = cadence || '';
+  document.querySelectorAll('#cadence-chips .cadence-chip').forEach(c => {
+    c.classList.toggle('selected', (c.dataset.cadence || '') === (cadence || ''));
+  });
+}
+
+// keep openSidebar reachable from here
+function openSidebar() {
+  document.querySelector('.sidebar')?.classList.add('open');
+  document.getElementById('sidebar-backdrop')?.classList.add('open');
+}
+
 function toggleRel(el) {
   document.querySelectorAll('.rel-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -1665,14 +2195,23 @@ function confirmAddPerson() {
     p.name = name;
     p.familyName = familyName;
     p.who = who;
+    p.phone = (document.getElementById('new-phone').value || '').trim();
     p.initial = name[0].toUpperCase();
     p.relation = selectedRel || 'Friend';
     p.photo = pendingPhoto || '';
+    // cadence: only stamp cadenceSetAt the first time a rhythm is set,
+    // so the "due" countdown starts from the moment of opt-in
+    const wasCadence = p.cadence || '';
+    p.cadence = pendingCadence || '';
+    if(p.cadence && p.cadence !== wasCadence) p.cadenceSetAt = new Date().toISOString();
+    if(!p.cadence) p.snoozedUntil = '';
     const savedIdx = editingIdx;
     pendingPhoto = '';
+    pendingCadence = '';
     saveData();
     closeModal();
     renderSearchResults();
+    renderOnYourMind();
     renderTree();
     // if this person's card is open, refresh it in place
     const overlayOpen = document.getElementById('person-overlay').style.display !== 'none';
@@ -1687,6 +2226,11 @@ function confirmAddPerson() {
     name, familyName, who, initial: name[0].toUpperCase(), avClass,
     relation: selectedRel || 'Friend',
     photo: pendingPhoto || '',
+    phone: (document.getElementById('new-phone').value || '').trim(),
+    cadence: pendingCadence || '',
+    cadenceSetAt: pendingCadence ? new Date().toISOString() : '',
+    lastConvDate: '',
+    snoozedUntil: '',
     convCount: 0,
     lastCall: 'No conversations yet',
     precallQ: '', precallCtx: '',
@@ -1694,16 +2238,24 @@ function confirmAddPerson() {
     commStyle: '', matters: '', mentioned: '', emotion: '',
     chips: [], timeline: [], gems: [],
     orbit: [], topics: [], forget: [], links: [], echoes: [],
-    aboutYou: [], capsule: [], photos: [], events: []
+    aboutYou: [], capsule: [], photos: [], events: [],
+    yourView: { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 }
   };
   PEOPLE.push(person);
   pendingPhoto = '';
+  pendingCadence = '';
   saveData();
   closeModal();
   renderSearchResults();
+  renderOnYourMind();
   document.getElementById('welcome-state').style.display = 'none';
   showTree();
-  showNotif(name + ' added to your tree. Tap them to add a conversation.');
+  // Open the new person's card so the user has a clear "what's next" —
+  // on mobile especially, otherwise the user is dropped on the tree with
+  // a toast that vanishes and no obvious continuation of intent.
+  const newIdx = PEOPLE.length - 1;
+  setTimeout(() => selectPerson(newIdx), 80);
+  showNotif(name + ' added to your tree.');
 }
 
 let pendingPhoto = '';
@@ -1770,6 +2322,7 @@ function deleteConfirmed() {
   closeDelete();
   closePersonCard();
   renderSearchResults();
+  renderOnYourMind();
   if(PEOPLE.length === 0) {
     currentIdx = -1;
     document.getElementById('tree-view').style.display = 'none';
@@ -1833,6 +2386,10 @@ function refreshPersonTabs(p) {
   const isFamily = relationCategory(p.relation) === 'family';
   const capBtn = document.getElementById('tab-capsule-btn');
   if(capBtn) capBtn.style.display = (hasConvs && isFamily && (p.capsule||[]).length > 0) ? '' : 'none';
+  // "Your view" tab — show once they've recorded any reflection about this person
+  const yvBtn = document.getElementById('tab-yourview-btn');
+  const yvCount = (p.yourView && p.yourView.reflectionCount) || 0;
+  if(yvBtn) yvBtn.style.display = yvCount > 0 ? '' : 'none';
 }
 
 function hasConversations(p) { return (p.convCount || 0) > 0 || (p.timeline && p.timeline.length > 0); }
@@ -1861,7 +2418,7 @@ function renderSearchResults() {
 }
 
 // keep old name working
-function renderSidebar() { renderSearchResults(); }
+function renderSidebar() { renderSearchResults(); renderOnYourMind(); }
 
 function selectPerson(idx) {
   if(isMobile()) closeSidebar();
@@ -1873,6 +2430,9 @@ function selectPerson(idx) {
   // reset the conversation turn builder for this person
   if(typeof resetTurnBuilder === 'function') resetTurnBuilder();
   if(typeof syncSpeakerPillName === 'function') syncSpeakerPillName();
+  // reset intent to conversation each time a person is opened
+  CONV_INTENT = 'conversation';
+  if(typeof renderIntentUI === 'function') renderIntentUI();
 
   const hasConvs = hasConversations(p);
 
@@ -1882,17 +2442,24 @@ function selectPerson(idx) {
     ? `background-image:url(${p.photo})`
     : `background:${avatarBg(p.avClass)};color:${avatarColor(p.avClass)}`;
   const subLine = hasConvs ? (p.lastCall || '') : 'No conversations yet';
+  // cadence badge — shown when a rhythm is set; styled differently when overdue
+  const due = personDueState(p);
+  const cadBadge = p.cadence
+    ? `<span class="info-cadence ${due === 'due' ? 'due' : ''}" title="${due === 'due' ? 'It\'s been a while' : 'A gentle rhythm'}"><i class="ti ti-heart"></i> ${escapeHTML(cadenceLabel(p.cadence))}${due === 'due' ? ' · on your mind' : ''}</span>`
+    : '';
   document.getElementById('info-card').innerHTML = `
     <div class="info-card-head">
       <div class="info-card-avatar" style="${avatarStyle}">${avatarInner}</div>
       <div>
         <div class="info-card-title">${escapeHTML(p.name)}${p.familyName ? ' ' + escapeHTML(p.familyName) : ''}</div>
         <div class="info-card-sub">${escapeHTML(subLine)}</div>
+        ${cadBadge ? `<div style="margin-top:6px;">${cadBadge}</div>` : ''}
       </div>
     </div>
     ${p.who ? `<div class="info-row"><div class="info-label">Who they are to you</div><div class="info-value">${escapeHTML(p.who)}</div></div>` : (p.relation ? `<div class="info-row"><div class="info-label">Relationship</div><div class="info-value"><span class="info-rel-chip">${escapeHTML(p.relation)}</span></div></div>` : '')}
     <div class="info-actions">
       <button class="btn-edit" onclick="openEditPerson(currentIdx)"><i class="ti ti-edit" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Edit</button>
+      ${p.phone ? `<button class="btn-edit" onclick="initiateCall(currentIdx)" title="${escapeHTML(p.phone)}"><i class="ti ti-phone" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Call</button>` : ''}
       <button class="btn-addconv" id="info-addconv-btn" onclick="toggleUpload()">+ Add conversation</button>
     </div>`;
 
@@ -2131,13 +2698,15 @@ function renderEchoes(p) {
 
 
 function switchTab(name) {
-  const names = ['portrait','timeline','photos','gems','aboutyou','capsule','upload'];
+  const names = ['portrait','timeline','photos','gems','aboutyou','capsule','yourview','upload'];
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', names[i]===name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   if(name === 'none') return;
   const panel = document.getElementById('tab-'+name);
   if(panel) panel.classList.add('active');
   if(name === 'photos' && currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  if(name === 'yourview' && currentIdx >= 0) renderYourView(PEOPLE[currentIdx]);
+  if(name === 'upload') { renderUploadGate(); renderIntentUI(); }
 }
 
 // the info-card "+ Add conversation" button toggles the upload panel open/closed
@@ -2264,6 +2833,81 @@ function setInputMode(mode) {
 
   // if switching away from record mode, clean up any live session
   if(mode !== 'record') stopRecordingCleanup();
+}
+
+// ---- CONV INTENT: 'conversation' (with them) vs 'reflection' (about them) ----
+let CONV_INTENT = 'conversation';
+
+function setConvIntent(intent) {
+  if(intent !== 'conversation' && intent !== 'reflection') return;
+  CONV_INTENT = intent;
+  renderIntentUI();
+  // when switching intent, drop any half-built turn list (was for two-speaker convs)
+  if(intent === 'reflection' && typeof resetTurnBuilder === 'function') resetTurnBuilder();
+}
+
+function renderIntentUI() {
+  const isRefl = CONV_INTENT === 'reflection';
+  const convBtn = document.getElementById('intent-conversation');
+  const reflBtn = document.getElementById('intent-reflection');
+  if(convBtn) convBtn.classList.toggle('active', !isRefl);
+  if(reflBtn) reflBtn.classList.toggle('active',  isRefl);
+
+  const subConv = document.getElementById('intent-sub-conv');
+  const subRefl = document.getElementById('intent-sub-refl');
+  if(subConv) subConv.style.display = isRefl ? 'none'  : 'block';
+  if(subRefl) subRefl.style.display = isRefl ? 'block' : 'none';
+
+  // upload-mode button — file uploads only make sense for two-speaker conversations
+  const modeAudio = document.getElementById('mode-audio');
+  if(modeAudio) modeAudio.style.display = isRefl ? 'none' : '';
+  if(isRefl && INPUT_MODE === 'audio') setInputMode('record');
+
+  // update submit-button labels + section copy
+  const p = currentIdx >= 0 ? PEOPLE[currentIdx] : null;
+  const name = p ? p.name : 'them';
+
+  const titleEl = document.getElementById('upload-title');
+  if(titleEl) titleEl.textContent = isRefl ? ('A thought about ' + name) : ('Add a conversation with ' + name);
+
+  // submit button labels
+  const recordBtn = document.querySelector('#playback-area .btn-gold');
+  if(recordBtn) recordBtn.innerHTML = '<i class="ti ti-sparkles" style="font-size:13px;vertical-align:-1px;margin-right:5px;"></i>' + (isRefl ? 'Save this reflection' : 'Analyze this conversation');
+  const textSubmitBtn = document.querySelector('#text-input-area .text-submit');
+  if(textSubmitBtn) textSubmitBtn.textContent = isRefl ? 'Save this reflection' : 'Analyze this conversation';
+
+  // when in reflection mode, the turn-builder (which assumes two speakers) becomes a single text area
+  const turnBuilder = document.getElementById('turn-builder');
+  const pasteMode   = document.getElementById('paste-mode');
+  const togglePaste = document.getElementById('toggle-paste-link');
+  if(isRefl) {
+    if(turnBuilder) turnBuilder.style.display = 'none';
+    if(pasteMode)   pasteMode.style.display   = 'block';
+    if(togglePaste) togglePaste.style.display = 'none';
+    const ta = document.getElementById('transcript-text');
+    if(ta) ta.placeholder = "Type what you're feeling about " + name + " right now — what's working, what's not, what you wish you could say.";
+  } else {
+    if(turnBuilder) turnBuilder.style.display = '';
+    if(togglePaste) togglePaste.style.display = '';
+    const ta = document.getElementById('transcript-text');
+    if(ta) ta.placeholder = "Paste the transcript of your conversation here — Cognom will read it and build the portrait, exactly as it does with audio.";
+  }
+
+  // mic status text adapts to intent
+  const micStatus = document.getElementById('mic-status');
+  if(micStatus && !micRecording) micStatus.textContent = isRefl ? 'Tap to start a reflection' : 'Tap to start recording';
+}
+
+// ---- UPLOAD GATE: until SELF.voiceSample exists, block conversation-add ----
+function selfVoiceEstablished() { return !!(SELF && SELF.voiceSample); }
+
+function renderUploadGate() {
+  const gate = document.getElementById('upload-gate');
+  const body = document.getElementById('upload-body');
+  if(!gate || !body) return;
+  const established = selfVoiceEstablished();
+  gate.style.display = established ? 'none' : 'block';
+  body.style.display = established ? ''     : 'none';
 }
 
 // ---- MIC RECORDER STATE ----
@@ -2504,7 +3148,8 @@ async function submitRecording() {
   [1,2,3,4].forEach(n => setStep(n,'pending'));
   setStep(1,'active');
 
-  const analysisInstructions = buildAnalysisInstructions(p);
+  const isRefl = CONV_INTENT === 'reflection';
+  const analysisInstructions = isRefl ? buildReflectionInstructions(p) : buildAnalysisInstructions(p);
   // give the blob a sensible filename for OpenAI
   const ext = micAudioBlob.type.includes('ogg') ? 'ogg' : micAudioBlob.type.includes('mp4') ? 'mp4' : 'webm';
   const file = new File([micAudioBlob], 'recording.' + ext, { type: micAudioBlob.type });
@@ -2520,16 +3165,20 @@ async function submitRecording() {
     await new Promise(res => setTimeout(res, 500));
     setStep(4,'done');
 
-    applyAnalysis(p, r);
+    if(isRefl) {
+      applyReflectionAnalysis(p, r);
+    } else {
+      applyAnalysis(p, r);
+    }
     saveData();
     renderSidebar();
     refreshPersonTabs(p);
     renderPersonContent(p);
     proc.classList.remove('visible');
-    switchTab('portrait');
+    switchTab(isRefl ? 'yourview' : 'portrait');
     syncAddConvLabel();
     discardRecording();
-    showNotif('Portrait updated for ' + p.name + '.');
+    showNotif(isRefl ? ('Your view of ' + p.name + ' updated.') : ('Portrait updated for ' + p.name + '.'));
   } catch(err) {
     [1,2,3,4].forEach(n => setStep(n,'pending'));
     proc.classList.remove('visible');
@@ -2623,10 +3272,11 @@ function syncSpeakerPillName() {
 
 async function handleTextSubmit() {
   if(currentIdx < 0) return;
-  // gather text: prefer the turn builder; if user pasted plain text, use that
+  const isRefl = CONV_INTENT === 'reflection';
+  // gather text: prefer the turn builder; if user pasted plain text or in reflection mode, use that
   const builder = document.getElementById('turn-builder');
   const paste   = document.getElementById('paste-mode');
-  const onPaste = paste && paste.style.display !== 'none';
+  const onPaste = isRefl || (paste && paste.style.display !== 'none');
   let text = '';
   if(onPaste) {
     text = (document.getElementById('transcript-text').value || '').trim();
@@ -2637,11 +3287,14 @@ async function handleTextSubmit() {
   }
   const errBox = document.getElementById('upload-error');
   errBox.style.display = 'none';
-  if(text.length < 20) {
+  const minLen = isRefl ? 10 : 20;
+  if(text.length < minLen) {
     errBox.style.display='block';
-    errBox.textContent = onPaste
-      ? 'Please paste a bit more of the conversation so Cognom has something to work with.'
-      : 'Add a few more turns so Cognom has something to work with.';
+    errBox.textContent = isRefl
+      ? 'Write a little more — Cognom needs something to work with.'
+      : (onPaste
+        ? 'Please paste a bit more of the conversation so Cognom has something to work with.'
+        : 'Add a few more turns so Cognom has something to work with.');
     return;
   }
   const p = PEOPLE[currentIdx];
@@ -2662,12 +3315,12 @@ async function handleTextSubmit() {
   setStep(1,'done'); setStep(2,'active');
 
   try {
-    const analysisInstructions = buildAnalysisInstructions(p);
+    const analysisInstructions = isRefl ? buildReflectionInstructions(p) : buildAnalysisInstructions(p);
     const r = await analyzeTranscript(text, apiKey, provider, analysisInstructions);
     setStep(3,'done'); setStep(4,'active');
     await new Promise(res => setTimeout(res, 400));
     setStep(4,'done');
-    applyAnalysis(p, r);
+    if(isRefl) applyReflectionAnalysis(p, r); else applyAnalysis(p, r);
     document.getElementById('transcript-text').value = '';
     resetTurnBuilder();
     saveData();
@@ -2675,9 +3328,9 @@ async function handleTextSubmit() {
     refreshPersonTabs(p);
     renderPersonContent(p);
     proc.classList.remove('visible');
-    switchTab('portrait');
+    switchTab(isRefl ? 'yourview' : 'portrait');
     syncAddConvLabel();
-    showNotif('Portrait updated for ' + p.name + '.');
+    showNotif(isRefl ? ('Your view of ' + p.name + ' updated.') : ('Portrait updated for ' + p.name + '.'));
   } catch(err) {
     [1,2,3,4].forEach(n=>setStep(n,'pending'));
     proc.classList.remove('visible');
@@ -2787,6 +3440,10 @@ function applyAnalysis(p, r) {
   const dateStr = today.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   p.convCount++;
   p.lastCall = 'Last conversation ' + dateStr;
+  // ISO stamp for cadence math — separate from the display string
+  p.lastConvDate = today.toISOString();
+  // a fresh conversation clears any active snooze
+  p.snoozedUntil = '';
   p.precallQ = r.precall_question;
   p.precallCtx = r.precall_context;
   p.commStyle = r.communication_style;
@@ -3754,6 +4411,7 @@ document.getElementById('api-key-openai').addEventListener('input', () => localS
 
 setProvider(CURRENT_PROVIDER);
 setInputMode('record');
+if(typeof renderIntentUI === 'function') renderIntentUI();
 document.addEventListener('click', (e) => {
   if(!e.target.closest('.orbit-menu') && !e.target.closest('.orbit-menu-btn')) {
     document.querySelectorAll('.orbit-menu.open').forEach(m => m.classList.remove('open'));
@@ -3764,6 +4422,16 @@ document.addEventListener('click', (e) => {
 // INNER SELF — floating thought recorder + self-portrait
 // =========================================================
 
+// Remembers the person the user was viewing when they hit the gate,
+// so we can return them there after recording their first self-note.
+let SELF_RETURN_TO_PERSON = -1;
+
+function openSelfModalFromGate() {
+  if(currentIdx >= 0) SELF_RETURN_TO_PERSON = currentIdx;
+  closePersonCard();
+  openSelfModal();
+}
+
 function openSelfModal() {
   switchSelfTab('portrait');
   document.getElementById('self-modal-overlay').classList.add('open');
@@ -3771,6 +4439,25 @@ function openSelfModal() {
 
 function closeSelfModal() {
   document.getElementById('self-modal-overlay').classList.remove('open');
+  // If they came here via the upload gate and have now established a voice
+  // sample, drop them back on the person they were trying to engage with,
+  // landing on Add conversation so they can pick up where they left off.
+  if(SELF_RETURN_TO_PERSON >= 0 && selfVoiceEstablished && selfVoiceEstablished()) {
+    const idx = SELF_RETURN_TO_PERSON;
+    SELF_RETURN_TO_PERSON = -1;
+    setTimeout(() => {
+      if(idx < PEOPLE.length) {
+        selectPerson(idx);
+        setTimeout(() => switchTab('upload'), 60);
+      }
+    }, 180);
+  } else if(SELF_RETURN_TO_PERSON >= 0) {
+    // they bailed without recording — still return them to the person,
+    // but on the portrait tab (don't push them at the gate again)
+    const idx = SELF_RETURN_TO_PERSON;
+    SELF_RETURN_TO_PERSON = -1;
+    setTimeout(() => { if(idx < PEOPLE.length) selectPerson(idx); }, 180);
+  }
 }
 
 function switchSelfTab(name) {
@@ -3875,6 +4562,8 @@ function onThoughtFinished() {
       // hide the welcome hint immediately
       const hint = document.getElementById('first-thought-hint');
       if(hint) hint.style.display = 'none';
+      // if a person card is open and showing the gate, unlock it
+      if(typeof renderUploadGate === 'function') renderUploadGate();
     };
     fr.readAsDataURL(tBlob);
   }
@@ -4090,6 +4779,115 @@ function applyThoughtAnalysis(r) {
   SELF.spJournal = SELF.spJournal || [];
   if(r.journal_entry) SELF.spJournal.unshift({ date: today, text: r.journal_entry });
   SELF.spJournal = SELF.spJournal.slice(0, 40);
+}
+
+// =========================================================
+// YOUR VIEW — your private reflections about a specific person
+// =========================================================
+
+function buildReflectionInstructions(p) {
+  const yv = p.yourView || {};
+  const prior = (yv.reflectionCount || 0) > 0 ? `
+Prior reflection on this relationship:
+- How they feel about them: ${yv.feelings || '—'}
+- The dynamic between them: ${yv.dynamic || '—'}
+- Appreciates: ${(yv.appreciate || []).join(', ') || '—'}
+- Frustrates: ${(yv.frustrate || []).join(', ') || '—'}
+- What goes unsaid: ${yv.unsaid || '—'}
+
+This is reflection #${(yv.reflectionCount || 0) + 1}. Build on what's known — deepen, correct, or enrich it.
+` : 'This is the first reflection on this relationship. Start building the picture from scratch.';
+
+  const selfCtx = (SELF.spValues || SELF.spNeeds) ? `
+About the person reflecting (Cognom user — for context only, do not mix into the picture of the relationship):
+- Their values: ${SELF.spValues || '—'}
+- Their needs: ${SELF.spNeeds || '—'}
+- Their emotional patterns: ${SELF.spEmotions || '—'}
+` : '';
+
+  return `You are Cognom — a quiet witness to how someone feels about another person in their life.
+
+The Cognom user has just spoken or written a private reflection about ${p.name}${p.relation ? ' (' + p.relation + ')' : ''}. This is NOT a conversation between them — only the user is speaking. Read it carefully and capture how the user sees ${p.name}, what they appreciate, what frustrates them, and what tends to go unspoken between them.
+${selfCtx}
+${prior}
+
+Return a JSON object with these keys. Be warm, honest, specific. Avoid generic phrasing. Speak about ${p.name} only through the user's eyes — never as if you know ${p.name} directly.
+
+{
+  "feelings": "2-3 sentences about how the user currently feels toward ${p.name} — affection, ambivalence, gratitude, frustration, longing, distance. Be honest about the texture.",
+  "dynamic": "2-3 sentences about the dynamic between them as the user describes it — who reaches out, who holds back, where it works, where it strains.",
+  "appreciate": ["short phrase", "short phrase", "short phrase"],
+  "frustrate": ["short phrase", "short phrase"],
+  "unsaid": "1-2 sentences about what the user wishes they could say to ${p.name} but doesn't. Empty string if nothing emerges.",
+  "reflection_entry": "2-3 sentences capturing the essence of this reflection, written warmly as if for the user's own private journal."
+}
+
+Return ONLY valid JSON. No markdown. No explanation.`;
+}
+
+function applyReflectionAnalysis(p, r) {
+  if(!p.yourView) p.yourView = { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 };
+  const yv = p.yourView;
+  const today = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' });
+
+  if(r.feelings) yv.feelings = r.feelings;
+  if(r.dynamic)  yv.dynamic  = r.dynamic;
+  if(typeof r.unsaid === 'string') yv.unsaid = r.unsaid;
+
+  const merge = (existing, incoming) => {
+    const all = [...(existing || [])];
+    (incoming || []).forEach(item => {
+      if(item && !all.some(e => e.toLowerCase().includes(item.toLowerCase().slice(0, 8)))) all.push(item);
+    });
+    return all.slice(0, 8);
+  };
+  yv.appreciate = merge(yv.appreciate, r.appreciate);
+  yv.frustrate  = merge(yv.frustrate,  r.frustrate);
+
+  yv.reflections = yv.reflections || [];
+  if(r.reflection_entry) yv.reflections.unshift({ date: today, text: r.reflection_entry });
+  yv.reflections = yv.reflections.slice(0, 40);
+  yv.reflectionCount = (yv.reflectionCount || 0) + 1;
+}
+
+function renderYourView(p) {
+  const yv = p && p.yourView;
+  const hasAny = yv && (yv.reflectionCount || 0) > 0;
+  const empty = document.getElementById('yv-empty');
+  const content = document.getElementById('yv-content');
+  if(empty)   empty.style.display   = hasAny ? 'none'  : 'block';
+  if(content) content.style.display = hasAny ? 'block' : 'none';
+  if(!hasAny) return;
+
+  document.getElementById('yv-feelings').textContent = yv.feelings || '—';
+  document.getElementById('yv-dynamic').textContent  = yv.dynamic  || '—';
+
+  const renderTags = (id, items, kind) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = (items || []).map(t =>
+      `<span class="yv-tag ${kind}">${escapeHTML(t)}</span>`).join('') || '<span class="yv-tag">—</span>';
+  };
+  renderTags('yv-appreciate', yv.appreciate, 'warm');
+  renderTags('yv-frustrate',  yv.frustrate,  'cool');
+
+  const apprSec = document.getElementById('yv-appreciate-section');
+  const frusSec = document.getElementById('yv-frustrate-section');
+  const unsaidSec = document.getElementById('yv-unsaid-section');
+  if(apprSec) apprSec.style.display = (yv.appreciate||[]).length ? 'block' : 'none';
+  if(frusSec) frusSec.style.display = (yv.frustrate||[]).length  ? 'block' : 'none';
+  if(unsaidSec) unsaidSec.style.display = yv.unsaid ? 'block' : 'none';
+  if(unsaidSec) document.getElementById('yv-unsaid').textContent = yv.unsaid || '';
+
+  const reflList = document.getElementById('yv-reflections');
+  const reflSec  = document.getElementById('yv-reflections-section');
+  const refls = yv.reflections || [];
+  if(reflSec) reflSec.style.display = refls.length ? 'block' : 'none';
+  if(reflList) reflList.innerHTML = refls.slice(0, 20).map(r => `
+    <div class="yv-reflection">
+      <div class="yv-reflection-date">${escapeHTML(r.date || '')}</div>
+      <div class="yv-reflection-text">${escapeHTML(r.text || '')}</div>
+    </div>`).join('');
 }
 
 function renderSelfPortrait() {
@@ -4447,9 +5245,15 @@ function renderEvents(p) {
       else fromHost = (PEOPLE.find(x => x.pid === ev._hostPid)?.name || '').split(' ')[0];
     }
     const sharedBadge = fromHost ? `<div class="photo-shared-from">tagged in by ${escapeHTML(fromHost)}</div>` : '';
+    // small badge on the thumb when this moment has been shared with someone
+    const shared = (ev.sharedWith || []).slice(-1)[0];
+    const sharedThumb = shared
+      ? `<div class="photo-shared-badge" title="Shared with ${escapeHTML(shared.name || 'someone')}"><i class="ti ti-send"></i> shared</div>`
+      : '';
     return `<div class="photo-card" onclick="openEventEditor('${ev.id}')">
       <div class="photo-thumb" style="background-image:url('${cover}')">
         ${n > 1 ? `<div class="photo-count-badge"><i class="ti ti-stack-2" style="font-size:11px;"></i> ${n}</div>` : ''}
+        ${sharedThumb}
       </div>
       <div class="photo-info">
         <div class="photo-caption${cap ? '' : ' empty'}">${cap ? escapeHTML(cap) : 'Add a story…'}</div>
@@ -4819,7 +5623,245 @@ function shareCurrentEvent() {
   if(syncEditorFieldsToEvent(ev)) {
     if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
   }
-  buildAndOpenMemoryPage(owner, [ev], { single: true });
+  openShareModal(currentEventId);
+}
+
+// =========================================================
+// SHARE MOMENT MODAL — send a moment into someone else's Cognom
+// (or invite them in if they don't have one yet)
+// =========================================================
+
+// Storage shape on each event:
+//   ev.sharedWith = [{ pid, name, channel: 'cognom'|'invite'|'page', date, token? }, ...]
+
+let shareCtx = { eventId: null, recipientPid: null };
+
+function openShareModal(eventId) {
+  const owner = findEventOwner(eventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === eventId);
+  if(!ev) return;
+
+  shareCtx.eventId = eventId;
+
+  // build the list of candidate recipients: anyone tagged in this moment + the host (if not SELF)
+  const candidatePids = [];
+  if(owner !== SELF && owner.pid) candidatePids.push(owner.pid);
+  (ev.taggedPeople || []).forEach(pid => { if(pid && pid !== SELF_PID && !candidatePids.includes(pid)) candidatePids.push(pid); });
+
+  // if there are no people attached, fall back to the currently-open person
+  if(!candidatePids.length && currentIdx >= 0 && PEOPLE[currentIdx]?.pid) {
+    candidatePids.push(PEOPLE[currentIdx].pid);
+  }
+
+  // pick the initial recipient (first candidate)
+  shareCtx.recipientPid = candidatePids[0] || null;
+
+  // preview card
+  const photo = (ev.photos || [])[0];
+  const cap   = eventSummaryCaption(ev) || 'A moment without words yet.';
+  const date  = eventSummaryDate(ev);
+  const prev  = document.getElementById('share-preview');
+  prev.innerHTML = `
+    <div class="share-preview-img" ${photo ? `style="background-image:url('${photo}')"` : ''}></div>
+    <div class="share-preview-body">
+      <div class="share-preview-cap">${escapeHTML(cap)}</div>
+      ${date ? `<div class="share-preview-date">${escapeHTML(date)}</div>` : ''}
+    </div>`;
+
+  // recipient chips
+  renderShareRecipients(candidatePids);
+  renderShareModalState();
+  renderShareHistory();
+
+  // reset invite preview state
+  const invPrev = document.getElementById('share-invite-preview');
+  if(invPrev) invPrev.classList.remove('visible');
+  const cogStatus = document.getElementById('share-cognom-status');
+  if(cogStatus) cogStatus.classList.remove('visible');
+
+  document.getElementById('share-overlay').classList.add('open');
+}
+
+function closeShareModal() {
+  document.getElementById('share-overlay').classList.remove('open');
+  shareCtx = { eventId: null, recipientPid: null };
+}
+
+function renderShareRecipients(candidatePids) {
+  const box = document.getElementById('share-recipients');
+  const label = document.getElementById('share-recipients-label');
+  if(!box) return;
+
+  if(!candidatePids.length) {
+    label.style.display = 'none';
+    box.innerHTML = '<div class="share-option-sub" style="padding:4px 2px;">No one is tagged in this moment yet. Tag someone first to share it with them.</div>';
+    return;
+  }
+  label.style.display = '';
+  box.innerHTML = candidatePids.map(pid => {
+    const person = PEOPLE.find(x => x.pid === pid);
+    if(!person) return '';
+    const isSel = pid === shareCtx.recipientPid;
+    const avStyle = person.photo
+      ? `background-image:url(${person.photo})`
+      : `background:${avatarBg(person.avClass)};color:${avatarColor(person.avClass)}`;
+    const avInner = person.photo ? '' : escapeHTML(person.initial || person.name.charAt(0));
+    return `<button class="share-recipient ${isSel ? 'selected' : ''}" onclick="selectShareRecipient('${pid}')">
+      <div class="share-recipient-av" style="${avStyle}">${avInner}</div>
+      <span>${escapeHTML(person.name)}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectShareRecipient(pid) {
+  shareCtx.recipientPid = pid;
+  // re-render chips and the option states / history for this recipient
+  const owner = findEventOwner(shareCtx.eventId);
+  const ev = owner ? (owner.events || []).find(x => x.id === shareCtx.eventId) : null;
+  const candidatePids = Array.from(document.querySelectorAll('.share-recipient')).map(el =>
+    (el.getAttribute('onclick') || '').match(/'([^']+)'/)?.[1]
+  ).filter(Boolean);
+  renderShareRecipients(candidatePids);
+  renderShareModalState();
+  renderShareHistory();
+  // reset preview/status
+  document.getElementById('share-invite-preview')?.classList.remove('visible');
+  document.getElementById('share-cognom-status')?.classList.remove('visible');
+}
+
+function renderShareModalState() {
+  const optCognom = document.getElementById('share-opt-cognom');
+  const optInvite = document.getElementById('share-opt-invite');
+  const optPage   = document.getElementById('share-opt-page');
+  const hasRecipient = !!shareCtx.recipientPid;
+  if(optCognom) optCognom.disabled = !hasRecipient;
+  if(optInvite) optInvite.disabled = !hasRecipient;
+  // page export works even with no specific recipient — we have an event
+  if(optPage)   optPage.disabled = false;
+}
+
+function getCurrentShareEvent() {
+  const owner = findEventOwner(shareCtx.eventId);
+  if(!owner) return { owner: null, ev: null };
+  const ev = (owner.events || []).find(x => x.id === shareCtx.eventId);
+  return { owner, ev };
+}
+
+function recordShare(channel, extra) {
+  const { owner, ev } = getCurrentShareEvent();
+  if(!ev) return;
+  if(!Array.isArray(ev.sharedWith)) ev.sharedWith = [];
+  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid);
+  const entry = {
+    pid: shareCtx.recipientPid || null,
+    name: recipient ? recipient.name : '',
+    channel,
+    date: new Date().toISOString().slice(0, 10),
+    ...(extra || {})
+  };
+  ev.sharedWith.push(entry);
+  if(owner === SELF) saveSelfData(); else saveData();
+  if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  return entry;
+}
+
+function executeShareViaCognom() {
+  if(!shareCtx.recipientPid) return;
+  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid);
+  if(!recipient) return;
+  recordShare('cognom');
+  // Show inline confirmation inside the option; we don't close the modal —
+  // user might want to also send an invite link just in case.
+  const status = document.getElementById('share-cognom-status');
+  if(status) {
+    status.textContent = `Queued for ${recipient.name}. Will send to their Cognom once accounts launch.`;
+    status.classList.add('visible');
+  }
+  renderShareHistory();
+  showNotif('Saved — Cognom will send this to ' + recipient.name + ' once accounts go live.');
+}
+
+function generateInviteToken() {
+  // Short opaque token; not secret today, just a placeholder for the future link resolver.
+  const rand = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6);
+  return rand;
+}
+
+function executeShareViaInvite() {
+  if(!shareCtx.recipientPid) return;
+  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid);
+  if(!recipient) return;
+  const { ev } = getCurrentShareEvent();
+  if(!ev) return;
+
+  const token = generateInviteToken();
+  const fromName = (SELF.name || 'someone').split(' ')[0];
+  const recName  = (recipient.name || 'you').split(' ')[0];
+  const base = (location.origin && location.origin.startsWith('http')) ? location.origin : 'https://cognom.com';
+  const link = `${base}/invite/${token}?from=${encodeURIComponent(fromName)}&to=${encodeURIComponent(recName)}&m=${ev.id}`;
+
+  const msg = `${fromName} shared a moment with you on Cognom — a quiet space for the relationships that matter. Open this link to see it and start your own tree:`;
+
+  recordShare('invite', { token });
+
+  const prev = document.getElementById('share-invite-preview');
+  document.getElementById('share-invite-msg').textContent = msg;
+  document.getElementById('share-invite-link').textContent = link;
+  if(prev) prev.classList.add('visible');
+  renderShareHistory();
+}
+
+function copyInviteLink() {
+  const link = document.getElementById('share-invite-link')?.textContent || '';
+  if(!link) return;
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(
+      () => showNotif('Link copied — paste it anywhere.'),
+      () => fallbackCopy(link)
+    );
+  } else {
+    fallbackCopy(link);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showNotif('Link copied.'); }
+  catch(_) { showNotif('Couldn\'t copy — select and copy the link manually.'); }
+  document.body.removeChild(ta);
+}
+
+function executeShareViaPage() {
+  const { owner, ev } = getCurrentShareEvent();
+  if(!owner || !ev) return;
+  recordShare('page');
+  // build the recipient's view — for the page header, prefer the chosen recipient,
+  // fall back to the event's host
+  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid) || owner;
+  buildAndOpenMemoryPage(recipient, [ev], { single: true });
+  closeShareModal();
+}
+
+function renderShareHistory() {
+  const { ev } = getCurrentShareEvent();
+  const wrap = document.getElementById('share-history');
+  const list = document.getElementById('share-history-list');
+  if(!wrap || !list) return;
+  const history = (ev && ev.sharedWith) || [];
+  if(!history.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const channelLabel = { cognom: 'queued for Cognom', invite: 'invite link sent', page: 'opened as a page' };
+  list.innerHTML = history.slice().reverse().slice(0, 5).map(h => {
+    const label = channelLabel[h.channel] || 'shared';
+    const who = h.name || 'someone';
+    return `<div class="share-history-item"><i class="ti ti-check"></i> ${escapeHTML(who)} — ${escapeHTML(label)} · ${escapeHTML(h.date || '')}</div>`;
+  }).join('');
 }
 
 init();
