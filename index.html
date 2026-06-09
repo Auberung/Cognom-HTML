@@ -380,10 +380,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .echo-item { display:flex; align-items:flex-start; gap:9px; padding:7px 0; font-size:12.5px; }
 .echo-text { color:var(--ink-mid); }
 .echo-date { color:var(--ink-light); font-size:11px; }
-.snav-btn { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink-light); transition: all 0.15s; text-align: left; }
-.snav-btn:hover { background: rgba(255,255,255,0.06); color: var(--cream); }
-.snav-btn.active { background: rgba(184,154,90,0.15); color: var(--gold-light); }
-.snav-btn i { font-size: 17px; }
 .upload-icon { font-size: 30px; color: var(--ink-light); margin-bottom: 10px; }
 .upload-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; color: var(--ink); margin-bottom: 5px; }
 .upload-sub { font-size: 12px; color: var(--ink-light); }
@@ -2088,11 +2084,6 @@ function loadData() {
   } catch(e) { PEOPLE = []; }
 }
 
-function firstWithConversation() {
-  for(let i=0;i<PEOPLE.length;i++) if(hasConversations(PEOPLE[i])) return i;
-  return -1;
-}
-
 function init() {
   loadData();
   loadSelf();
@@ -2120,26 +2111,39 @@ const SUPABASE_KEY  = 'sb_publishable_rTLehkFS3vaui2I2Ug4xDg_P6VEE6Yo';
 let sb = null;             // the Supabase client
 let CURRENT_USER = null;   // { id, email } when signed in
 
-function initSupabase() {
+// Lazy + retrying initialization. The SDK is loaded from a CDN; if the page
+// network was slow or the script tag missed, this function waits up to 3
+// seconds for the global to appear before giving up.
+async function ensureSupabase() {
+  if(sb) return sb;
+  // Wait briefly for the SDK to be available on window
+  for(let i = 0; i < 30; i++) {
+    if(window.supabase && window.supabase.createClient) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  if(!window.supabase || !window.supabase.createClient) {
+    console.error('Supabase SDK did not load. Check network and that <script> tag for @supabase/supabase-js is in the page.');
+    return null;
+  }
   try {
-    if(!window.supabase || !window.supabase.createClient) return;
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     // Initial session check (covers magic-link return when the URL has the token)
-    sb.auth.getSession().then(({ data }) => {
-      CURRENT_USER = data?.session?.user || null;
-      renderAuthState();
-    });
-
+    const { data } = await sb.auth.getSession();
+    CURRENT_USER = data?.session?.user || null;
+    renderAuthState();
     // React to sign-in / sign-out / refresh events
     sb.auth.onAuthStateChange((_evt, session) => {
       CURRENT_USER = session?.user || null;
       renderAuthState();
     });
+    return sb;
   } catch(err) {
-    console.warn('Supabase init failed:', err);
+    console.error('Supabase init failed:', err);
+    return null;
   }
 }
+
+function initSupabase() { ensureSupabase(); }   // fire-and-forget at startup
 
 function renderAuthState() {
   const out = document.getElementById('auth-signed-out');
@@ -2157,16 +2161,21 @@ function renderAuthState() {
 }
 
 async function sendMagicLink() {
-  if(!sb) { showNotif('Sign-in service unavailable — try refreshing.'); return; }
+  const msgEl = document.getElementById('auth-msg');
+  if(msgEl) msgEl.textContent = 'Connecting…';
+  const client = await ensureSupabase();
+  if(!client) {
+    if(msgEl) msgEl.textContent = "Couldn't reach Supabase. Check your internet, then hard-refresh the page (hold reload → Request Without Cache).";
+    return;
+  }
   const emailEl = document.getElementById('auth-email');
-  const msgEl   = document.getElementById('auth-msg');
   const email = (emailEl?.value || '').trim();
   if(!email || !email.includes('@')) {
     if(msgEl) msgEl.textContent = "That doesn't look like an email. Try again?";
     return;
   }
-  if(msgEl) msgEl.textContent = 'Sending…';
-  const { error } = await sb.auth.signInWithOtp({
+  if(msgEl) msgEl.textContent = 'Sending the sign-in link…';
+  const { error } = await client.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: window.location.origin }
   });
@@ -2178,8 +2187,9 @@ async function sendMagicLink() {
 }
 
 async function signOut() {
-  if(!sb) return;
-  await sb.auth.signOut();
+  const client = await ensureSupabase();
+  if(!client) return;
+  await client.auth.signOut();
   showNotif('Signed out. Your tree stays on this device.');
 }
 
@@ -2247,9 +2257,6 @@ function closePersonCard() {
   document.getElementById('person-card-escape')?.classList.remove('visible');
   currentIdx = -1;
 }
-
-// kept for any legacy callers
-function showView(view) { if(view === 'tree') { closePersonCard(); showTree(); } }
 
 let editingIdx = -1;
 
@@ -2346,7 +2353,6 @@ function personDueState(p) {
   if(!target) return null;
   // honor an active snooze
   if(p.snoozedUntil && new Date(p.snoozedUntil) > new Date()) return null;
-  const since = daysSince(p.lastConvDate);
   // brand-new relationships with a cadence set but no conversations yet:
   // start counting from when the rhythm was set (or today if missing)
   const ref = p.lastConvDate || p.cadenceSetAt;
@@ -4049,37 +4055,24 @@ function renderTree() {
   const container = document.getElementById('tree-container');
 
   const COL = {
-    friend:'#6E8266', family:'#9A6B45', partner:'#BFA15E', other:'#A98DB3',
+    friend:'#6E8266', family:'#9A6B45', partner:'#BFA15E',
     leafA:'#8FA383', leafB:'#A8B89F', leafC:'#9CB389', leafD:'#C9B98E', leafE:'#7E9576',
-    trunk:'#6E5238', branch:'#7C5E40',
+    trunk:'#6E5238',
     grass:'#7FA15A', grassDk:'#6B8E48', earth:'#C9B79E', earthDk:'#B8A485',
     petalA:'#E8A0B8', petalB:'#F2C57C', petalC:'#C9A0E8', petalD:'#F2E27C'
   };
   const directOf = (cat) => PEOPLE.map((p,i)=>({p,i})).filter(o => relationCategory(o.p.relation)===cat);
-  const attachedTo = (_pid) => [];
 
   const friends = directOf('friend');
   let family = directOf('family');
   const partners = directOf('partner');
-  const others = directOf('other');
 
   // ---- dynamic canvas width so people NEVER get cut off ----
-  // each person needs ~150px of horizontal room; attached people push the edge out further.
   const friendSlots = Math.max(5, friends.length);
   const familySlots = Math.max(5, family.length);
-  const maxAttached = Math.max(0, ...PEOPLE.map(p => attachedTo(p.pid).length));
   const widest = Math.max(friendSlots, familySlots);
-  // half-spread each person occupies from center, plus room for the outermost bubble,
-  // its label, and any attached offshoot reaching further out
-  const perSide = (widest - 1) / 2 * 150 + 160 + maxAttached * 90;
-  // sky "others" can form their own wide row of group-clouds — make sure the canvas fits them too
-  const skyGroups = others.concat(partners.slice(1));
-  const skyRowW = skyGroups.reduce((sum,o)=>{
-    const members = 1 + attachedTo(o.p.pid).length;
-    const cs = 1.1 + (members-1)*0.65;
-    return sum + (58*cs*2 + 30) + 24;
-  }, 0);
-  const W = Math.max(960, Math.round(perSide * 2 + 200), Math.round(skyRowW + 240));
+  const perSide = (widest - 1) / 2 * 150 + 160;
+  const W = Math.max(960, Math.round(perSide * 2 + 200));
   const cx = W/2;
 
   let seed = 20240531;
@@ -4187,72 +4180,14 @@ function renderTree() {
     </g>`;
   }
 
-  function branch(x1,y1,x2,y2,wide,col,dashed){
-    const mx=x1+(x2-x1)*0.5, dash=dashed?' stroke-dasharray="3 6"':'';
-    return `<path d="M ${x1} ${y1} C ${mx} ${y1+(y2-y1)*0.1}, ${x2} ${y1+(y2-y1)*0.6}, ${x2} ${y2}" stroke="${col}" stroke-width="${wide}" fill="none" stroke-linecap="round" opacity="0.5"${dash}/>`;
-  }
-
-  // attached people grow as small twigs off the host bubble, fanning UP and OUTWARD
-  // (away from the trunk) so they never collide with neighboring main branches.
-  // point at parameter t along the same cubic used by branch() from (x1,y1) to (x2,y2)
-  function branchPoint(x1,y1,x2,y2,t){
-    const mx=x1+(x2-x1)*0.5;
-    const c1x=mx, c1y=y1+(y2-y1)*0.1;
-    const c2x=x2, c2y=y1+(y2-y1)*0.6;
-    const u=1-t;
-    const bx=u*u*u*x1+3*u*u*t*c1x+3*u*t*t*c2x+t*t*t*x2;
-    const by=u*u*u*y1+3*u*u*t*c1y+3*u*t*t*c2y+t*t*t*y2;
-    return {x:bx,y:by};
-  }
-
-  // attached people: a sub-branch grows OUT of the host's own main branch (partway up it),
-  // sweeping to a child bubble that sits clearly beside the host — like a real offshoot limb.
-  // originX/originY = a point on the host's main branch where the offshoot begins.
-  function attachedSVG(hostX,hostY,hostR,items,originX,originY){
-    let twigs='', leaves='', bubs='';
-    const n=items.length;
-    const outward = hostX >= cx ? 1 : -1;     // lean away from the trunk
-    const childR = 17;
-    const reach = hostR + childR + 54;
-    // if no explicit origin given, start from the host bubble edge
-    const ox0 = (originX===undefined) ? hostX + outward*hostR*0.5 : originX;
-    const oy0 = (originY===undefined) ? hostY - hostR*0.4 : originY;
-    items.forEach((item,k)=>{
-      const deg = 60 + k*34;                    // mostly sideways & up, fanning per child
-      const ang = deg * Math.PI/180;
-      const ax = hostX + outward * Math.sin(ang) * reach;
-      const ay = hostY - Math.cos(ang) * reach;
-      const c = COL[relationCategory(item.p.relation)] || COL.other;
-      const ex = ax - outward * childR * 0.6;   // arrive at child's inner-lower edge
-      const ey = ay + childR * 0.55;
-      // bow the offshoot outward for a natural limb curve
-      const cpx = ox0 + outward * Math.abs(ex-ox0) * 0.5;
-      const cpy = oy0 - Math.abs(oy0-ey) * 0.25;
-      twigs += `<path d="M ${ox0.toFixed(1)} ${oy0.toFixed(1)} Q ${cpx.toFixed(1)} ${cpy.toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="${COL.branch}" stroke-width="3.5" fill="none" opacity="0.7" stroke-linecap="round"/>`;
-      leaves += leavesAlong(ox0, oy0, ex, ey, 6, 6);
-      bubs += bubble(item, ax, ay, childR, {color:c});
-    });
-    return {twigs, leaves, bubs};
-  }
-
   // ---- bands ----
-  const skyOthers = [];
-  const maxSkyAttached = 0;
-  // sky needs room for the floating people PLUS a clear gap above the crown (matching the
-  // trunk-to-roots gap of ~70). taller when an "other" carries connections (bigger cloud + sub-people).
-  const skyGap = 70;
-  const skyH = skyOthers.length ? (200 + skyGap + maxSkyAttached*55) : 70;
-  const crownTop = skyH + 10;
-  const friendRows = Math.max(1, Math.ceil(friends.length/4));
+  const crownTop = 80;
   const crownH = 330;
   const trunkTop = crownTop + crownH;
   const trunkH = partners.length ? 340 : 130;
   const trunkBot = trunkTop + trunkH;
-  const rootRows = Math.max(1, Math.ceil(family.length/4));
   const rootH = 340;   // mirror of the crown — always full and substantial
   const H = trunkBot + rootH + 30;
-
-  const skyBottom = trunkBot - 20;
   const groundY = trunkBot - 8;   // where sky meets earth — grass & flowers live here
 
   // ---- TRUNK ----
@@ -4272,11 +4207,6 @@ function renderTree() {
   const crownRx = friendSpread + 150;
   const crownRy = crownH * 0.7;
   const crownMidY = crownTop + crownH * 0.5;
-  // true topmost extent of the crown: highest base blob (fy=-0.6, ry=0.5) reaches
-  // crownMidY - 0.6*crownRy - 0.5*crownRy*0.6, plus the leaf jitter (~30)
-  const crownFoliageTop = crownMidY - 0.6*crownRy - 0.3*crownRy - 30;
-  // if people float in the sky above the crown, include them (and their clouds) in the fit
-  const foliageTop = skyOthers.length ? Math.min(crownFoliageTop, 20) : crownFoliageTop;
   const cols = [COL.leafA, COL.leafB, COL.leafC, COL.leafD, COL.leafE];
   let foliage = '';
 
@@ -4341,7 +4271,7 @@ function renderTree() {
   // ---- FRIENDS: a non-crossing fan across the crown ----
   // Always lay out at least 5 branch slots so the tree looks full from the start.
   // Real friends fill slots left-to-right; remaining slots are empty leafy branches.
-  let fBranch='', fLeaves='', fBub='';
+  let fLeaves='', fBub='';
   {
     const realN = friends.length;
     const slots = Math.max(5, realN);
@@ -4369,7 +4299,7 @@ function renderTree() {
 
   // ---- PARTNER (on the trunk, above you) ----
   // Partner sits high on the trunk, clear of the foliage drape, with generous space below for "you"
-  let pBranch='', pLeaves='', pBub='';
+  let pBub='';
   const hasPartner = partners.length > 0;
   if(hasPartner){
     const px=cx, py=trunkTop + 110;   // clear of the foliage drape (which extends ~85px below trunkTop)
@@ -4449,18 +4379,6 @@ function renderTree() {
     s += `<path d="${shadowD}" fill="${rootShadow}" opacity="0.6"/>`;
     s += `<path d="${hiD}" fill="${rootHilite}" opacity="0.5"/>`;
     return { svg: s, c1x, c1y, c2x, c2y };
-  }
-
-  // Helper: compute a point AND tangent ALONG a cubic Bezier at parameter t.
-  // Used so forks can emerge from the actual curved midline of their parent (not a straight line).
-  function bezierPoint(x1, y1, c1x, c1y, c2x, c2y, x2, y2, t) {
-    const u = 1 - t;
-    return {
-      x: u*u*u*x1 + 3*u*u*t*c1x + 3*u*t*t*c2x + t*t*t*x2,
-      y: u*u*u*y1 + 3*u*u*t*c1y + 3*u*t*t*c2y + t*t*t*y2,
-      tx: 3*u*u*(c1x-x1) + 6*u*t*(c2x-c1x) + 3*t*t*(x2-c2x),
-      ty: 3*u*u*(c1y-y1) + 6*u*t*(c2y-c1y) + 3*t*t*(y2-c2y)
-    };
   }
 
   // FLOWING TENDRIL ROOTS — long curves fanning to distinct angles (no collisions),
@@ -4558,7 +4476,7 @@ function renderTree() {
   rootMass += primariesSvg;
 
   // ---- FAMILY ROOTS: same style, terminating near family bubbles ----
-  let rBranch='', rLeaves='', rBub='';
+  let rBranch='', rBub='';
   {
     const realN = family.length;
     if(realN > 0) {
@@ -4583,7 +4501,6 @@ function renderTree() {
 
   // Others / sky people removed — the tree holds only your core people:
   // friends in the crown, partner above you, family at the roots.
-  let sClouds='', sBranch='', sLeaves='', sBub='';
 
   const emptyHint = PEOPLE.length===0
     ? `<text x="${cx}" y="${crownCy}" text-anchor="middle" class="tree-node-rel" fill="#5F7A8A" font-style="italic">Add the people you love — they'll grow on the branches</text>`
@@ -4605,18 +4522,13 @@ function renderTree() {
     <rect x="${-W*2}" y="${-H*2}" width="${W*5}" height="${groundY + H*2}" fill="url(#skyGrad)"/>
     <rect x="${-W*2}" y="${groundY}" width="${W*5}" height="${H*3}" fill="url(#earthGrad)"/>
     ${cloudsAcross(groundY)}
-    ${sClouds}
     <line x1="${-W*2}" y1="${groundY}" x2="${W*3}" y2="${groundY}" stroke="${COL.grassDk}" stroke-width="1.5" opacity="0.3"/>
     ${rootMass}
-    ${sBranch}
     ${rBranch}
     ${trunk}
-    ${fBranch}
-    ${pBranch}
     ${foliage}
-    ${fLeaves}${pLeaves}${rLeaves}${sLeaves}
+    ${fLeaves}
     ${emptyHint}
-    ${sBub}
     ${fBub}
     ${pBub}
     ${grassAndFlowers(groundY)}
@@ -4643,11 +4555,6 @@ function escapeXML(s) {
 
 function selectFromTree(idx) {
   selectPerson(idx);
-}
-
-function jumpToPerson(pid) {
-  const idx = PEOPLE.findIndex(p => p.pid === pid);
-  if(idx >= 0) selectPerson(idx);
 }
 
 // ---- TREE ZOOM & PAN ----
@@ -4923,7 +4830,7 @@ function closeSelfModal() {
   // If they came here via the upload gate and have now established a voice
   // sample, drop them back on the person they were trying to engage with,
   // landing on Add conversation so they can pick up where they left off.
-  if(SELF_RETURN_TO_PERSON >= 0 && selfVoiceEstablished && selfVoiceEstablished()) {
+  if(SELF_RETURN_TO_PERSON >= 0 && selfVoiceEstablished()) {
     const idx = SELF_RETURN_TO_PERSON;
     SELF_RETURN_TO_PERSON = -1;
     setTimeout(() => {
