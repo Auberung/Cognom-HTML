@@ -290,7 +290,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   transition: background 0.15s, transform 0.15s;
 }
 .person-card-escape:hover { background: rgba(28,28,26,0.85); transform: scale(1.05); }
-.person-card-escape.visible { display: flex; }
+/* Only show the floating escape hatch on mobile — on desktop the card's
+   own × button is reliably visible, and the floating one would just duplicate it. */
+@media (max-width: 760px) {
+  .person-card-escape.visible { display: flex; }
+}
 
 /* Floating mobile menu button — viewport-anchored safety net so the user can
    always reach the sidebar even if iOS Safari scroll state has hidden the
@@ -776,22 +780,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   }
   .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
 
-  /* Hamburger button in the topbar */
-  .menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px; height: 38px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--warm-white);
-    color: var(--ink);
-    cursor: pointer;
-    font-size: 18px;
-    flex-shrink: 0;
-    margin-right: 10px;
-  }
-  .menu-btn:hover { background: var(--cream); }
+  /* Hamburger button in the topbar — replaced on mobile by the floating menu
+     button, which is reliable even when iOS scroll state hides the topbar. */
+  .menu-btn { display: none; }
 
   .topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
   .topbar-actions { gap: 6px; flex-wrap: wrap; }
@@ -828,6 +819,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     height: 100%;
     border-radius: 0;
   }
+  /* Hide the card's internal topbar (× close) on mobile — the floating
+     escape button is the single, viewport-anchored close. */
+  .person-card > .topbar { display: none; }
   .person-card .content { padding: 8px 18px 80px; max-height: calc(100vh - 60px); }
   .info-card-head { gap: 12px; }
   .info-card-avatar { width: 60px; height: 60px; font-size: 26px; }
@@ -1319,6 +1313,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="field-group">
       <div class="field-label">Phone number <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
       <input type="tel" class="field-input" id="new-phone" placeholder="So you can call them straight from Cognom" onkeydown="if(event.key==='Enter')confirmAddPerson()" autocomplete="tel" />
+    </div>
+    <div class="field-group" id="new-channel-group">
+      <div class="field-label">Call them through</div>
+      <div class="cadence-chips" id="channel-chips">
+        <button class="cadence-chip selected" data-channel="phone"    onclick="toggleChannel(this)"><i class="ti ti-phone" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Phone</button>
+        <button class="cadence-chip"          data-channel="whatsapp" onclick="toggleChannel(this)"><i class="ti ti-brand-whatsapp" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>WhatsApp</button>
+        <button class="cadence-chip"          data-channel="telegram" onclick="toggleChannel(this)"><i class="ti ti-brand-telegram" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Telegram</button>
+        <button class="cadence-chip"          data-channel="facetime" onclick="toggleChannel(this)"><i class="ti ti-video" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>FaceTime</button>
+      </div>
+      <div class="cadence-hint">Whichever they actually pick up on. WhatsApp and Telegram open in the app if installed; otherwise the web version.</div>
     </div>
     <div class="field-group">
       <div class="field-label">A gentle rhythm <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
@@ -1866,6 +1870,7 @@ function loadData() {
         lastConvDate: '',
         snoozedUntil: '',
         phone: '',
+        channel: 'phone',
         photos: [],     // legacy — kept for migration
         events: [],     // new: each event has 1-4 photos plus context
         ...p
@@ -1958,6 +1963,7 @@ function openAddPerson() {
   selectedRel = '';
   pendingPhoto = '';
   if(typeof preselectCadence === 'function') preselectCadence('');
+  if(typeof preselectChannel === 'function') preselectChannel('phone');
   const prev = document.getElementById('modal-photo-preview');
   prev.style.backgroundImage = '';
   document.getElementById('modal-photo-initial').textContent = '';
@@ -1984,6 +1990,7 @@ function openEditPerson(idx, ev) {
   selectedRel = zone;
   pendingPhoto = p.photo || '';
   if(typeof preselectCadence === 'function') preselectCadence(p.cadence || '');
+  if(typeof preselectChannel === 'function') preselectChannel(p.channel || 'phone');
   const prev = document.getElementById('modal-photo-preview');
   if(p.photo) {
     prev.style.backgroundImage = 'url(' + p.photo + ')';
@@ -2162,16 +2169,16 @@ function savePendingCall(obj) {
 function initiateCall(idx) {
   const p = PEOPLE[idx];
   if(!p || !p.phone) return;
+  const url = buildCallUrl(p);
+  if(!url) return;
   // record the intent so the return-from-call prompt can fire when they come back
   savePendingCall({ pid: p.pid, name: p.name, startedAt: Date.now() });
   // reset the session guard so a fresh call always gets a fresh prompt
   postCallShownThisSession = false;
-  // open the system dialer — works on iOS and Android, no-ops on desktop
-  // (desktop may show "open in FaceTime" or similar)
-  const tel = (p.phone || '').replace(/[^\d+]/g, '');
-  if(tel) window.location.href = 'tel:' + tel;
-  // also stamp a soft notification — the user might dismiss the iOS confirm dialog
-  showNotif("Dialing " + (p.name || '').split(' ')[0] + " — Cognom will be here when you're back.");
+  window.location.href = url;
+  // also stamp a soft notification — tells them which channel is dialing
+  const ch = CALL_CHANNELS[p.channel || 'phone'] || CALL_CHANNELS.phone;
+  showNotif("Reaching " + (p.name || '').split(' ')[0] + " on " + ch.short + " — Cognom will be here when you're back.");
 }
 
 // Opens the edit-person modal and lands the cursor in the phone field —
@@ -2276,6 +2283,49 @@ function preselectCadence(cadence) {
   });
 }
 
+// =========================================================
+// CALL CHANNELS — phone / WhatsApp / Telegram / FaceTime
+// =========================================================
+// Each channel uses a URL scheme that the OS routes to the installed app.
+// Web fallbacks (wa.me, t.me) handle the "app not installed" case gracefully.
+
+const CALL_CHANNELS = {
+  phone:    { label: 'Phone',    short: 'phone'    },
+  whatsapp: { label: 'WhatsApp', short: 'WhatsApp' },
+  telegram: { label: 'Telegram', short: 'Telegram' },
+  facetime: { label: 'FaceTime', short: 'FaceTime' },
+};
+
+let pendingChannel = 'phone';
+
+function toggleChannel(el) {
+  document.querySelectorAll('#channel-chips .cadence-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  pendingChannel = el.dataset.channel || 'phone';
+}
+
+function preselectChannel(channel) {
+  pendingChannel = channel || 'phone';
+  document.querySelectorAll('#channel-chips .cadence-chip').forEach(c => {
+    c.classList.toggle('selected', (c.dataset.channel || 'phone') === pendingChannel);
+  });
+}
+
+function buildCallUrl(p) {
+  if(!p || !p.phone) return null;
+  const raw = (p.phone || '').replace(/[^\d+]/g, '');
+  if(!raw) return null;
+  const bare = raw.replace(/^\+/, '');  // wa.me and t.me want digits-only
+  const channel = p.channel || 'phone';
+  switch(channel) {
+    case 'whatsapp': return 'https://wa.me/' + bare;
+    case 'telegram': return 'https://t.me/+' + bare;
+    case 'facetime': return 'facetime-audio:' + raw;
+    case 'phone':
+    default:         return 'tel:' + raw;
+  }
+}
+
 // keep openSidebar reachable from here
 function openSidebar() {
   document.querySelector('.sidebar')?.classList.add('open');
@@ -2300,6 +2350,7 @@ function confirmAddPerson() {
     p.familyName = familyName;
     p.who = who;
     p.phone = (document.getElementById('new-phone').value || '').trim();
+    p.channel = pendingChannel || 'phone';
     p.initial = name[0].toUpperCase();
     p.relation = selectedRel || 'Friend';
     p.photo = pendingPhoto || '';
@@ -2312,6 +2363,7 @@ function confirmAddPerson() {
     const savedIdx = editingIdx;
     pendingPhoto = '';
     pendingCadence = '';
+    pendingChannel = 'phone';
     saveData();
     closeModal();
     renderSearchResults();
@@ -2336,6 +2388,7 @@ function confirmAddPerson() {
     relation: selectedRel || 'Friend',
     photo: pendingPhoto || '',
     phone: (document.getElementById('new-phone').value || '').trim(),
+    channel: pendingChannel || 'phone',
     cadence: pendingCadence || '',
     cadenceSetAt: pendingCadence ? new Date().toISOString() : '',
     lastConvDate: '',
@@ -2353,6 +2406,7 @@ function confirmAddPerson() {
   PEOPLE.push(person);
   pendingPhoto = '';
   pendingCadence = '';
+  pendingChannel = 'phone';
   saveData();
   closeModal();
   renderSearchResults();
@@ -2570,7 +2624,15 @@ function selectPerson(idx) {
     <div class="info-actions">
       <button class="btn-edit" onclick="openEditPerson(currentIdx)"><i class="ti ti-edit" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Edit</button>
       ${p.phone
-        ? `<button class="btn-edit" onclick="initiateCall(currentIdx)" title="${escapeHTML(p.phone)}"><i class="ti ti-phone" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Call</button>`
+        ? (() => {
+            const ch = p.channel || 'phone';
+            const icon = ch === 'whatsapp' ? 'ti-brand-whatsapp'
+                      : ch === 'telegram' ? 'ti-brand-telegram'
+                      : ch === 'facetime' ? 'ti-video'
+                      : 'ti-phone';
+            const label = ch === 'phone' ? 'Call' : 'Call · ' + (CALL_CHANNELS[ch]?.short || 'Phone');
+            return `<button class="btn-edit" onclick="initiateCall(currentIdx)" title="${escapeHTML(p.phone)} via ${escapeHTML(CALL_CHANNELS[ch]?.label || 'Phone')}"><i class="ti ${icon}" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>${label}</button>`;
+          })()
         : `<button class="btn-edit" style="opacity:0.75;font-style:italic;" onclick="openEditPersonFocusPhone(currentIdx)" title="Add their number so you can call from Cognom"><i class="ti ti-phone-plus" aria-hidden="true" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Add phone to call</button>`
       }
       <button class="btn-addconv" id="info-addconv-btn" onclick="toggleUpload()">+ Add conversation</button>
