@@ -2254,10 +2254,10 @@ function loadData() {
 }
 
 function init() {
-  loadData();
-  loadSelf();
-  // Auth gate will be shown first — initSupabase checks for a session,
-  // and calls enterApp() if signed in (which then renders the tree/sidebar).
+  // Don't load any data yet — the auth gate shows first.
+  // Data loads from Supabase inside enterApp() after sign-in.
+  PEOPLE = [];
+  SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
   initSupabase();
 }
 
@@ -2430,16 +2430,23 @@ async function enterApp() {
   const app  = document.getElementById('app-main');
   if(gate) gate.style.display = 'none';
   if(app)  app.style.display  = '';
-  // show floating buttons
   document.getElementById('float-thought-btn')?.classList.add('visible');
 
-  // Try loading from Supabase. If data exists there, it becomes the source of truth.
-  // If no data exists (first login), push whatever is in localStorage up to Supabase.
+  // Always start clean — the database is the single source of truth.
+  PEOPLE = [];
+  SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
+
+  // Load this user's data from Supabase
   const loaded = await loadFromSupabase();
-  if(!loaded && (PEOPLE.length > 0 || SELF.name)) {
-    // First login with existing local data — push it to Supabase
+  if(!loaded) {
+    // No data in Supabase yet — brand new account, start fresh.
+    // Write the empty state so the row exists for future saves.
     await _forceSyncToSupabase();
   }
+
+  // Cache to localStorage for this user (keyed so it doesn't bleed across accounts)
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ people: PEOPLE, savedAt: Date.now() })); } catch(_) {}
+  try { localStorage.setItem(SELF_KEY, JSON.stringify(SELF)); } catch(_) {}
 
   initAppUI();
   renderAuthState();
@@ -2453,6 +2460,10 @@ function showGate() {
   // hide floating buttons behind the gate
   document.getElementById('float-thought-btn')?.classList.remove('visible');
   document.getElementById('floating-menu-btn')?.classList.remove('visible');
+  // clear in-memory data so no bleed between accounts
+  PEOPLE = [];
+  SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
+  CURRENT_USER = null;
 }
 
 // Modified initSupabase: check for existing session, show gate or app accordingly
@@ -2629,8 +2640,10 @@ async function signOut() {
   const client = await ensureSupabase();
   if(client) await client.auth.signOut();
   CURRENT_USER = null;
+  // Clear local cache so next login starts clean from Supabase
+  try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(SELF_KEY); } catch(_) {}
   showGate();
-  showNotif('Signed out. Your tree stays on this device.');
+  showNotif('Signed out.');
 }
 
 // =========================================================
