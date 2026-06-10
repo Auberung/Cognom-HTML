@@ -444,31 +444,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .share-preview-body { flex: 1; min-width: 0; }
 .share-preview-cap { font-size: 13px; color: var(--ink); line-height: 1.4; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .share-preview-date { font-size: 11px; color: var(--ink-light); letter-spacing: 1px; text-transform: uppercase; }
-.share-section-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 10px; margin-top: 4px; }
-.share-recipients { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
-.share-recipient { display: flex; align-items: center; gap: 7px; padding: 6px 12px 6px 6px; background: var(--cream); border: 1px solid var(--border); border-radius: 18px; cursor: pointer; transition: all 0.15s; font-size: 12.5px; color: var(--ink-mid); }
-.share-recipient:hover { border-color: var(--gold); }
-.share-recipient.selected { background: rgba(184,154,90,0.15); border-color: var(--gold); color: var(--ink); }
-.share-recipient-av { width: 26px; height: 26px; border-radius: 50%; font-family: 'Cormorant Garamond', serif; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background-size: cover; background-position: center; }
-.share-options { display: flex; flex-direction: column; gap: 10px; }
-.share-option { display: flex; align-items: flex-start; gap: 14px; padding: 16px 16px; background: var(--cream); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.15s; text-align: left; font-family: 'DM Sans', sans-serif; }
-.share-option:hover:not(:disabled) { border-color: var(--gold); background: rgba(184,154,90,0.06); transform: translateY(-1px); }
-.share-option:disabled { opacity: 0.55; cursor: not-allowed; }
-.share-option-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--warm-white); border: 1px solid var(--border); color: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
-.share-option.primary .share-option-icon { background: var(--ink); border-color: var(--ink); color: var(--cream); }
-.share-option-body { flex: 1; min-width: 0; }
-.share-option-title { font-size: 13.5px; color: var(--ink); font-weight: 400; margin-bottom: 3px; }
-.share-option-sub { font-size: 11.5px; color: var(--ink-light); line-height: 1.55; }
-.share-option-status { font-size: 10.5px; color: var(--sage-dark); letter-spacing: 0.5px; margin-top: 6px; display: none; }
-.share-option-status.visible { display: block; }
-.share-invite-preview { margin-top: 14px; padding: 12px 14px; background: var(--cream-dark); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; color: var(--ink-mid); line-height: 1.55; display: none; }
-.share-invite-preview.visible { display: block; }
-.share-invite-link { display: block; word-break: break-all; font-family: 'DM Mono', 'SF Mono', Monaco, monospace; font-size: 11px; color: var(--ink); margin-top: 6px; padding: 7px 9px; background: var(--warm-white); border-radius: 6px; border: 1px solid var(--border); }
-.share-invite-copy { margin-top: 8px; padding: 7px 14px; background: var(--ink); color: var(--cream); border: none; border-radius: 7px; font-size: 11.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-.share-invite-copy:hover { background: var(--sage-dark); }
-.share-history { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
-.share-history-item { display: flex; align-items: center; gap: 9px; font-size: 11.5px; color: var(--ink-light); padding: 4px 0; }
-.share-history-item i { font-size: 13px; color: var(--sage); }
 
 /* Tiny "shared" badge on the moment thumbnail */
 .photo-shared-badge { position: absolute; bottom: 8px; right: 8px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: rgba(28,28,26,0.7); color: var(--cream); border-radius: 12px; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; backdrop-filter: blur(4px); }
@@ -1746,42 +1721,79 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <div class="share-overlay" id="share-overlay" onclick="if(event.target===this)closeShareModal()">
   <div class="share-modal">
     <button class="share-close" onclick="closeShareModal()" aria-label="Close">&times;</button>
-    <div class="share-title" id="share-title">Share this moment</div>
-    <div class="share-sub" id="share-sub">Send a moment from your Cognom to theirs — or invite them in if they aren't here yet.</div>
+    <div class="share-title">Share this moment</div>
+    <div class="share-sub">Anyone with the link can see this moment. If they have Cognom, they can save it to their tree.</div>
 
     <div class="share-preview" id="share-preview"></div>
 
-    <div class="share-section-label" id="share-recipients-label">Share with</div>
-    <div class="share-recipients" id="share-recipients"></div>
+    <div id="share-status" style="font-size:12px;color:var(--ink-light);line-height:1.5;min-height:20px;margin-bottom:12px;"></div>
 
-    <div class="share-options">
-      <button class="share-option primary" id="share-opt-cognom" onclick="executeShareViaCognom()">
-        <div class="share-option-icon"><i class="ti ti-send"></i></div>
-        <div class="share-option-body">
-          <div class="share-option-title">Send to their Cognom</div>
-          <div class="share-option-sub">If they're on Cognom, this moment will appear in their file with you. Direct sharing launches alongside accounts — until then, it sits in your share queue.</div>
-          <div class="share-option-status" id="share-cognom-status">Queued — will send when accounts launch.</div>
-        </div>
-      </button>
+    <button class="btn-primary" id="share-link-btn" onclick="createShareLink()" style="width:100%;padding:13px;font-size:14px;"><i class="ti ti-link" style="font-size:14px;vertical-align:-1px;margin-right:6px;"></i>Create link</button>
 
-      <button class="share-option" id="share-opt-invite" onclick="executeShareViaInvite()">
-        <div class="share-option-icon"><i class="ti ti-link"></i></div>
-        <div class="share-option-body">
-          <div class="share-option-title">Send them an invite</div>
-          <div class="share-option-sub">Get a personal link you can text or email. They'll see this moment when they open Cognom for the first time.</div>
-          <div class="share-invite-preview" id="share-invite-preview">
-            <div id="share-invite-msg"></div>
-            <code class="share-invite-link" id="share-invite-link"></code>
-            <button class="share-invite-copy" onclick="event.stopPropagation();copyInviteLink()"><i class="ti ti-copy" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Copy link</button>
-          </div>
-        </div>
-      </button>
+    <div id="share-link-result" style="display:none;margin-top:12px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <code id="share-link-url" style="flex:1;font-size:11px;background:var(--cream);padding:10px;border-radius:8px;word-break:break-all;border:1px solid var(--border);"></code>
+        <button class="btn-ghost" onclick="copyShareLink()" style="white-space:nowrap;"><i class="ti ti-copy" style="font-size:13px;"></i> Copy</button>
+      </div>
+      <div style="margin-top:10px;text-align:center;">
+        <button class="btn-ghost" onclick="nativeShareLink()" style="font-size:12px;"><i class="ti ti-share" style="font-size:13px;vertical-align:-1px;margin-right:4px;"></i>Share via…</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div class="share-history" id="share-history" style="display:none;">
-      <div class="share-section-label">Already shared</div>
-      <div id="share-history-list"></div>
+<!-- SHARED MOMENT LANDING — shown when someone opens a ?share=ID link -->
+<div id="share-landing" class="auth-gate" style="display:none;">
+  <div class="auth-gate-card" style="max-width:440px;">
+    <div class="auth-gate-brand">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:42px;height:42px;">
+        <circle cx="24" cy="13" r="6.5" fill="#8A9A7E"/><circle cx="15" cy="17" r="5.5" fill="#A8B89F"/>
+        <circle cx="33" cy="17" r="5.5" fill="#BBA071"/><circle cx="11" cy="23" r="4.5" fill="#C9AE78"/>
+        <circle cx="37" cy="23" r="4.5" fill="#8A9A7E"/><circle cx="19" cy="22" r="5" fill="#9CB389"/>
+        <circle cx="29" cy="22" r="5" fill="#A8B89F"/><circle cx="24" cy="20" r="5.5" fill="#7E9576"/>
+        <rect x="22.6" y="24" width="2.8" height="15" rx="1.2" fill="#6E5238"/>
+        <path d="M24 30 L18 27 M24 33 L30 29 M24 27 L28 24" stroke="#6E5238" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div><div class="logo" style="font-size:22px;">COG<span>NOM</span></div></div>
     </div>
+    <div id="share-landing-from" style="font-size:13px;color:var(--ink-mid);margin-bottom:16px;"></div>
+    <div id="share-landing-preview" style="background:var(--cream);border-radius:12px;padding:16px;margin-bottom:20px;"></div>
+
+    <div style="font-size:13.5px;color:var(--ink);line-height:1.6;margin-bottom:20px;">Sign in or create an account to save this moment to your tree.</div>
+
+    <div class="auth-gate-tabs">
+      <button id="sl-tab-signin" onclick="setShareLandingMode('signin')" class="auth-mode-tab active">Sign in</button>
+      <button id="sl-tab-signup" onclick="setShareLandingMode('signup')" class="auth-mode-tab">Create account</button>
+    </div>
+    <input type="email" id="sl-email" class="field-input" placeholder="your@email.com" autocomplete="email" autocapitalize="off" />
+    <input type="password" id="sl-password" class="field-input" placeholder="Password" autocomplete="current-password" />
+    <input type="password" id="sl-password2" class="field-input" placeholder="Confirm password" style="display:none;" />
+    <button class="btn-primary" id="sl-submit" onclick="submitShareLandingAuth()" style="width:100%;padding:13px;font-size:14px;">Sign in</button>
+    <div id="sl-msg" style="font-size:12px;margin-top:8px;line-height:1.5;min-height:20px;"></div>
+
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--ink-light);text-align:center;">Or just enjoy the moment — no account needed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE SHARED MOMENT — after auth, choose where to put it -->
+<div class="modal-overlay" id="save-shared-overlay" style="z-index:550;display:none;" onclick="if(event.target===this)closeSaveShared()">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">Save this moment</div>
+    <div style="font-size:13px;color:var(--ink-mid);margin-bottom:16px;line-height:1.5;" id="save-shared-sub"></div>
+    <div id="save-shared-preview" style="background:var(--cream);border-radius:10px;padding:12px;margin-bottom:18px;"></div>
+
+    <div class="field-label">Add to a person on your tree</div>
+    <select id="save-shared-person" class="field-input" style="margin-bottom:12px;">
+      <option value="">Choose a person…</option>
+    </select>
+
+    <button class="btn-primary" onclick="executeSaveShared('person')" style="width:100%;margin-bottom:8px;">Save to this person</button>
+    <div style="text-align:center;color:var(--ink-light);font-size:12px;margin:8px 0;">or</div>
+    <button class="btn-ghost" onclick="executeSaveShared('new')" style="width:100%;margin-bottom:8px;">Create a new person from the sender</button>
+    <button class="btn-ghost" onclick="executeSaveShared('personal')" style="width:100%;">Save to personal moments (assign later)</button>
+    <button class="btn-ghost" onclick="closeSaveShared()" style="width:100%;margin-top:8px;color:var(--ink-light);">Skip</button>
   </div>
 </div>
 
@@ -2012,23 +2024,6 @@ let currentIdx = -1;
 let selectedRel = '';
 let selfPhotoPending = '';
 
-function loadSelf() {
-  try {
-    const raw = localStorage.getItem(SELF_KEY);
-    if(raw) SELF = {
-      name:'', about:'', photo:'',
-      spValues:'', spNeeds:'', spEmotions:'',
-      spEnergizes:[], spDrains:[],
-      spTensions:'', spGrowing:'',
-      spThoughtCount:0, spJournal:[],
-      events:[],
-      ...JSON.parse(raw)
-    };
-  } catch(e) {}
-  if(!Array.isArray(SELF.events)) SELF.events = [];
-  SELF.events.forEach(ev => { if(!Array.isArray(ev.taggedPeople)) ev.taggedPeople = []; });
-}
-
 // Debounced Supabase sync — batches rapid saves into one write
 let _syncTimer = null;
 let _lastSyncOk = false;
@@ -2213,58 +2208,15 @@ async function loadFromSupabase() {
   }
 }
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) {
-      const data = JSON.parse(raw);
-      PEOPLE = (data.people || []).map(p => ({
-        altQuestions: [], altQIdx: 0, chips: [], timeline: [], gems: [],
-        relatedTo: '', familyName: '',
-        orbit: [], topics: [], forget: [], links: [], echoes: [],
-        aboutYou: [],
-        capsule: [],
-        yourView: { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 },
-        cadence: '',
-        cadenceSetAt: '',
-        lastConvDate: '',
-        snoozedUntil: '',
-        phone: '',
-        channel: 'phone',
-        photos: [],
-        events: [],
-        ...p
-      }));
-      PEOPLE.forEach(p => {
-        if(!p.pid) p.pid = newPid();
-        if(Array.isArray(p.photos) && p.photos.length) {
-          p.events = p.events || [];
-          p.photos.forEach(old => {
-            p.events.push({
-              id: 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-              date: old.date || '',
-              title: '', where: '', feeling: '',
-              favorite: old.caption || '',
-              taggedPeople: [],
-              photos: [old.src]
-            });
-          });
-          p.photos = [];
-        }
-        (p.events || []).forEach(ev => {
-          if(!Array.isArray(ev.taggedPeople)) ev.taggedPeople = [];
-        });
-      });
-    }
-  } catch(e) { PEOPLE = []; }
-}
-
 function init() {
   // Don't load any data yet — the auth gate shows first.
-  // Data loads from Supabase inside enterApp() after sign-in.
   PEOPLE = [];
   SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
-  initSupabase();
+
+  // Check for a ?share=ID link first — if found, show the share landing instead of auth gate
+  initSupabase().then(() => {
+    if(!pendingShareMoment) return; // handleShareUrl already ran inside initSupabase
+  });
 }
 
 // Called by enterApp() after auth succeeds, or re-called after data changes
@@ -2457,9 +2409,11 @@ async function enterApp() {
   initAppUI();
   renderAuthState();
 
-  // First-time user: show the self-portrait setup first
-  if(isNewUser) {
-    openSelfEdit();
+  // First sign-in ever (no onboarding flag in Supabase yet): show the 3 intro slides.
+  // After they finish/skip, the onboarding flag is saved to SELF.onboarded and
+  // synced to Supabase — so they won't see it again on any device.
+  if(!SELF.onboarded) {
+    showOnboarding();
   }
 }
 
@@ -2481,10 +2435,35 @@ function showGate() {
 async function initSupabase() {
   const client = await ensureSupabase();
   if(!client) {
-    // SDK or project not available — still show the gate, user will see error when they try
     showGate();
     return;
   }
+
+  // Check for a ?share=ID link first
+  const hasShareLink = await handleShareUrl();
+  if(hasShareLink) {
+    // Share landing is showing — check if already signed in
+    try {
+      const { data } = await client.auth.getSession();
+      if(data?.session?.user) {
+        CURRENT_USER = data.session.user;
+        // Already signed in — skip the landing auth, go straight to save modal
+        document.getElementById('share-landing').style.display = 'none';
+        PEOPLE = [];
+        SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
+        await loadFromSupabase();
+        openSaveSharedModal();
+      }
+    } catch(_) {}
+    // Set up auth listener for share landing flow
+    client.auth.onAuthStateChange((_evt, session) => {
+      CURRENT_USER = session?.user || null;
+      renderAuthState();
+    });
+    return;
+  }
+
+  // Normal flow — no share link
   try {
     const { data } = await client.auth.getSession();
     if(data?.session?.user) {
@@ -2497,11 +2476,10 @@ async function initSupabase() {
     console.warn('getSession failed:', err.message);
     showGate();
   }
-  // listen for auth changes (sign out, token refresh)
   client.auth.onAuthStateChange((_evt, session) => {
     CURRENT_USER = session?.user || null;
-    if(CURRENT_USER) enterApp();
-    else showGate();
+    if(CURRENT_USER && !pendingShareMoment) enterApp();
+    else if(!CURRENT_USER) showGate();
     renderAuthState();
   });
 }
@@ -2660,28 +2638,26 @@ async function signOut() {
 // =========================================================
 // ONBOARDING — first-visit orientation
 // =========================================================
-const ONBOARDED_KEY = 'cognom_onboarded_v1';
+// =========================================================
+// ONBOARDING — 3-slide intro, shown only on first sign-in
+// SELF.onboarded persists in Supabase, so the slides won't
+// re-appear on other devices once dismissed.
+// =========================================================
+let onboardSlide = 1;
 
-function maybeShowOnboarding() {
-  // Only first-time, truly-empty users — don't re-show to anyone who has data
-  if(localStorage.getItem(ONBOARDED_KEY)) return;
-  if(PEOPLE.length > 0) {
-    // returning user with data, just mark them as onboarded silently
-    try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(_) {}
-    return;
-  }
-  if(SELF && (SELF.name || SELF.voiceSample || SELF.spThoughtCount)) {
-    try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(_) {}
-    return;
-  }
+function showOnboarding() {
+  onboardSlide = 1;
+  document.querySelectorAll('.onboard-slide').forEach(el => {
+    el.classList.toggle('active', el.dataset.slide === '1');
+  });
+  document.querySelectorAll('.onboard-dot').forEach(el => {
+    el.classList.toggle('active', el.dataset.dot === '1');
+  });
   document.getElementById('onboard-overlay')?.classList.add('open');
 }
 
-let onboardSlide = 1;
-
 function onboardNext() {
-  const total = 3;
-  onboardSlide = Math.min(onboardSlide + 1, total);
+  onboardSlide = Math.min(onboardSlide + 1, 3);
   document.querySelectorAll('.onboard-slide').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.slide, 10) === onboardSlide);
   });
@@ -2691,16 +2667,11 @@ function onboardNext() {
 }
 
 function finishOnboarding() {
-  try { localStorage.setItem(ONBOARDED_KEY, '1'); } catch(_) {}
   document.getElementById('onboard-overlay')?.classList.remove('open');
-  // Reset slide state in case they re-open via some future "Show again" path
-  onboardSlide = 1;
-  document.querySelectorAll('.onboard-slide').forEach(el => {
-    el.classList.toggle('active', el.dataset.slide === '1');
-  });
-  document.querySelectorAll('.onboard-dot').forEach(el => {
-    el.classList.toggle('active', el.dataset.dot === '1');
-  });
+  SELF.onboarded = true;
+  saveSelfData();
+  // After the 3 slides, take them to the self-portrait setup
+  setTimeout(() => openSelfEdit(), 250);
 }
 
 let CURRENT_VIEW = 'tree';
@@ -6479,14 +6450,11 @@ function shareCurrentEvent() {
 }
 
 // =========================================================
-// SHARE MOMENT MODAL — send a moment into someone else's Cognom
-// (or invite them in if they don't have one yet)
+// SHARING — create a link, store moment in Supabase,
+// receiver sees it and can save to their tree
 // =========================================================
-
-// Storage shape on each event:
-//   ev.sharedWith = [{ pid, name, channel: 'cognom'|'invite'|'page', date, token? }, ...]
-
-let shareCtx = { eventId: null, recipientPid: null };
+let shareCtx = { eventId: null };
+let pendingShareMoment = null; // set when opening from a ?share= link
 
 function openShareModal(eventId) {
   const owner = findEventOwner(eventId);
@@ -6496,24 +6464,11 @@ function openShareModal(eventId) {
 
   shareCtx.eventId = eventId;
 
-  // build the list of candidate recipients: anyone tagged in this moment + the host (if not SELF)
-  const candidatePids = [];
-  if(owner !== SELF && owner.pid) candidatePids.push(owner.pid);
-  (ev.taggedPeople || []).forEach(pid => { if(pid && pid !== SELF_PID && !candidatePids.includes(pid)) candidatePids.push(pid); });
-
-  // if there are no people attached, fall back to the currently-open person
-  if(!candidatePids.length && currentIdx >= 0 && PEOPLE[currentIdx]?.pid) {
-    candidatePids.push(PEOPLE[currentIdx].pid);
-  }
-
-  // pick the initial recipient (first candidate)
-  shareCtx.recipientPid = candidatePids[0] || null;
-
   // preview card
   const photo = (ev.photos || [])[0];
-  const cap   = eventSummaryCaption(ev) || 'A moment without words yet.';
-  const date  = eventSummaryDate(ev);
-  const prev  = document.getElementById('share-preview');
+  const cap = eventSummaryCaption(ev) || 'A moment without words yet.';
+  const date = eventSummaryDate(ev);
+  const prev = document.getElementById('share-preview');
   prev.innerHTML = `
     <div class="share-preview-img" ${photo ? `style="background-image:url('${photo}')"` : ''}></div>
     <div class="share-preview-body">
@@ -6521,186 +6476,338 @@ function openShareModal(eventId) {
       ${date ? `<div class="share-preview-date">${escapeHTML(date)}</div>` : ''}
     </div>`;
 
-  // recipient chips
-  renderShareRecipients(candidatePids);
-  renderShareModalState();
-  renderShareHistory();
-
-  // reset invite preview state
-  const invPrev = document.getElementById('share-invite-preview');
-  if(invPrev) invPrev.classList.remove('visible');
-  const cogStatus = document.getElementById('share-cognom-status');
-  if(cogStatus) cogStatus.classList.remove('visible');
+  // reset state
+  document.getElementById('share-status').textContent = '';
+  document.getElementById('share-link-result').style.display = 'none';
+  document.getElementById('share-link-btn').style.display = '';
 
   document.getElementById('share-overlay').classList.add('open');
 }
 
 function closeShareModal() {
   document.getElementById('share-overlay').classList.remove('open');
-  shareCtx = { eventId: null, recipientPid: null };
+  shareCtx = { eventId: null };
 }
 
-function renderShareRecipients(candidatePids) {
-  const box = document.getElementById('share-recipients');
-  const label = document.getElementById('share-recipients-label');
-  if(!box) return;
+function generateShareId() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+}
 
-  if(!candidatePids.length) {
-    label.style.display = 'none';
-    box.innerHTML = '<div class="share-option-sub" style="padding:4px 2px;">No one is tagged in this moment yet. Tag someone first to share it with them.</div>';
+async function createShareLink() {
+  if(!sb || !CURRENT_USER) { showNotif('Sign in to share moments.'); return; }
+
+  const owner = findEventOwner(shareCtx.eventId);
+  if(!owner) return;
+  const ev = (owner.events || []).find(x => x.id === shareCtx.eventId);
+  if(!ev) return;
+
+  const statusEl = document.getElementById('share-status');
+  statusEl.textContent = 'Creating link\u2026';
+  statusEl.style.color = 'var(--ink-light)';
+
+  const shareId = generateShareId();
+  const personName = (owner === SELF) ? '' : (owner.name || '');
+  const senderName = SELF.name || 'Someone';
+
+  // Store the moment in Supabase
+  try {
+    const { error } = await sb.from('shared_moments').insert({
+      id: shareId,
+      sender_id: CURRENT_USER.id,
+      sender_name: senderName,
+      person_name: personName,
+      moment: {
+        title: ev.title || '',
+        date: ev.date || '',
+        where: ev.where || '',
+        feeling: ev.feeling || '',
+        favorite: ev.favorite || '',
+        photos: (ev.photos || []).slice(0, 4)
+      }
+    });
+    if(error) {
+      statusEl.textContent = 'Could not create link: ' + error.message;
+      statusEl.style.color = '#9a3b32';
+      return;
+    }
+  } catch(err) {
+    statusEl.textContent = 'Error: ' + err.message;
+    statusEl.style.color = '#9a3b32';
     return;
   }
-  label.style.display = '';
-  box.innerHTML = candidatePids.map(pid => {
-    const person = PEOPLE.find(x => x.pid === pid);
-    if(!person) return '';
-    const isSel = pid === shareCtx.recipientPid;
-    const avStyle = person.photo
-      ? `background-image:url(${person.photo})`
-      : `background:${avatarBg(person.avClass)};color:${avatarColor(person.avClass)}`;
-    const avInner = person.photo ? '' : escapeHTML(person.initial || person.name.charAt(0));
-    return `<button class="share-recipient ${isSel ? 'selected' : ''}" onclick="selectShareRecipient('${pid}')">
-      <div class="share-recipient-av" style="${avStyle}">${avInner}</div>
-      <span>${escapeHTML(person.name)}</span>
-    </button>`;
-  }).join('');
-}
 
-function selectShareRecipient(pid) {
-  shareCtx.recipientPid = pid;
-  // re-render chips and the option states / history for this recipient
-  const owner = findEventOwner(shareCtx.eventId);
-  const ev = owner ? (owner.events || []).find(x => x.id === shareCtx.eventId) : null;
-  const candidatePids = Array.from(document.querySelectorAll('.share-recipient')).map(el =>
-    (el.getAttribute('onclick') || '').match(/'([^']+)'/)?.[1]
-  ).filter(Boolean);
-  renderShareRecipients(candidatePids);
-  renderShareModalState();
-  renderShareHistory();
-  // reset preview/status
-  document.getElementById('share-invite-preview')?.classList.remove('visible');
-  document.getElementById('share-cognom-status')?.classList.remove('visible');
-}
+  // Build the link
+  const base = location.origin || 'https://cognom-html.vercel.app';
+  const link = base + '?share=' + shareId;
 
-function renderShareModalState() {
-  const optCognom = document.getElementById('share-opt-cognom');
-  const optInvite = document.getElementById('share-opt-invite');
-  const hasRecipient = !!shareCtx.recipientPid;
-  if(optCognom) optCognom.disabled = !hasRecipient;
-  if(optInvite) optInvite.disabled = !hasRecipient;
-}
+  document.getElementById('share-link-url').textContent = link;
+  document.getElementById('share-link-result').style.display = '';
+  document.getElementById('share-link-btn').style.display = 'none';
+  statusEl.textContent = 'Link created. Send it however you like.';
 
-function getCurrentShareEvent() {
-  const owner = findEventOwner(shareCtx.eventId);
-  if(!owner) return { owner: null, ev: null };
-  const ev = (owner.events || []).find(x => x.id === shareCtx.eventId);
-  return { owner, ev };
-}
-
-function recordShare(channel, extra) {
-  const { owner, ev } = getCurrentShareEvent();
-  if(!ev) return;
+  // Record the share on the event
   if(!Array.isArray(ev.sharedWith)) ev.sharedWith = [];
-  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid);
-  const entry = {
-    pid: shareCtx.recipientPid || null,
-    name: recipient ? recipient.name : '',
-    channel,
+  ev.sharedWith.push({
+    shareId,
     date: new Date().toISOString().slice(0, 10),
-    ...(extra || {})
-  };
-  ev.sharedWith.push(entry);
+    channel: 'link'
+  });
   if(owner === SELF) saveSelfData(); else saveData();
-  if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
-  return entry;
 }
 
-function executeShareViaCognom() {
-  if(!shareCtx.recipientPid) return;
-  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid);
-  if(!recipient) return;
-  recordShare('cognom');
-  // Show inline confirmation inside the option; we don't close the modal —
-  // user might want to also send an invite link just in case.
-  const status = document.getElementById('share-cognom-status');
-  if(status) {
-    status.textContent = `Queued for ${recipient.name}. Will send to their Cognom once accounts launch.`;
-    status.classList.add('visible');
-  }
-  renderShareHistory();
-  showNotif('Saved — Cognom will send this to ' + recipient.name + ' once accounts go live.');
-}
-
-function generateInviteToken() {
-  // Short opaque token; not secret today, just a placeholder for the future link resolver.
-  const rand = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6);
-  return rand;
-}
-
-function executeShareViaInvite() {
-  if(!shareCtx.recipientPid) return;
-  const recipient = PEOPLE.find(p => p.pid === shareCtx.recipientPid);
-  if(!recipient) return;
-  const { ev } = getCurrentShareEvent();
-  if(!ev) return;
-
-  const token = generateInviteToken();
-  const fromName = (SELF.name || 'someone').split(' ')[0];
-  const recName  = (recipient.name || 'you').split(' ')[0];
-  const base = (location.origin && location.origin.startsWith('http')) ? location.origin : 'https://cognom.com';
-  const link = `${base}/invite/${token}?from=${encodeURIComponent(fromName)}&to=${encodeURIComponent(recName)}&m=${ev.id}`;
-
-  const msg = `${fromName} shared a moment with you on Cognom — a quiet space for the relationships that matter. Open this link to see it and start your own tree:`;
-
-  recordShare('invite', { token });
-
-  const prev = document.getElementById('share-invite-preview');
-  document.getElementById('share-invite-msg').textContent = msg;
-  document.getElementById('share-invite-link').textContent = link;
-  if(prev) prev.classList.add('visible');
-  renderShareHistory();
-}
-
-function copyInviteLink() {
-  const link = document.getElementById('share-invite-link')?.textContent || '';
+function copyShareLink() {
+  const link = document.getElementById('share-link-url')?.textContent || '';
   if(!link) return;
-  if(navigator.clipboard && navigator.clipboard.writeText) {
+  if(navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(link).then(
-      () => showNotif('Link copied — paste it anywhere.'),
-      () => fallbackCopy(link)
+      () => showNotif('Link copied.'),
+      () => _fallbackCopy(link)
     );
   } else {
-    fallbackCopy(link);
+    _fallbackCopy(link);
   }
 }
 
-function fallbackCopy(text) {
+function _fallbackCopy(text) {
   const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.opacity = '0';
-  document.body.appendChild(ta);
-  ta.select();
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
   try { document.execCommand('copy'); showNotif('Link copied.'); }
-  catch(_) { showNotif('Couldn\'t copy — select and copy the link manually.'); }
+  catch(_) { showNotif('Select and copy the link manually.'); }
   document.body.removeChild(ta);
 }
 
-function renderShareHistory() {
-  const { ev } = getCurrentShareEvent();
-  const wrap = document.getElementById('share-history');
-  const list = document.getElementById('share-history-list');
-  if(!wrap || !list) return;
-  const history = (ev && ev.sharedWith) || [];
-  if(!history.length) { wrap.style.display = 'none'; return; }
-  wrap.style.display = 'block';
-  const channelLabel = { cognom: 'queued for Cognom', invite: 'invite link sent', page: 'opened as a page' };
-  list.innerHTML = history.slice().reverse().slice(0, 5).map(h => {
-    const label = channelLabel[h.channel] || 'shared';
-    const who = h.name || 'someone';
-    return `<div class="share-history-item"><i class="ti ti-check"></i> ${escapeHTML(who)} — ${escapeHTML(label)} · ${escapeHTML(h.date || '')}</div>`;
-  }).join('');
+function nativeShareLink() {
+  const link = document.getElementById('share-link-url')?.textContent || '';
+  if(navigator.share) {
+    navigator.share({ title: 'A moment on Cognom', url: link }).catch(() => {});
+  } else {
+    copyShareLink();
+  }
 }
+
+// =========================================================
+// SHARE LANDING — when someone opens ?share=ID
+// =========================================================
+let SHARE_LANDING_MODE = 'signin';
+
+async function handleShareUrl() {
+  const params = new URLSearchParams(location.search);
+  const shareId = params.get('share');
+  if(!shareId) return false;
+
+  // Clear the URL so refreshing doesn't re-trigger
+  history.replaceState(null, '', location.pathname);
+
+  // Fetch the shared moment from Supabase (anyone can read)
+  if(!sb && window.supabase?.createClient) {
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(_) {}
+  }
+  if(!sb) { showNotif('Could not load shared moment.'); return false; }
+
+  try {
+    const { data, error } = await sb.from('shared_moments').select('*').eq('id', shareId).maybeSingle();
+    if(error || !data) {
+      showNotif('This shared moment was not found or has been removed.');
+      return false;
+    }
+
+    pendingShareMoment = data;
+    showShareLanding(data);
+    return true;
+  } catch(err) {
+    showNotif('Could not load: ' + err.message);
+    return false;
+  }
+}
+
+function showShareLanding(data) {
+  // Hide everything else
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('float-thought-btn')?.classList.remove('visible');
+  document.getElementById('floating-menu-btn')?.classList.remove('visible');
+
+  const landing = document.getElementById('share-landing');
+  landing.style.display = '';
+
+  // From line
+  document.getElementById('share-landing-from').innerHTML =
+    `<i class="ti ti-send" style="font-size:14px;vertical-align:-1px;margin-right:4px;"></i>${escapeHTML(data.sender_name || 'Someone')} shared a moment with you`;
+
+  // Preview
+  const m = data.moment || {};
+  const photo = (m.photos || [])[0];
+  const prev = document.getElementById('share-landing-preview');
+  prev.innerHTML = `
+    ${photo ? `<div style="width:100%;height:200px;border-radius:8px;background:center/cover no-repeat url('${photo}');margin-bottom:12px;"></div>` : ''}
+    ${m.title ? `<div style="font-size:16px;font-weight:500;color:var(--ink);margin-bottom:6px;">${escapeHTML(m.title)}</div>` : ''}
+    ${m.date ? `<div style="font-size:12px;color:var(--ink-light);">${escapeHTML(m.date)}</div>` : ''}
+    ${m.favorite ? `<div style="font-size:13px;color:var(--ink-mid);margin-top:8px;line-height:1.5;">${escapeHTML(m.favorite)}</div>` : ''}`;
+}
+
+function setShareLandingMode(mode) {
+  SHARE_LANDING_MODE = mode;
+  const isSignup = mode === 'signup';
+  const p2  = document.getElementById('sl-password2');
+  const btn = document.getElementById('sl-submit');
+  const tabIn = document.getElementById('sl-tab-signin');
+  const tabUp = document.getElementById('sl-tab-signup');
+  const pw = document.getElementById('sl-password');
+
+  if(p2) p2.style.display = isSignup ? '' : 'none';
+  if(btn) btn.textContent = isSignup ? 'Create account' : 'Sign in';
+  if(pw) pw.placeholder = isSignup ? 'Choose a password (min. 6 chars)' : 'Password';
+  if(tabIn) tabIn.classList.toggle('active', !isSignup);
+  if(tabUp) tabUp.classList.toggle('active', isSignup);
+  slMsg('', false);
+}
+
+function slMsg(text, isError) {
+  const el = document.getElementById('sl-msg');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = isError ? '#9a3b32' : 'var(--ink-light)';
+}
+
+async function submitShareLandingAuth() {
+  const email = (document.getElementById('sl-email')?.value || '').trim();
+  const password = (document.getElementById('sl-password')?.value || '').trim();
+  const password2 = (document.getElementById('sl-password2')?.value || '').trim();
+
+  if(!email || !email.includes('@')) { slMsg('Please enter a valid email.', true); return; }
+  if(!password) { slMsg('Please enter a password.', true); return; }
+
+  if(SHARE_LANDING_MODE === 'signup') {
+    if(password.length < 6) { slMsg('Password must be at least 6 characters.', true); return; }
+    if(password !== password2) { slMsg('Passwords don\u2019t match.', true); return; }
+  }
+
+  slMsg(SHARE_LANDING_MODE === 'signup' ? 'Creating account\u2026' : 'Signing in\u2026', false);
+
+  if(!sb) { slMsg('Could not connect.', true); return; }
+
+  try {
+    if(SHARE_LANDING_MODE === 'signup') {
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if(error) { slMsg(friendlyAuthError(error), true); return; }
+      if(data?.user?.identities?.length === 0) {
+        slMsg('Account already exists. Try signing in.', true);
+        setShareLandingMode('signin');
+        return;
+      }
+      CURRENT_USER = data?.session?.user || null;
+      if(!CURRENT_USER) { slMsg('Check your inbox for a confirmation email, then sign in.', false); return; }
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) { slMsg(friendlyAuthError(error), true); return; }
+      CURRENT_USER = data?.session?.user || data?.user || null;
+    }
+
+    // Hide landing, load user data, show the save-shared modal
+    document.getElementById('share-landing').style.display = 'none';
+    PEOPLE = [];
+    SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
+    await loadFromSupabase();
+    openSaveSharedModal();
+  } catch(err) {
+    slMsg(err.message || 'Something went wrong.', true);
+  }
+}
+
+// =========================================================
+// SAVE SHARED MOMENT — after auth, choose where to store it
+// =========================================================
+function openSaveSharedModal() {
+  if(!pendingShareMoment) { enterApp(); return; }
+
+  const data = pendingShareMoment;
+  const m = data.moment || {};
+
+  // sub text
+  document.getElementById('save-shared-sub').textContent =
+    (data.sender_name || 'Someone') + ' shared this moment. Where would you like to save it?';
+
+  // preview
+  const photo = (m.photos || [])[0];
+  document.getElementById('save-shared-preview').innerHTML = `
+    ${photo ? `<div style="width:100%;height:140px;border-radius:8px;background:center/cover no-repeat url('${photo}');margin-bottom:8px;"></div>` : ''}
+    ${m.title ? `<div style="font-size:14px;font-weight:500;">${escapeHTML(m.title)}</div>` : ''}
+    ${m.date ? `<div style="font-size:11px;color:var(--ink-light);">${escapeHTML(m.date)}</div>` : ''}`;
+
+  // populate person dropdown
+  const sel = document.getElementById('save-shared-person');
+  sel.innerHTML = '<option value="">Choose a person\u2026</option>' +
+    PEOPLE.map((p, i) => `<option value="${i}">${escapeHTML(p.name)}</option>`).join('');
+
+  document.getElementById('save-shared-overlay').style.display = 'flex';
+}
+
+function closeSaveShared() {
+  document.getElementById('save-shared-overlay').style.display = 'none';
+  pendingShareMoment = null;
+  enterApp();
+}
+
+function sharedMomentToEvent(m) {
+  return {
+    id: 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    date: m.date || '',
+    title: m.title || '',
+    where: m.where || '',
+    feeling: m.feeling || '',
+    favorite: m.favorite || '',
+    taggedPeople: [],
+    photos: m.photos || [],
+    receivedFrom: pendingShareMoment?.sender_name || ''
+  };
+}
+
+function executeSaveShared(mode) {
+  if(!pendingShareMoment) return;
+  const m = pendingShareMoment.moment || {};
+  const ev = sharedMomentToEvent(m);
+
+  if(mode === 'person') {
+    const idx = parseInt(document.getElementById('save-shared-person').value);
+    if(isNaN(idx) || !PEOPLE[idx]) { showNotif('Pick a person first.'); return; }
+    if(!Array.isArray(PEOPLE[idx].events)) PEOPLE[idx].events = [];
+    PEOPLE[idx].events.push(ev);
+    saveData();
+    showNotif('Saved to ' + PEOPLE[idx].name + '.');
+  } else if(mode === 'new') {
+    // Create a new person from the sender
+    const newPerson = {
+      pid: newPid(),
+      name: pendingShareMoment.sender_name || 'Unknown',
+      relation: 'Friend',
+      photo: '',
+      avClass: AV_CLASSES[PEOPLE.length % AV_CLASSES.length],
+      initial: (pendingShareMoment.sender_name || 'U').charAt(0).toUpperCase(),
+      altQuestions:[], altQIdx:0, chips:[], timeline:[], gems:[],
+      relatedTo:'', familyName:'',
+      orbit:[], topics:[], forget:[], links:[], echoes:[],
+      aboutYou:[], capsule:[],
+      yourView: { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 },
+      cadence:'', cadenceSetAt:'', lastConvDate:'', snoozedUntil:'',
+      phone:'', channel:'phone', photos:[], events:[ev]
+    };
+    PEOPLE.push(newPerson);
+    saveData();
+    showNotif('Created ' + newPerson.name + ' with this moment.');
+  } else {
+    // personal moments — save to SELF.events
+    if(!Array.isArray(SELF.events)) SELF.events = [];
+    SELF.events.push(ev);
+    saveSelfData();
+    showNotif('Saved to your personal moments.');
+  }
+
+  document.getElementById('save-shared-overlay').style.display = 'none';
+  pendingShareMoment = null;
+  enterApp();
+}
+
 
 init();
 </script>
