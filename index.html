@@ -1564,7 +1564,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <div class="modal" style="max-width:520px;">
     <div class="modal-title">Privacy</div>
     <div style="font-size:13px;color:var(--ink-mid);line-height:1.7;margin-top:12px;">
-      <p style="margin-bottom:12px;"><b>Your data never leaves your device.</b> Everyone you add, every conversation, every photo and memory — all of it lives only in your browser's local storage. There is no Cognom server, no database, no account.</p>
+      <p style="margin-bottom:12px;"><b>Your data is stored securely.</b> When you're signed in, your people, conversations, and memories are saved to your Cognom account (hosted on Supabase) so they sync across devices. A local copy is also kept in your browser for speed. Only you can access your data.</p>
       <p style="margin-bottom:12px;"><b>AI provider.</b> When you record a conversation or thought, the audio (or text) is sent directly from your browser to the AI provider you chose in Settings — Google Gemini or OpenAI. Cognom doesn't see or store it. You provide your own API key and pay (or use the free tier) directly with them.</p>
       <p style="margin-bottom:12px;"><b>What this means in practice.</b> Clear your browser's site data and your Cognom is gone. Use a different device and you start fresh there. Use the Backup button in the sidebar regularly to save a file of your data somewhere safe.</p>
       <p style="margin-bottom:0;"><b>Recordings.</b> Audio is processed in memory and discarded after analysis. Only the AI's written notes about the conversation are saved.</p>
@@ -2031,6 +2031,8 @@ function loadSelf() {
 
 // Debounced Supabase sync — batches rapid saves into one write
 let _syncTimer = null;
+let _lastSyncOk = false;
+
 function _scheduleSyncToSupabase() {
   clearTimeout(_syncTimer);
   _syncTimer = setTimeout(() => _syncToSupabase(), 1500);
@@ -2044,10 +2046,25 @@ async function _syncToSupabase() {
       self_data: SELF,
       people_data: PEOPLE
     }, { onConflict: 'id' });
-    if(error) console.warn('Supabase sync failed:', error.message);
+    if(error) {
+      console.warn('Supabase sync failed:', error.message, error.details, error.hint);
+      if(!_lastSyncOk) showNotif('Cloud sync error: ' + error.message);
+      _lastSyncOk = false;
+    } else {
+      if(!_lastSyncOk) console.log('Supabase sync OK');
+      _lastSyncOk = true;
+    }
   } catch(err) {
     console.warn('Supabase sync error:', err.message);
+    if(!_lastSyncOk) showNotif('Cloud sync error: ' + err.message);
+    _lastSyncOk = false;
   }
+}
+
+// Force an immediate sync (used right after login to push existing localStorage data)
+async function _forceSyncToSupabase() {
+  clearTimeout(_syncTimer);
+  await _syncToSupabase();
 }
 
 function saveSelfData() {
@@ -2140,8 +2157,15 @@ async function loadFromSupabase() {
   if(!sb || !CURRENT_USER) return false;
   try {
     const { data, error } = await sb.from('user_data').select('*').eq('id', CURRENT_USER.id).maybeSingle();
-    if(error) { console.warn('Supabase load failed:', error.message); return false; }
-    if(!data) return false; // no row yet — first time user
+    if(error) {
+      console.warn('Supabase load failed:', error.message, error.details, error.hint);
+      showNotif('Cloud load error: ' + error.message);
+      return false;
+    }
+    if(!data) {
+      console.log('No cloud data yet — this is a new account or first sync.');
+      return false;
+    }
     // Load SELF
     if(data.self_data && typeof data.self_data === 'object') {
       SELF = {
@@ -2401,21 +2425,22 @@ async function forgotGatePassword() {
   gateMsg('Reset link sent \u2014 check your inbox.', false);
 }
 
-function enterApp() {
+async function enterApp() {
   const gate = document.getElementById('auth-gate');
   const app  = document.getElementById('app-main');
   if(gate) gate.style.display = 'none';
   if(app)  app.style.display  = '';
   // show floating buttons
   document.getElementById('float-thought-btn')?.classList.add('visible');
-  // Load data from Supabase (async), then render. localStorage is already loaded
-  // from init() so the UI appears instantly, then Supabase data overwrites if newer.
-  loadFromSupabase().then(loaded => {
-    if(loaded) {
-      // Supabase had data — re-render with the fresh data
-      initAppUI();
-    }
-  });
+
+  // Try loading from Supabase. If data exists there, it becomes the source of truth.
+  // If no data exists (first login), push whatever is in localStorage up to Supabase.
+  const loaded = await loadFromSupabase();
+  if(!loaded && (PEOPLE.length > 0 || SELF.name)) {
+    // First login with existing local data — push it to Supabase
+    await _forceSyncToSupabase();
+  }
+
   initAppUI();
   renderAuthState();
 }
