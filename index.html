@@ -999,8 +999,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .auth-mode-tab { flex:1; padding:9px; font-size:12px; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; background:transparent; color:var(--ink-mid); font-weight:400; transition:all 0.15s; }
 .auth-mode-tab.active { background:var(--sage); color:#fff; font-weight:500; }
 </style>
-<!-- Supabase JS SDK (v2) — UMD build sets window.supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Supabase JS SDK (v2) — try two CDNs for reliability -->
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+if(!window.supabase) document.write('<scr'+'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/scr'+'ipt>');
+</script>
 </head>
 <body>
 
@@ -2136,12 +2139,22 @@ let CURRENT_USER = null; // { id, email } when signed in
 // didn't load (ad-blocker, network error, etc.) — callers handle null gracefully.
 async function ensureSupabase() {
   if(sb) return sb;
+  // If SDK hasn't loaded yet (slow network), wait briefly
   if(!window.supabase?.createClient) {
-    console.warn('Supabase SDK not available — cloud sync unavailable.');
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  if(!window.supabase?.createClient) {
+    console.warn('Supabase SDK not loaded. window.supabase =', typeof window.supabase);
     return null;
   }
   try {
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch(err) {
+    console.error('createClient failed:', err);
+    sb = null;
+    return null;
+  }
+  try {
     const { data } = await sb.auth.getSession();
     CURRENT_USER = data?.session?.user || null;
     renderAuthState();
@@ -2151,8 +2164,11 @@ async function ensureSupabase() {
     });
     return sb;
   } catch(err) {
-    console.warn('Supabase init failed:', err);
-    return null;
+    // getSession can fail if the project is paused/misconfigured —
+    // the client itself is still usable for signUp/signIn
+    console.warn('getSession failed (project may be starting up):', err.message);
+    renderAuthState();
+    return sb;
   }
 }
 
@@ -2212,6 +2228,13 @@ async function submitAuth() {
   if(!email || !email.includes('@')) { authMsg('Please enter a valid email address.', true); return; }
   if(!password)                       { authMsg('Please enter a password.', true); return; }
 
+  // If ensureSupabase() failed at init (e.g. getSession threw because project was
+  // paused), try creating the client directly now — signUp/signIn can still work.
+  if(!sb && window.supabase?.createClient) {
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
+    catch(_) { sb = null; }
+  }
+
   if(AUTH_MODE === 'signup') {
     if(password.length < 6) { authMsg('Password must be at least 6 characters.', true); return; }
     if(password !== password2) { authMsg('Passwords don’t match.', true); return; }
@@ -2221,7 +2244,9 @@ async function submitAuth() {
 
   const client = await ensureSupabase();
   if(!client) {
-    authMsg('Could not connect to the sign-in service. Check your internet and try again.', true);
+    authMsg('Could not load the authentication library. Try reloading the page.', true);
+    console.error('ensureSupabase returned null. window.supabase:', typeof window.supabase,
+      'createClient:', typeof window.supabase?.createClient);
     return;
   }
 
@@ -2259,7 +2284,15 @@ async function forgotPassword() {
   }
   authMsg('Sending reset email…', false);
   const client = await ensureSupabase();
-  if(!client) { authMsg('Could not connect. Check your internet and try again.', true); return; }
+  if(!client) {
+    const sdkLoaded = !!(window.supabase?.createClient);
+    if(!sdkLoaded) {
+      authMsg('The Supabase library failed to load. Try reloading the page.', true);
+    } else {
+      authMsg('Could not connect to Supabase. Your project may be paused — check the Supabase dashboard.', true);
+    }
+    return;
+  }
   const { error } = await client.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin
   });
