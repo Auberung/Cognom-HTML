@@ -2111,6 +2111,7 @@ function handleSelfPhoto(e) {
   reader.readAsDataURL(file);
 }
 function saveSelf() {
+  const wasEmpty = !SELF.name && PEOPLE.length === 0;
   SELF.name = document.getElementById('self-name').value.trim();
   SELF.about = document.getElementById('self-about').value.trim();
   SELF.photo = selfPhotoPending || '';
@@ -2120,6 +2121,11 @@ function saveSelf() {
   closeSelf();
   if(document.getElementById('tree-view').style.display !== 'none') renderTree();
   showNotif(SELF.name ? 'Saved.' : 'Account updated.');
+
+  // First time setup: after saving your profile, prompt to add the first person
+  if(wasEmpty && SELF.name && PEOPLE.length === 0) {
+    setTimeout(() => openAddPerson(), 400);
+  }
 }
 function openSettings() { if(isMobile()) closeSidebar(); document.getElementById('settings-overlay').style.display = 'flex'; }
 function closeSettings() { document.getElementById('settings-overlay').style.display = 'none'; }
@@ -2274,7 +2280,6 @@ function initAppUI() {
     document.getElementById('welcome-state').style.display = 'none';
     showTree();
   }
-  maybeShowOnboarding();
 }
 
 // =========================================================
@@ -2438,18 +2443,24 @@ async function enterApp() {
 
   // Load this user's data from Supabase
   const loaded = await loadFromSupabase();
+  const isNewUser = !loaded || (!SELF.name && PEOPLE.length === 0);
+
   if(!loaded) {
-    // No data in Supabase yet — brand new account, start fresh.
-    // Write the empty state so the row exists for future saves.
+    // No row in Supabase yet — create one so future saves work
     await _forceSyncToSupabase();
   }
 
-  // Cache to localStorage for this user (keyed so it doesn't bleed across accounts)
+  // Cache to localStorage
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ people: PEOPLE, savedAt: Date.now() })); } catch(_) {}
   try { localStorage.setItem(SELF_KEY, JSON.stringify(SELF)); } catch(_) {}
 
   initAppUI();
   renderAuthState();
+
+  // First-time user: show the self-portrait setup first
+  if(isNewUser) {
+    openSelfEdit();
+  }
 }
 
 function showGate() {
