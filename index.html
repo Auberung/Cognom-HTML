@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Cognom — quiet AI that helps you remember what matters in your relationships. Your data stays on your device.">
 <title>Cognom</title>
@@ -996,18 +996,67 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   .info-card-title { font-size: 19px; }
   .modal-title { font-size: 20px; }
 }
+/* AUTH GATE — full-screen login before the app */
+.auth-gate { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:var(--cream); padding:24px; }
+.auth-gate-card { background:var(--warm-white); border:1px solid var(--border); border-radius:16px; padding:36px 28px 28px; max-width:400px; width:100%; }
+.auth-gate-brand { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.auth-gate-sub { font-size:13.5px; color:var(--ink-mid); line-height:1.6; margin-bottom:22px; }
+.auth-gate-tabs { display:flex; gap:0; margin-bottom:16px; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.auth-gate-card .field-input { margin-bottom:10px; }
 .auth-mode-tab { flex:1; padding:9px; font-size:12px; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; background:transparent; color:var(--ink-mid); font-weight:400; transition:all 0.15s; }
 .auth-mode-tab.active { background:var(--sage); color:#fff; font-weight:500; }
 </style>
-<!-- Supabase JS SDK (v2) — try two CDNs for reliability -->
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-if(!window.supabase) document.write('<scr'+'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/scr'+'ipt>');
-</script>
+<!-- Supabase JS SDK (v2) — official CDN per docs.supabase.com -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<div class="app">
+<!-- AUTH GATE — full-screen login/signup, shown before the app -->
+<div id="auth-gate" class="auth-gate">
+  <div class="auth-gate-card">
+    <div class="auth-gate-brand">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:52px;height:52px;">
+        <circle cx="24" cy="13" r="6.5" fill="#8A9A7E"/>
+        <circle cx="15" cy="17" r="5.5" fill="#A8B89F"/>
+        <circle cx="33" cy="17" r="5.5" fill="#BBA071"/>
+        <circle cx="11" cy="23" r="4.5" fill="#C9AE78"/>
+        <circle cx="37" cy="23" r="4.5" fill="#8A9A7E"/>
+        <circle cx="19" cy="22" r="5" fill="#9CB389"/>
+        <circle cx="29" cy="22" r="5" fill="#A8B89F"/>
+        <circle cx="24" cy="20" r="5.5" fill="#7E9576"/>
+        <rect x="22.6" y="24" width="2.8" height="15" rx="1.2" fill="#6E5238"/>
+        <path d="M24 30 L18 27 M24 33 L30 29 M24 27 L28 24" stroke="#6E5238" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div>
+        <div class="logo" style="font-size:26px;">COG<span>NOM</span></div>
+        <div class="logo-sub">Endless Stories</div>
+      </div>
+    </div>
+
+    <div class="auth-gate-sub">A quiet space for the people you love.<br>Sign in or create an account to begin.</div>
+
+    <!-- mode tabs -->
+    <div class="auth-gate-tabs">
+      <button id="gate-tab-signin" onclick="setGateMode('signin')" class="auth-mode-tab active">Sign in</button>
+      <button id="gate-tab-signup" onclick="setGateMode('signup')" class="auth-mode-tab">Create account</button>
+    </div>
+
+    <input type="email" id="gate-email" class="field-input" placeholder="your@email.com" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" />
+    <input type="password" id="gate-password" class="field-input" placeholder="Password" autocomplete="current-password" />
+    <input type="password" id="gate-password2" class="field-input" placeholder="Confirm password" autocomplete="new-password" style="display:none;" />
+
+    <button class="btn-primary" id="gate-submit-btn" onclick="submitGateAuth()" style="width:100%;padding:13px;font-size:14px;">Sign in</button>
+
+    <div style="text-align:center;margin-top:8px;">
+      <a href="#" id="gate-forgot-link" onclick="event.preventDefault();forgotGatePassword()" style="font-size:12px;color:var(--ink-light);text-decoration:underline;">Forgot password?</a>
+    </div>
+
+    <div id="gate-msg" style="font-size:12px;margin-top:10px;line-height:1.5;min-height:20px;"></div>
+  </div>
+  <div style="font-size:11px;color:var(--ink-light);text-align:center;margin-top:24px;line-height:1.6;">Your data stays on your device.<br>The account is only for sync across browsers.</div>
+</div>
+
+<div class="app" id="app-main" style="display:none;">
   <!-- Mobile sidebar backdrop -->
   <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
   <!-- SIDEBAR -->
@@ -2111,20 +2160,25 @@ function loadData() {
 function init() {
   loadData();
   loadSelf();
+  // Auth gate will be shown first — initSupabase checks for a session,
+  // and calls enterApp() if signed in (which then renders the tree/sidebar).
+  initSupabase();
+}
+
+// Called by enterApp() after auth succeeds, or re-called after data changes
+function initAppUI() {
   renderAccountRow();
   renderSearchResults();
   renderOnYourMind();
   if(PEOPLE.length === 0) {
-    document.getElementById('welcome-state').style.display = 'flex'; document.getElementById('floating-menu-btn')?.classList.remove('visible');
+    document.getElementById('welcome-state').style.display = 'flex';
+    document.getElementById('floating-menu-btn')?.classList.remove('visible');
     document.getElementById('tree-view').style.display = 'none';
   } else {
     document.getElementById('welcome-state').style.display = 'none';
     showTree();
   }
-  // Onboarding — show on first ever visit, before they've added anyone or set up self
   maybeShowOnboarding();
-  // Supabase auth — initialize client, listen for state changes
-  initSupabase();
 }
 
 // =========================================================
@@ -2172,7 +2226,153 @@ async function ensureSupabase() {
   }
 }
 
-function initSupabase() { ensureSupabase(); }  // fire-and-forget at startup
+// =========================================================
+// AUTH GATE — shown on load, hides the app until signed in
+// =========================================================
+let GATE_MODE = 'signin';
+
+function setGateMode(mode) {
+  GATE_MODE = mode;
+  const isSignup = mode === 'signup';
+  const p2     = document.getElementById('gate-password2');
+  const btn    = document.getElementById('gate-submit-btn');
+  const tabIn  = document.getElementById('gate-tab-signin');
+  const tabUp  = document.getElementById('gate-tab-signup');
+  const forgot = document.getElementById('gate-forgot-link');
+  const pw     = document.getElementById('gate-password');
+
+  if(p2)     p2.style.display   = isSignup ? '' : 'none';
+  if(btn)    btn.textContent    = isSignup ? 'Create account' : 'Sign in';
+  if(forgot) forgot.style.display = isSignup ? 'none' : '';
+  if(pw)     pw.placeholder     = isSignup ? 'Choose a password (min. 6 chars)' : 'Password';
+  if(pw)     pw.autocomplete    = isSignup ? 'new-password' : 'current-password';
+  if(tabIn)  tabIn.classList.toggle('active', !isSignup);
+  if(tabUp)  tabUp.classList.toggle('active',  isSignup);
+  gateMsg('', false);
+}
+
+function gateMsg(text, isError) {
+  const el = document.getElementById('gate-msg');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = isError ? '#9a3b32' : 'var(--ink-light)';
+}
+
+async function submitGateAuth() {
+  const email     = (document.getElementById('gate-email')?.value     || '').trim();
+  const password  = (document.getElementById('gate-password')?.value  || '').trim();
+  const password2 = (document.getElementById('gate-password2')?.value || '').trim();
+
+  if(!email || !email.includes('@')) { gateMsg('Please enter a valid email address.', true); return; }
+  if(!password)                       { gateMsg('Please enter a password.', true); return; }
+
+  if(GATE_MODE === 'signup') {
+    if(password.length < 6) { gateMsg('Password must be at least 6 characters.', true); return; }
+    if(password !== password2) { gateMsg('Passwords don\u2019t match.', true); return; }
+  }
+
+  gateMsg(GATE_MODE === 'signup' ? 'Creating your account\u2026' : 'Signing in\u2026', false);
+
+  // ensure client exists
+  if(!sb && window.supabase?.createClient) {
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(_) { sb = null; }
+  }
+  if(!sb) {
+    gateMsg('Could not connect to Supabase. Check your internet, or the project may be paused.', true);
+    return;
+  }
+
+  try {
+    if(GATE_MODE === 'signup') {
+      const { data, error } = await sb.auth.signUp({
+        email, password,
+        options: { emailRedirectTo: window.location.origin }
+      });
+      if(error) { gateMsg(friendlyAuthError(error), true); return; }
+      if(data?.user?.identities?.length === 0) {
+        gateMsg('An account with this email already exists. Try signing in instead.', true);
+        setGateMode('signin');
+        return;
+      }
+      if(data?.session) {
+        CURRENT_USER = data.session.user;
+        enterApp();
+      } else {
+        gateMsg('Account created! Check your inbox for a confirmation email, then come back and sign in.', false);
+      }
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) { gateMsg(friendlyAuthError(error), true); return; }
+      CURRENT_USER = data?.session?.user || data?.user || null;
+      enterApp();
+    }
+  } catch(err) {
+    gateMsg(err.message || 'Something went wrong.', true);
+  }
+}
+
+async function forgotGatePassword() {
+  const email = (document.getElementById('gate-email')?.value || '').trim();
+  if(!email || !email.includes('@')) {
+    gateMsg('Enter your email address above first, then tap Forgot password.', true);
+    return;
+  }
+  gateMsg('Sending reset email\u2026', false);
+  if(!sb && window.supabase?.createClient) {
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(_) {}
+  }
+  if(!sb) { gateMsg('Could not connect to Supabase.', true); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if(error) { gateMsg(friendlyAuthError(error), true); return; }
+  gateMsg('Reset link sent \u2014 check your inbox.', false);
+}
+
+function enterApp() {
+  const gate = document.getElementById('auth-gate');
+  const app  = document.getElementById('app-main');
+  if(gate) gate.style.display = 'none';
+  if(app)  app.style.display  = '';
+  initAppUI();
+  renderAuthState();
+}
+
+function showGate() {
+  const gate = document.getElementById('auth-gate');
+  const app  = document.getElementById('app-main');
+  if(gate) gate.style.display = '';
+  if(app)  app.style.display  = 'none';
+}
+
+// Modified initSupabase: check for existing session, show gate or app accordingly
+async function initSupabase() {
+  const client = await ensureSupabase();
+  if(!client) {
+    // SDK or project not available — still show the gate, user will see error when they try
+    showGate();
+    return;
+  }
+  try {
+    const { data } = await client.auth.getSession();
+    if(data?.session?.user) {
+      CURRENT_USER = data.session.user;
+      enterApp();
+    } else {
+      showGate();
+    }
+  } catch(err) {
+    console.warn('getSession failed:', err.message);
+    showGate();
+  }
+  // listen for auth changes (sign out, token refresh)
+  client.auth.onAuthStateChange((_evt, session) => {
+    CURRENT_USER = session?.user || null;
+    if(CURRENT_USER) enterApp();
+    else showGate();
+    renderAuthState();
+  });
+}
 
 // ---- AUTH MODE: 'signin' | 'signup' ----
 let AUTH_MODE = 'signin';
@@ -2317,8 +2517,9 @@ function friendlyAuthError(err) {
 
 async function signOut() {
   const client = await ensureSupabase();
-  if(!client) return;
-  await client.auth.signOut();
+  if(client) await client.auth.signOut();
+  CURRENT_USER = null;
+  showGate();
   showNotif('Signed out. Your tree stays on this device.');
 }
 
