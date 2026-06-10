@@ -69,6 +69,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .person-edit { display: none; background: none; border: none; color: var(--ink-light); font-size: 14px; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; transition: color 0.15s; }
 .person-item:hover .person-edit { display: block; }
 .person-edit:hover { color: var(--gold); }
+/* Touch devices have no hover — always show edit/delete on the list rows. */
+@media (hover: none) {
+  .person-item .person-edit,
+  .person-item .person-delete { display: block; }
+}
 .backup-row { display: flex; gap: 8px; }
 .backup-btn { flex: 1; background: var(--warm-white); border: 1px solid var(--border); color: var(--ink-mid); font-size: 11px; padding: 7px 8px; border-radius: 7px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
 .backup-btn:hover { background: var(--cream); color: var(--ink); border-color: var(--gold); }
@@ -957,7 +962,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
   /* Tree topbar — make Fit/+/- buttons compact */
   /* Make room for the floating hamburger at left:14 (40px wide + breathing). */
-  #tree-view .topbar { padding: 10px 14px 10px 64px; }
+  #tree-view .topbar { padding: 10px 14px 10px 64px; position: sticky; top: 0; z-index: 30; }
   #tree-view .topbar > div:first-child { flex: 1; min-width: 0; }
   #tree-view .topbar-name { font-size: 16px; }
   #tree-view .topbar-sub { font-size: 10.5px; }
@@ -6737,7 +6742,7 @@ function openSaveSharedModal() {
 
   // populate person dropdown
   const sel = document.getElementById('save-shared-person');
-  sel.innerHTML = '<option value="">Choose a person\u2026</option>' +
+  sel.innerHTML = '<option value="">Choose a person…</option>' +
     PEOPLE.map((p, i) => `<option value="${i}">${escapeHTML(p.name)}</option>`).join('');
 
   document.getElementById('save-shared-overlay').style.display = 'flex';
@@ -6746,7 +6751,14 @@ function openSaveSharedModal() {
 function closeSaveShared() {
   document.getElementById('save-shared-overlay').style.display = 'none';
   pendingShareMoment = null;
-  enterApp();
+  // Show the app with current data (don't call enterApp which resets PEOPLE/SELF)
+  const gate = document.getElementById('auth-gate');
+  const app  = document.getElementById('app-main');
+  if(gate) gate.style.display = 'none';
+  if(app)  app.style.display  = '';
+  document.getElementById('float-thought-btn')?.classList.add('visible');
+  initAppUI();
+  renderAuthState();
 }
 
 function sharedMomentToEvent(m) {
@@ -6763,7 +6775,7 @@ function sharedMomentToEvent(m) {
   };
 }
 
-function executeSaveShared(mode) {
+async function executeSaveShared(mode) {
   if(!pendingShareMoment) return;
   const m = pendingShareMoment.moment || {};
   const ev = sharedMomentToEvent(m);
@@ -6773,10 +6785,8 @@ function executeSaveShared(mode) {
     if(isNaN(idx) || !PEOPLE[idx]) { showNotif('Pick a person first.'); return; }
     if(!Array.isArray(PEOPLE[idx].events)) PEOPLE[idx].events = [];
     PEOPLE[idx].events.push(ev);
-    saveData();
     showNotif('Saved to ' + PEOPLE[idx].name + '.');
   } else if(mode === 'new') {
-    // Create a new person from the sender
     const newPerson = {
       pid: newPid(),
       name: pendingShareMoment.sender_name || 'Unknown',
@@ -6793,19 +6803,30 @@ function executeSaveShared(mode) {
       phone:'', channel:'phone', photos:[], events:[ev]
     };
     PEOPLE.push(newPerson);
-    saveData();
     showNotif('Created ' + newPerson.name + ' with this moment.');
   } else {
-    // personal moments — save to SELF.events
     if(!Array.isArray(SELF.events)) SELF.events = [];
     SELF.events.push(ev);
-    saveSelfData();
     showNotif('Saved to your personal moments.');
   }
 
+  // Write to localStorage + force immediate Supabase sync BEFORE re-rendering
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ people: PEOPLE, savedAt: Date.now() })); } catch(_) {}
+  try { localStorage.setItem(SELF_KEY, JSON.stringify(SELF)); } catch(_) {}
+  await _forceSyncToSupabase();
+
   document.getElementById('save-shared-overlay').style.display = 'none';
   pendingShareMoment = null;
-  enterApp();
+
+  // Render the app with the current in-memory state (already correct)
+  // Don't call enterApp() — that would reset PEOPLE/SELF and reload from Supabase
+  const gate = document.getElementById('auth-gate');
+  const app  = document.getElementById('app-main');
+  if(gate) gate.style.display = 'none';
+  if(app)  app.style.display  = '';
+  document.getElementById('float-thought-btn')?.classList.add('visible');
+  initAppUI();
+  renderAuthState();
 }
 
 
