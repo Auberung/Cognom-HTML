@@ -999,18 +999,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .auth-mode-tab { flex:1; padding:9px; font-size:12px; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; background:transparent; color:var(--ink-mid); font-weight:400; transition:all 0.15s; }
 .auth-mode-tab.active { background:var(--sage); color:#fff; font-weight:500; }
 </style>
-<!-- Supabase JS SDK (v2) — loaded async with onload/onerror signals -->
-<script>
-(function(){
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  s.async = true;
-  s.onload  = function(){ if(typeof window._sbResolve === 'function') window._sbResolve(true);  };
-  s.onerror = function(){ if(typeof window._sbResolve === 'function') window._sbResolve(false); };
-  window._sbReady = new Promise(function(res){ window._sbResolve = res; });
-  document.head.appendChild(s);
-})();
-</script>
+<!-- Supabase JS SDK (v2) — UMD build sets window.supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -2142,19 +2132,12 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let sb = null;           // the Supabase client instance
 let CURRENT_USER = null; // { id, email } when signed in
 
-// ensureSupabase: waits for the async SDK script to load (via the _sbReady
-// promise set by the loader), then creates the client once. Returns null if
-// the SDK failed to load (network error, CDN down, ad-blocker, etc.) —
-// callers handle null gracefully instead of showing a hard error.
+// ensureSupabase: creates the Supabase client once. Returns null if the SDK
+// didn't load (ad-blocker, network error, etc.) — callers handle null gracefully.
 async function ensureSupabase() {
   if(sb) return sb;
-  // _sbReady resolves true on load, false on error (set by the loader script)
-  const loaded = await Promise.race([
-    window._sbReady || Promise.resolve(false),
-    new Promise(r => setTimeout(() => r(false), 8000))  // 8s hard timeout
-  ]);
-  if(!loaded || !window.supabase?.createClient) {
-    console.warn('Supabase SDK did not load — cloud sync unavailable.');
+  if(!window.supabase?.createClient) {
+    console.warn('Supabase SDK not available — cloud sync unavailable.');
     return null;
   }
   try {
