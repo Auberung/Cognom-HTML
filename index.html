@@ -2198,6 +2198,20 @@ function _scheduleSyncToSupabase() {
 
 async function _syncToSupabase() {
   if(!sb || !CURRENT_USER) return;
+  // Safety guard: never overwrite cloud data with empty state.
+  // If PEOPLE is empty AND localStorage still has people, something went wrong — abort.
+  if(PEOPLE.length === 0) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) {
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed.people) && parsed.people.length > 0) {
+          console.warn('_syncToSupabase: refusing to overwrite cloud with empty PEOPLE (localStorage has data)');
+          return;
+        }
+      }
+    } catch(_) {}
+  }
   try {
     const { error } = await sb.from('user_data').upsert({
       id: CURRENT_USER.id,
@@ -2667,8 +2681,10 @@ async function initSupabase() {
       showResetLanding();
       return;
     }
-    if(CURRENT_USER && !pendingShareMoment) enterApp();
-    else if(!CURRENT_USER) showGate();
+    // Only re-run enterApp on explicit sign-in, not on silent token refreshes.
+    // TOKEN_REFRESHED fires every hour and should never reload the whole app.
+    if(evt === 'SIGNED_IN' && CURRENT_USER && !pendingShareMoment) enterApp();
+    else if(evt === 'SIGNED_OUT' || !CURRENT_USER) showGate();
     renderAuthState();
   });
 }
@@ -2818,7 +2834,8 @@ async function signOut() {
   const client = await ensureSupabase();
   if(client) await client.auth.signOut();
   CURRENT_USER = null;
-  try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(SELF_KEY); } catch(_) {}
+  // Do NOT delete localStorage on sign-out — it's the safety net if Supabase
+  // ever failed to sync. It will be overwritten correctly on the next sign-in.
   showGate();
   showNotif('Signed out.');
 }
@@ -3477,11 +3494,15 @@ function importData(event) {
     try {
       const data = JSON.parse(e.target.result);
       if(!data.people || !Array.isArray(data.people)) throw new Error('Invalid backup file');
-      PEOPLE = data.people.map(p => ({ altQuestions: [], altQIdx: 0, chips: [], timeline: [], gems: [], relatedTo: '', familyName: '', orbit: [], topics: [], forget: [], links: [], echoes: [], ...p }));
+      PEOPLE = data.people.map(p => ({ altQuestions: [], altQIdx: 0, chips: [], timeline: [], gems: [], relatedTo: '', familyName: '', orbit: [], topics: [], forget: [], links: [], echoes: [], aboutYou: [], capsule: [], yourView: { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 }, cadence: '', cadenceSetAt: '', lastConvDate: '', snoozedUntil: '', phone: '', channel: 'phone', photos: [], events: [], ...p }));
       PEOPLE.forEach(p => { if(!p.pid) p.pid = newPid(); });
-      if(data.self && typeof data.self === 'object') { SELF = { name:'', about:'', photo:'', ...data.self }; saveSelfData(); }
-      saveData();
-      init();
+      if(data.self && typeof data.self === 'object') { SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[], ...data.self }; saveSelfData(); }
+      saveData(); // saves to localStorage + schedules Supabase sync
+      // Re-render in place — do NOT call init() which would wipe PEOPLE
+      currentIdx = -1;
+      closePersonCard();
+      initAppUI();
+      renderAccountRow();
       showNotif('Backup restored — ' + PEOPLE.length + ' people loaded.');
     } catch(err) {
       showNotif('Could not read that backup file.');
