@@ -675,6 +675,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .event-date-input { flex: 0 0 170px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink); background: var(--cream); outline: none; }
 .event-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
 .event-actions-left { display: flex; gap: 8px; }
+.photo-pinned-badge { position:absolute; top:6px; left:6px; background:rgba(184,154,90,0.9); color:#fff; font-size:11px; padding:3px 5px; border-radius:4px; line-height:1; }
+.event-view { padding: 4px 0; }
+.ev-view-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--cream); line-height: 1.3; margin-bottom: 4px; }
+.ev-view-date { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+.ev-view-row { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.ev-view-row:empty { display: none; }
+.ev-view-row i { font-size: 14px; opacity: 0.5; }
+.ev-view-block { margin-top: 14px; }
+.ev-view-block:empty { display: none; }
+.ev-view-block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+.ev-view-block-text { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; font-style: italic; }
+.ev-view-received { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 14px; display: flex; align-items: center; gap: 5px; }
+.ev-view-received:empty { display: none; }
+.ev-view-received i { font-size: 13px; }
 .event-actions-bar { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 
 /* ===== ONBOARDING — first-visit orientation, 3 slides, skippable ===== */
@@ -1743,38 +1757,53 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 
   <div class="event-meta">
-    <div class="event-meta-row">
-      <input type="date" class="event-date-input" id="event-date-input" />
-      <input type="text" class="event-input" id="event-title-input" placeholder="A short title for this moment (optional)" style="flex:1;min-width:200px;" />
+    <!-- VIEW MODE (default) — clean read-only presentation -->
+    <div id="event-view" class="event-view">
+      <div id="ev-view-title" class="ev-view-title"></div>
+      <div id="ev-view-date" class="ev-view-date"></div>
+      <div id="ev-view-where" class="ev-view-row"></div>
+      <div id="ev-view-tagged" class="ev-view-row"></div>
+      <div id="ev-view-feeling" class="ev-view-block"></div>
+      <div id="ev-view-favorite" class="ev-view-block"></div>
+      <div id="ev-view-received" class="ev-view-received"></div>
+      <div class="event-actions-bar" id="ev-view-actions"></div>
     </div>
-    <div class="event-field">
-      <div class="event-field-label">Where were you?</div>
-      <input type="text" class="event-input" id="event-where" placeholder="e.g. Santorini, our kitchen, the lake house…" />
-    </div>
-    <div class="event-field">
-      <div class="event-field-label">Who else was there?</div>
-      <div class="mention-field" id="event-tagged-wrap">
-        <div class="mention-chips" id="event-tagged-chips"></div>
-        <input type="text" class="event-input mention-input" id="event-tagged-input" placeholder="Type @ to tag someone…" autocomplete="off" />
-        <div class="mention-menu" id="event-tagged-menu" style="display:none;"></div>
+
+    <!-- EDIT MODE — form fields, shown when owner taps Edit -->
+    <div id="event-edit" style="display:none;">
+      <div class="event-meta-row">
+        <input type="date" class="event-date-input" id="event-date-input" />
+        <input type="text" class="event-input" id="event-title-input" placeholder="A short title for this moment (optional)" style="flex:1;min-width:200px;" />
       </div>
-      <div class="mention-hint">Tag a person and this moment will also appear on their profile.</div>
-    </div>
-    <div class="event-field">
-      <div class="event-field-label">What does this moment make you feel?</div>
-      <textarea class="event-textarea" id="event-feeling" placeholder="Joy, calm, gratitude, the kind of warmth that stays with you…"></textarea>
-    </div>
-    <div class="event-field">
-      <div class="event-field-label">Your favorite part</div>
-      <textarea class="event-textarea" id="event-favorite" placeholder="The little detail that makes this moment yours — the laugh, the silence, the surprise…"></textarea>
-    </div>
-    <div class="event-actions-bar">
-      <div class="event-actions-left">
-        <button class="btn-ghost" onclick="deleteCurrentEvent()" style="color:#9a3b32;"><i class="ti ti-trash" style="font-size:13px;"></i> Delete moment</button>
+      <div class="event-field">
+        <div class="event-field-label">Where were you?</div>
+        <input type="text" class="event-input" id="event-where" placeholder="e.g. Santorini, our kitchen, the lake house…" />
       </div>
-      <div class="event-actions">
-        <button class="btn-ghost" onclick="shareCurrentEvent()"><i class="ti ti-share" style="font-size:13px;"></i> Share this moment</button>
-        <button class="btn-primary" onclick="saveCurrentEvent()">Save</button>
+      <div class="event-field">
+        <div class="event-field-label">Who else was there?</div>
+        <div class="mention-field" id="event-tagged-wrap">
+          <div class="mention-chips" id="event-tagged-chips"></div>
+          <input type="text" class="event-input mention-input" id="event-tagged-input" placeholder="Type @ to tag someone…" autocomplete="off" />
+          <div class="mention-menu" id="event-tagged-menu" style="display:none;"></div>
+        </div>
+        <div class="mention-hint">Tag a person and this moment will also appear on their profile.</div>
+      </div>
+      <div class="event-field">
+        <div class="event-field-label">What does this moment make you feel?</div>
+        <textarea class="event-textarea" id="event-feeling" placeholder="Joy, calm, gratitude, the kind of warmth that stays with you…"></textarea>
+      </div>
+      <div class="event-field">
+        <div class="event-field-label">Your favorite part</div>
+        <textarea class="event-textarea" id="event-favorite" placeholder="The little detail that makes this moment yours — the laugh, the silence, the surprise…"></textarea>
+      </div>
+      <div class="event-actions-bar">
+        <div class="event-actions-left">
+          <button class="btn-ghost" onclick="deleteCurrentEvent()" style="color:#9a3b32;"><i class="ti ti-trash" style="font-size:13px;"></i> Delete</button>
+        </div>
+        <div class="event-actions">
+          <button class="btn-ghost" onclick="switchToEventView()"><i class="ti ti-x" style="font-size:13px;"></i> Cancel</button>
+          <button class="btn-primary" onclick="saveCurrentEvent()">Save</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5176,7 +5205,14 @@ function applyTreeTransform() {
     if(treeView.y < minY) treeView.y = minY;
   }
 
-  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
+  // Use SVG dimension scaling for crisp vector rendering at any zoom.
+  // CSS transform scale() rasterizes then stretches — looks blurry.
+  const svg = pan.querySelector('.tree-svg');
+  if(svg) {
+    svg.style.width  = (treeView.scale * 100) + '%';
+    svg.style.height = (treeView.scale * 100) + '%';
+  }
+  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px)`;
 }
 
 function fitTreeToViewport() {
@@ -6190,7 +6226,12 @@ async function handleNewSelfEventUpload(event) {
 }
 
 function renderEvents(p) {
-  const events = collectEventsForPerson(p).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const events = collectEventsForPerson(p).slice().sort((a, b) => {
+    // Pinned first, then by date descending
+    if(a.pinned && !b.pinned) return -1;
+    if(!a.pinned && b.pinned) return 1;
+    return (b.date || '').localeCompare(a.date || '');
+  });
   const empty  = document.getElementById('photos-empty');
   const grid   = document.getElementById('photos-grid');
   const share  = document.getElementById('photos-share-btn');
@@ -6221,6 +6262,7 @@ function renderEvents(p) {
       else fromHost = (PEOPLE.find(x => x.pid === ev._hostPid)?.name || '').split(' ')[0];
     }
     const sharedBadge = fromHost ? `<div class="photo-shared-from">tagged in by ${escapeHTML(fromHost)}</div>` : '';
+    const pinnedBadge = ev.pinned ? `<div class="photo-pinned-badge"><i class="ti ti-pinned-filled"></i></div>` : '';
     // small badge on the thumb when this moment has been shared with someone
     const shared = (ev.sharedWith || []).slice(-1)[0];
     const sharedThumb = shared
@@ -6230,6 +6272,7 @@ function renderEvents(p) {
       <div class="photo-thumb" style="background-image:url('${cover}')">
         ${n > 1 ? `<div class="photo-count-badge"><i class="ti ti-stack-2" style="font-size:11px;"></i> ${n}</div>` : ''}
         ${sharedThumb}
+        ${pinnedBadge}
       </div>
       <div class="photo-info">
         <div class="photo-caption${cap ? '' : ' empty'}">${cap ? escapeHTML(cap) : 'Add a story…'}</div>
@@ -6359,7 +6402,7 @@ async function handleAddPhotosToEvent(event) {
 }
 
 // ---- editor open/close ----
-function openEventEditor(eventId) {
+function openEventEditor(eventId, forceEdit) {
   const owner = findEventOwner(eventId);
   if(!owner) return;
   const ev = (owner.events || []).find(x => x.id === eventId);
@@ -6368,65 +6411,160 @@ function openEventEditor(eventId) {
   currentEventSlide = 0;
   const isReceived = !!ev.receivedFrom;
 
-  // load fields
+  // Populate the edit form fields (used when switching to edit mode)
   document.getElementById('event-date-input').value  = ev.date  || '';
   document.getElementById('event-title-input').value = ev.title || '';
   document.getElementById('event-where').value       = ev.where || '';
   document.getElementById('event-feeling').value     = ev.feeling || '';
   document.getElementById('event-favorite').value    = ev.favorite || '';
-
-  // mention chips
   eventTaggedPids = Array.isArray(ev.taggedPeople) ? ev.taggedPeople.slice() : [];
   renderMentionChips();
   closeMentionMenu();
   const inp = document.getElementById('event-tagged-input');
   if(inp) inp.value = '';
 
-  // Lock fields for received moments
-  const fields = ['event-date-input', 'event-title-input', 'event-where', 'event-feeling', 'event-favorite'];
-  fields.forEach(id => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    if(isReceived) {
-      el.setAttribute('readonly', '');
-      el.setAttribute('disabled', '');
-      el.style.opacity = '0.7';
-    } else {
-      el.removeAttribute('readonly');
-      el.removeAttribute('disabled');
-      el.style.opacity = '';
-    }
-  });
+  // Populate the VIEW mode
+  populateEventView(ev, isReceived);
 
-  // Hide/show edit controls
-  const tagInput = document.getElementById('event-tagged-input');
-  if(tagInput) tagInput.style.display = isReceived ? 'none' : '';
-  const mentionHint = document.querySelector('.mention-hint');
-  if(mentionHint) mentionHint.style.display = isReceived ? 'none' : '';
-
-  // Show/hide action buttons based on received status
-  const actionsBar = document.querySelector('.event-actions-bar');
-  if(actionsBar) {
-    if(isReceived) {
-      actionsBar.innerHTML = `
-        <div style="flex:1;font-size:12px;color:var(--ink-light);"><i class="ti ti-send" style="font-size:13px;vertical-align:-1px;margin-right:4px;"></i>Received from ${escapeHTML(ev.receivedFrom)}</div>
-        <div class="event-actions">
-          <button class="btn-ghost" onclick="shareCurrentEvent()"><i class="ti ti-share" style="font-size:13px;"></i> Share</button>
-        </div>`;
-    } else {
-      actionsBar.innerHTML = `
-        <div class="event-actions-left">
-          <button class="btn-ghost" onclick="deleteCurrentEvent()" style="color:#9a3b32;"><i class="ti ti-trash" style="font-size:13px;"></i> Delete moment</button>
-        </div>
-        <div class="event-actions">
-          <button class="btn-ghost" onclick="shareCurrentEvent()"><i class="ti ti-share" style="font-size:13px;"></i> Share this moment</button>
-          <button class="btn-primary" onclick="saveCurrentEvent()">Save</button>
-        </div>`;
-    }
+  // Always start in view mode — unless forceEdit or the moment is brand new (empty)
+  const isEmpty = !ev.title && !ev.feeling && !ev.favorite && !ev.where;
+  if(forceEdit || (isEmpty && !isReceived)) {
+    document.getElementById('event-view').style.display = 'none';
+    document.getElementById('event-edit').style.display = '';
+  } else {
+    document.getElementById('event-view').style.display = '';
+    document.getElementById('event-edit').style.display = 'none';
   }
 
   document.getElementById('photo-viewer').classList.add('open');
   renderEventEditor();
+}
+
+function populateEventView(ev, isReceived) {
+  const titleEl = document.getElementById('ev-view-title');
+  const dateEl = document.getElementById('ev-view-date');
+  const whereEl = document.getElementById('ev-view-where');
+  const taggedEl = document.getElementById('ev-view-tagged');
+  const feelingEl = document.getElementById('ev-view-feeling');
+  const favoriteEl = document.getElementById('ev-view-favorite');
+  const receivedEl = document.getElementById('ev-view-received');
+  const actionsEl = document.getElementById('ev-view-actions');
+
+  // Title
+  titleEl.textContent = ev.title || '';
+  titleEl.style.display = ev.title ? '' : 'none';
+
+  // Date
+  if(ev.date) {
+    try {
+      const d = new Date(ev.date + 'T00:00:00');
+      dateEl.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+    } catch(_) { dateEl.textContent = ev.date; }
+  } else {
+    dateEl.textContent = '';
+  }
+  dateEl.style.display = ev.date ? '' : 'none';
+
+  // Where
+  if(ev.where) {
+    whereEl.innerHTML = '<i class="ti ti-map-pin"></i> ' + escapeHTML(ev.where);
+  } else {
+    whereEl.innerHTML = '';
+  }
+
+  // Tagged people
+  if(Array.isArray(ev.taggedPeople) && ev.taggedPeople.length) {
+    const names = ev.taggedPeople.map(pid => {
+      const p = PEOPLE.find(x => x.pid === pid);
+      return p ? escapeHTML(p.name) : '';
+    }).filter(Boolean);
+    if(names.length) {
+      taggedEl.innerHTML = '<i class="ti ti-users"></i> ' + names.join(', ');
+    } else {
+      taggedEl.innerHTML = '';
+    }
+  } else {
+    taggedEl.innerHTML = '';
+  }
+
+  // Feeling
+  if(ev.feeling) {
+    feelingEl.innerHTML = '<div class="ev-view-block-label">What this moment feels like</div><div class="ev-view-block-text">' + escapeHTML(ev.feeling) + '</div>';
+  } else {
+    feelingEl.innerHTML = '';
+  }
+
+  // Favorite
+  if(ev.favorite) {
+    favoriteEl.innerHTML = '<div class="ev-view-block-label">The favorite part</div><div class="ev-view-block-text">' + escapeHTML(ev.favorite) + '</div>';
+  } else {
+    favoriteEl.innerHTML = '';
+  }
+
+  // Received badge
+  if(isReceived) {
+    receivedEl.innerHTML = '<i class="ti ti-send"></i> Received from ' + escapeHTML(ev.receivedFrom);
+  } else {
+    receivedEl.innerHTML = '';
+  }
+
+  // Action buttons
+  const pinIcon = ev.pinned ? 'ti-pinned-filled' : 'ti-pin';
+  const pinLabel = ev.pinned ? 'Pinned' : 'Pin';
+  const btnStyle = 'color:var(--cream);border-color:rgba(255,255,255,0.2);';
+
+  if(isReceived) {
+    actionsEl.innerHTML = `<div class="event-actions" style="width:100%;justify-content:space-between;">
+      <button class="btn-ghost" onclick="togglePinEvent()" style="${btnStyle}"><i class="ti ${pinIcon}" style="font-size:13px;"></i> ${pinLabel}</button>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-ghost" onclick="shareCurrentEvent()" style="${btnStyle}"><i class="ti ti-share" style="font-size:13px;"></i> Share</button>
+        <button class="btn-ghost" onclick="deleteCurrentEvent()" style="${btnStyle}color:rgba(255,150,140,0.8);"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+      </div>
+    </div>`;
+  } else {
+    actionsEl.innerHTML = `<div class="event-actions" style="width:100%;justify-content:space-between;">
+      <button class="btn-ghost" onclick="togglePinEvent()" style="${btnStyle}"><i class="ti ${pinIcon}" style="font-size:13px;"></i> ${pinLabel}</button>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-ghost" onclick="switchToEventEdit()" style="${btnStyle}"><i class="ti ti-pencil" style="font-size:13px;"></i> Edit</button>
+        <button class="btn-ghost" onclick="shareCurrentEvent()" style="${btnStyle}"><i class="ti ti-share" style="font-size:13px;"></i> Share</button>
+        <button class="btn-ghost" onclick="deleteCurrentEvent()" style="${btnStyle}color:rgba(255,150,140,0.8);"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+      </div>
+    </div>`;
+  }
+}
+
+function switchToEventEdit() {
+  document.getElementById('event-view').style.display = 'none';
+  document.getElementById('event-edit').style.display = '';
+}
+
+function togglePinEvent() {
+  const ev = getCurrentEvent();
+  if(!ev) return;
+  ev.pinned = !ev.pinned;
+  const owner = findEventOwner(currentEventId);
+  if(owner === SELF) saveSelfData(); else saveData();
+  // Re-render the view with updated pin state
+  populateEventView(ev, !!ev.receivedFrom);
+  // Refresh the moments grid
+  if(currentIdx >= 0) renderEvents(PEOPLE[currentIdx]);
+  if(document.getElementById('self-modal-overlay')?.classList.contains('open')) renderSelfMoments();
+  showNotif(ev.pinned ? 'Pinned to top.' : 'Unpinned.');
+}
+
+function switchToEventView() {
+  // Re-populate view from current form values (in case they changed)
+  const ev = getCurrentEvent();
+  if(ev) populateEventView(ev, !!ev.receivedFrom);
+  document.getElementById('event-view').style.display = '';
+  document.getElementById('event-edit').style.display = 'none';
+}
+
+function getCurrentEvent() {
+  if(!currentEventId) return null;
+  const owner = findEventOwner(currentEventId);
+  if(!owner) return null;
+  return (owner.events || []).find(x => x.id === currentEventId);
 }
 
 function closeEventEditor() {
