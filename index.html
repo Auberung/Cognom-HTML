@@ -137,7 +137,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .empty-sub { font-size: 13px; color: var(--ink-light); line-height: 1.8; max-width: 380px; margin-bottom: 28px; }
 
 /* ADD PERSON MODAL OVERLAY */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,28,26,0.55); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,28,26,0.55); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px 80px; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(--warm-white); border-radius: 16px; padding: 32px; width: 420px; max-width: 90vw; margin: auto; }
 .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--ink); margin-bottom: 6px; }
@@ -999,7 +999,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
   /* Tree topbar — make Fit/+/- buttons compact */
   /* Make room for the floating hamburger at left:14 (40px wide + breathing). */
-  #tree-view .topbar { padding: 10px 14px 10px 64px; position: sticky; top: 0; z-index: 30; }
+  #tree-view .topbar { padding: 10px 14px 10px 64px; position: fixed; top: 0; left: 0; right: 0; z-index: 30; background: var(--warm-white); border-bottom: 1px solid var(--border); }
+  #tree-view .tree-viewport { margin-top: 52px; }
   #tree-view .topbar > div:first-child { flex: 1; min-width: 0; }
   #tree-view .topbar-name { font-size: 16px; }
   #tree-view .topbar-sub { font-size: 10.5px; }
@@ -1475,7 +1476,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
               <!-- Paste-plain-transcript fallback (hidden by default) -->
               <div id="paste-mode" style="display:none;">
-                <textarea class="text-drop" id="transcript-text" placeholder="Paste the transcript of your conversation here — Cognom will read it and build the portrait, exactly as it does with audio."></textarea>
+                <textarea class="text-drop" id="transcript-text" placeholder="Paste your conversation here…"></textarea>
+                <div id="paste-options" style="display:none;margin-top:10px;">
+                  <div style="font-size:12px;color:var(--ink-mid);margin-bottom:8px;">How should Cognom read this?</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <button class="btn-ghost" onclick="handlePasteOption('labeled')" style="text-align:left;padding:10px 14px;">
+                      <div style="font-size:13px;font-weight:500;">Already labeled</div>
+                      <div style="font-size:11px;color:var(--ink-light);margin-top:2px;">Lines start with a name (e.g. Mom: … / Me: …)</div>
+                    </button>
+                    <button class="btn-ghost" onclick="handlePasteOption('tag')" style="text-align:left;padding:10px 14px;">
+                      <div style="font-size:13px;font-weight:500;">I’ll tag the speakers</div>
+                      <div style="font-size:11px;color:var(--ink-light);margin-top:2px;">Split into lines so you can mark who said what</div>
+                    </button>
+                    <button class="btn-ghost" onclick="handlePasteOption('asis')" style="text-align:left;padding:10px 14px;">
+                      <div style="font-size:13px;font-weight:500;">Just analyze as-is</div>
+                      <div style="font-size:11px;color:var(--ink-light);margin-top:2px;">Let the AI figure out who said what</div>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div class="text-mode-toggle">
@@ -1518,13 +1536,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div class="field-label">Name</div>
       <input type="text" class="field-input" id="new-name" placeholder="How do you know them..." oninput="updateModalInitial()" onkeydown="if(event.key==='Enter')confirmAddPerson()" autofocus />
     </div>
-        <div style="margin-top:4px;">
-      <button class="btn-ghost" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='none'?'':'none';this.querySelector('i').className=d.style.display==='none'?'ti ti-chevron-down':'ti ti-chevron-up';" style="font-size:12px;padding:6px 0;color:var(--ink-light);"><i class="ti ti-chevron-down" style="font-size:14px;vertical-align:-1px;margin-right:4px;"></i>More details (all optional)</button>
-      <div style="display:none;">
-<div class="field-group">
-      <div class="field-label">Family name <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
-      <input type="text" class="field-input" id="new-family-name" placeholder="Surname, if you'd like to record it" onkeydown="if(event.key==='Enter')confirmAddPerson()" />
-    </div>
+
     <div class="field-group">
       <div class="field-label">Where they belong</div>
       <div class="relation-chips">
@@ -1533,6 +1545,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <button class="rel-chip" onclick="toggleRel(this)">Partner</button>
       </div>
       <div class="photo-hint" style="margin-top:7px;">Friends grow in the crown, family at the roots, your partner beside you.</div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Family name <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
+      <input type="text" class="field-input" id="new-family-name" placeholder="Surname, if you'd like to record it" onkeydown="if(event.key==='Enter')confirmAddPerson()" />
     </div>
     <div class="field-group">
       <div class="field-label">Who they are to you <span style="color:var(--ink-light);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>
@@ -1561,11 +1578,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <button class="cadence-chip" data-cadence="quarterly" onclick="toggleCadence(this)">Quarterly</button>
         <button class="cadence-chip selected" data-cadence=""  onclick="toggleCadence(this)">No rhythm</button>
       </div>
-      <div class="cadence-hint">Cognom will gently remind you when it's been a while. No streaks, no shame — just a quiet nudge.</div>
+      <div class="cadence-hint">Cognom will gently remind you when it’s been a while. No streaks, no shame — just a quiet nudge.</div>
     </div>
-          </div>
-    </div>
-<div class="modal-actions">
+
+    <div class="modal-actions" style="padding-bottom:40px;">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn-primary" id="modal-save-btn" onclick="confirmAddPerson()">Add person</button>
     </div>
@@ -4334,10 +4350,60 @@ function togglePasteMode() {
     paste.style.display = 'none';
     builder.style.display = 'block';
     link.textContent = 'Or paste a plain transcript';
+    document.getElementById('paste-options').style.display = 'none';
   } else {
     paste.style.display = 'block';
     builder.style.display = 'none';
     link.textContent = 'Use the conversation builder instead';
+    // Show options when text appears
+    const ta = document.getElementById('transcript-text');
+    ta.oninput = function() {
+      document.getElementById('paste-options').style.display = ta.value.trim() ? '' : 'none';
+    };
+  }
+}
+
+function handlePasteOption(mode) {
+  const ta = document.getElementById('transcript-text');
+  const text = (ta?.value || '').trim();
+  if(!text) { showNotif('Paste some text first.'); return; }
+
+  if(mode === 'tag') {
+    // Split pasted text into lines, populate the turn builder
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    convTurns = [];
+
+    lines.forEach(line => {
+      // Try to detect "Name: text" format and pre-assign speaker
+      const match = line.match(/^([^:]{1,30}):\s*(.+)$/);
+      const personName = currentIdx >= 0 && PEOPLE[currentIdx] ? PEOPLE[currentIdx].name.split(' ')[0].toLowerCase() : '';
+      const selfName = (SELF.name || '').split(' ')[0].toLowerCase();
+
+      if(match) {
+        const speaker = match[1].trim().toLowerCase();
+        const isSelf = speaker === 'me' || speaker === 'i' || (selfName && speaker === selfName);
+        convTurns.push({ speaker: isSelf ? 'me' : 'them', text: match[2].trim() });
+      } else {
+        // Alternate speakers for unlabeled lines
+        const lastSpeaker = convTurns.length ? convTurns[convTurns.length - 1].speaker : 'me';
+        convTurns.push({ speaker: lastSpeaker === 'me' ? 'them' : 'me', text: line });
+      }
+    });
+
+    // Switch to turn builder with the populated turns
+    ta.value = '';
+    document.getElementById('paste-mode').style.display = 'none';
+    document.getElementById('paste-options').style.display = 'none';
+    document.getElementById('turn-builder').style.display = 'block';
+    document.getElementById('toggle-paste-link').textContent = 'Or paste a plain transcript';
+    renderTurnList();
+    showNotif(convTurns.length + ' lines loaded. Review the speakers and tap Save.');
+  } else if(mode === 'labeled') {
+    // Already labeled — submit directly with a hint to the AI
+    handleTextSubmit();
+  } else {
+    // As-is — submit directly
+    handleTextSubmit();
   }
 }
 
@@ -4886,28 +4952,36 @@ function renderTree() {
 
   // ---- FRIENDS: a non-crossing fan across the crown ----
   // Always lay out at least 5 branch slots so the tree looks full from the start.
-  // Real friends fill slots left-to-right; remaining slots are empty leafy branches.
+  // Real friends fill slots center-out: first in the middle, then alternating left/right.
+  // When more than 5, expand with 2 more slots (one left, one right) per pair.
   let fLeaves='', fBub='';
   {
     const realN = friends.length;
-    const slots = Math.max(5, realN);
+    // Always at least 5 slots; expand in pairs of 2 beyond that
+    const slots = realN <= 5 ? 5 : 5 + Math.ceil((realN - 5) / 2) * 2;
     const maxSpread = (slots - 1) / 2 * 150;
     const arcTop = crownTop + 70;
     const arcDepth = crownH * 0.42;
-    for(let k=0;k<slots;k++){
-      const t = slots === 1 ? 0.5 : k/(slots-1);
-      const ox = (t - 0.5) * 2;
+
+    // Build center-out position order: [0, -1, +1, -2, +2, -3, +3, ...]
+    const posOrder = [0];
+    for(let level = 1; posOrder.length < slots; level++) {
+      posOrder.push(-level);
+      if(posOrder.length < slots) posOrder.push(level);
+    }
+    const maxLevel = Math.floor(slots / 2);
+
+    for(let k = 0; k < slots; k++) {
+      const pos = posOrder[k];
+      const ox = maxLevel === 0 ? 0 : pos / maxLevel; // -1 to +1 normalized
       const x = cx + ox * maxSpread;
-      const y = arcTop + (1 - Math.cos(ox * Math.PI/2)) * arcDepth;
+      const y = arcTop + (1 - Math.cos(Math.abs(ox) * Math.PI / 2)) * arcDepth;
       const sideAbs = Math.abs(ox);
       const forkY = fork + sideAbs * (trunkH * 0.30);
-      // branches removed for cleaner look — positions retained for layout
-      fLeaves += leavesAlong(cx, forkY, x, y+30, 11, 9);
-      if(k < realN){
-        const item = friends[k];
-        fBub += bubble(item, x, y, 30);
+      fLeaves += leavesAlong(cx, forkY, x, y + 30, 11, 9);
+      if(k < realN) {
+        fBub += bubble(friends[k], x, y, 30);
       } else {
-        // empty branch tip — a little leafy cluster so it looks alive, no bubble
         fLeaves += leafCluster(x, y, 34, 22);
       }
     }
@@ -5205,14 +5279,7 @@ function applyTreeTransform() {
     if(treeView.y < minY) treeView.y = minY;
   }
 
-  // Use SVG dimension scaling for crisp vector rendering at any zoom.
-  // CSS transform scale() rasterizes then stretches — looks blurry.
-  const svg = pan.querySelector('.tree-svg');
-  if(svg) {
-    svg.style.width  = (treeView.scale * 100) + '%';
-    svg.style.height = (treeView.scale * 100) + '%';
-  }
-  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px)`;
+  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
 }
 
 function fitTreeToViewport() {
