@@ -55,7 +55,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
 
 /* SIDEBAR */
-.sidebar { background: var(--cream-dark); color: var(--ink); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.sidebar { background: var(--cream-dark); color: var(--ink); display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .sidebar-top { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
 .logo { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; letter-spacing: 2px; color: var(--ink); }
 .logo span { color: var(--gold); }
@@ -70,7 +70,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .account-meta { font-size: 11px; color: var(--ink-light); }
 .settings-btn { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 12px; margin-bottom: 12px; background: var(--warm-white); border: 1px solid var(--border); border-radius: 8px; color: var(--ink-mid); font-family: 'DM Sans', sans-serif; font-size: 12.5px; cursor: pointer; transition: all 0.15s; }
 .settings-btn:hover { background: var(--cream); border-color: var(--gold); color: var(--ink); }
-.sidebar-section { padding: 20px 24px 8px; flex: 1; }
+.sidebar-section { padding: 20px 24px 8px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .sidebar-section-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 12px; }
 .person-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; margin-bottom: 2px; }
 .person-item:hover { background: var(--warm-white); }
@@ -980,7 +980,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   /* Floating thought button — slightly smaller on mobile so it doesn't dominate */
   .float-thought-btn { width: 52px; height: 52px; bottom: 18px; right: 18px; font-size: 20px; }
   .tree-hint { display: none; }
-  .tree-legend-overlay { padding: 7px 9px; }
+  .tree-legend-overlay { padding: 7px 9px; top: 62px !important; }
   .tree-legend-overlay .legend-item { font-size: 10px; }
 
   /* Event viewer — tighter layout */
@@ -3489,8 +3489,8 @@ function renderSearchResults() {
   if(q) matches = matches.filter(o => (o.p.name + ' ' + (o.p.familyName||'') + ' ' + (o.p.relation||'')).toLowerCase().includes(q));
   if(PEOPLE.length === 0) { box.innerHTML = ''; return; }
   if(matches.length === 0) { box.innerHTML = `<div class="person-empty-sub" style="font-size:12px;padding:8px 4px;">No one matches “${escapeHTML(q)}”.</div>`; return; }
-  // when no query, show a short hint rather than the full list
-  const shown = q ? matches : matches.slice(0, 8);
+  // Show all people (filtered if searching)
+  const shown = matches;
   box.innerHTML = shown.map(({p, i}) => `
     <div class="person-item" onclick="selectPerson(${i})">
       <div class="person-avatar ${p.avClass}${p.photo?' has-photo':''}" ${p.photo?`style="background-image:url(${p.photo})"`:''}>${p.photo?'':p.initial}</div>
@@ -3500,7 +3500,7 @@ function renderSearchResults() {
       </div>
       <button class="person-edit" title="Edit" onclick="openEditPerson(${i}, event)"><i class="ti ti-edit" aria-hidden="true"></i></button>
       <button class="person-delete" title="Delete" onclick="deletePerson(${i}, event)">&times;</button>
-    </div>`).join('') + (!q && matches.length > 8 ? `<div class="person-empty-sub" style="font-size:11px;padding:6px 4px;">…and ${matches.length-8} more. Type to search.</div>` : '');
+    </div>`).join('');
 }
 
 // keep old name working
@@ -5197,7 +5197,7 @@ function renderTree() {
     : '';
 
   const svg = `
-  <svg class="tree-svg" width="${W}" height="${H}" viewBox="${-W*0.09} ${-H*0.09} ${W*1.18} ${H*1.18}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+  <svg class="tree-svg" width="${W}" height="${H}" viewBox="${-W*0.09} ${-H*0.09} ${W*1.18} ${H*1.18}" data-vbx="${-W*0.09}" data-vby="${-H*0.09}" data-vbw="${W*1.18}" data-vbh="${H*1.18}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
     <defs>
       <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#AECFE6"/>
@@ -5258,16 +5258,11 @@ function applyTreeTransform() {
   const pan = document.getElementById('tree-pan');
   const vp  = document.getElementById('tree-viewport');
   if(!pan || !vp) return;
+  const svg = pan.querySelector('.tree-svg');
 
-  // clamp scale
   if(treeView.scale < treeView.minScale) treeView.scale = treeView.minScale;
   if(treeView.scale > 5) treeView.scale = 5;
 
-  // bound the pan so we never expose sky/earth past the tree's edges.
-  // when scale > 1 the canvas is enlarged — valid translate range is
-  // [vw*(1-s), 0] horizontally and [vh*(1-s), 0] vertically. when scale = 1,
-  // the only valid translate is (0, 0). pinching gestures temporarily skip the
-  // clamp so focal-point zoom can shift freely; we snap back on touchend.
   if(!treeView.pinching) {
     const vw = vp.clientWidth  || window.innerWidth  || 700;
     const vh = vp.clientHeight || window.innerHeight || 600;
@@ -5279,7 +5274,26 @@ function applyTreeTransform() {
     if(treeView.y < minY) treeView.y = minY;
   }
 
-  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
+  // ViewBox-based zoom: re-renders the SVG as crisp vector at every scale.
+  if(svg && svg.dataset.vbw) {
+    const vpW = vp.clientWidth  || 700;
+    const vpH = vp.clientHeight || 600;
+    const oX = parseFloat(svg.dataset.vbx);
+    const oY = parseFloat(svg.dataset.vby);
+    const oW = parseFloat(svg.dataset.vbw);
+    const oH = parseFloat(svg.dataset.vbh);
+    const s  = treeView.scale;
+    const vw = oW / s;
+    const vh = oH / s;
+    const cx = oX + (oW - vw) / 2;
+    const cy = oY + (oH - vh) / 2;
+    const px = -treeView.x * (oW / s) / vpW;
+    const py = -treeView.y * (oH / s) / vpH;
+    svg.setAttribute('viewBox', cx + px + ' ' + (cy + py) + ' ' + vw + ' ' + vh);
+    pan.style.transform = '';
+  } else {
+    pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
+  }
 }
 
 function fitTreeToViewport() {
@@ -5351,14 +5365,7 @@ function setupTreePanZoom() {
     if(e.touches.length < 2 && treeView.pinching){
       // gesture done — re-enable clamp and smoothly settle the tree back in bounds
       treeView.pinching = false;
-      const pan = document.getElementById('tree-pan');
-      if(pan){
-        pan.style.transition = 'transform 180ms ease-out';
-        applyTreeTransform();
-        setTimeout(() => { if(pan) pan.style.transition = ''; }, 200);
-      } else {
-        applyTreeTransform();
-      }
+      applyTreeTransform();
     }
     if(e.touches.length === 0) pinchDist = 0;
   });
