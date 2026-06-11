@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https://*.supabase.co; media-src 'self' blob:; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Cognom — a quiet space for the people you love. Stop scrolling. Call your mom.">
@@ -137,9 +137,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .empty-sub { font-size: 13px; color: var(--ink-light); line-height: 1.8; max-width: 380px; margin-bottom: 28px; }
 
 /* ADD PERSON MODAL OVERLAY */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,28,26,0.55); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px 80px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,28,26,0.55); z-index: 200; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px 100px; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--warm-white); border-radius: 16px; padding: 32px; width: 420px; max-width: 90vw; margin: auto; }
+.modal { background: var(--warm-white); border-radius: 16px; padding: 32px; width: 420px; max-width: 90vw; margin: auto; position: relative; }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.modal-header .modal-title { margin-bottom: 0; }
+.modal-close-btn { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent; color: var(--ink-light); font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.15s; margin-left: 8px; margin-top: -2px; }
+.modal-close-btn:hover { background: rgba(0,0,0,0.06); color: var(--ink); }
 .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--ink); margin-bottom: 6px; }
 .modal-sub { font-size: 12px; color: var(--ink-light); margin-bottom: 24px; line-height: 1.6; }
 .field-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 7px; }
@@ -923,23 +927,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   .empty-title { font-size: 26px; }
 
   /* Modals — full width on phones, slide up from bottom */
-  .modal-overlay { align-items: flex-end; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
   /* Delete confirmation appears at top so it's immediately visible */
-  #delete-overlay { align-items: flex-start; padding-top: 60px; }
+  #delete-overlay { align-items: flex-start; padding-top: 60px; padding-left: 0; padding-right: 0; }
   #delete-overlay .modal { border-radius: 18px; }
   .modal {
     width: 100%;
     max-width: 100%;
     border-radius: 18px 18px 0 0;
-    padding: 24px 22px;
+    padding: 24px 22px 48px;
     max-height: 92vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  /* Modal action buttons — center & widen so they don't hide under the floating brain */
-  .modal-actions { justify-content: center; flex-direction: column-reverse; gap: 10px; padding-right: 0; }
+  /* Modal action buttons — center & widen so they don't hide under browser chrome */
+  .modal-actions { justify-content: center; flex-direction: column-reverse; gap: 10px; padding-right: 0; margin-top: 16px; }
   .modal-actions .btn-primary,
   .modal-actions .btn-ghost,
-  .modal-actions .btn-danger { width: 100%; padding: 12px 16px; font-size: 14px; }
+  .modal-actions .btn-danger { width: 100%; padding: 14px 16px; font-size: 14px; }
 
   /* Person overlay — card fills most of the screen */
   .person-overlay { padding: 0; }
@@ -1215,11 +1220,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
     <!-- PERSON CARD OVERLAY (opens over the tree) -->
     <div id="person-overlay" class="person-overlay" onclick="if(event.target===this)closePersonCard()" style="display:none;">
-    <button class="person-card-escape" id="person-card-escape" onclick="closePersonCard()" aria-label="Close" title="Close">&times;</button>
     <div id="person-view" class="person-card" style="display:flex;flex-direction:column;overflow:hidden;">
-      <div class="topbar" style="justify-content:flex-end;">
+      <div class="topbar" style="justify-content:flex-end;min-height:48px;flex-shrink:0;">
         <div class="topbar-actions">
-          <button class="btn-ghost" onclick="closePersonCard()" title="Close" style="font-size:20px;line-height:1;padding:4px 10px;">&times;</button>
+          <button class="modal-close-btn" onclick="closePersonCard()" title="Close" aria-label="Close">&times;</button>
         </div>
       </div>
 
@@ -1394,7 +1398,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
             <div class="api-field" style="margin-bottom:14px;">
               <div class="prov-note" style="display:flex;align-items:center;justify-content:space-between;">
-                <span id="upload-provider-label" style="font-size:12px;color:var(--ink-mid);">Using Gemini</span>
+                <span id="upload-provider-label" style="font-size:12px;color:var(--ink-mid);">Using OpenAI</span>
                 <button class="btn-ghost" style="font-size:11px;padding:5px 12px;" onclick="closePersonCard();openSettings()">Change in Settings</button>
               </div>
             </div>
@@ -1524,7 +1528,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <!-- ADD / EDIT PERSON MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
   <div class="modal">
-    <div class="modal-title" id="modal-title">Add a person</div>
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add a person</div>
+      <button class="modal-close-btn" onclick="closeModal()" aria-label="Close">&times;</button>
+    </div>
     <div class="modal-sub" id="modal-sub">Give them a name you'll recognise. You can call them anything — Mom, Babusya, Old friend from college.</div>
     <div class="photo-upload-wrap">
       <div class="photo-preview" id="modal-photo-preview" onclick="document.getElementById('modal-photo-input').click()">
@@ -1594,7 +1601,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <div class="modal-overlay" id="delete-overlay" onclick="if(event.target===this)closeDelete()">
   <div class="modal">
     <div id="delete-step-1">
-      <div class="modal-title">Delete <span id="del-name-1"></span>?</div>
+      <div class="modal-header">
+        <div class="modal-title">Delete <span id="del-name-1"></span>?</div>
+        <button class="modal-close-btn" onclick="closeDelete()" aria-label="Close">&times;</button>
+      </div>
       <div class="modal-sub">This will permanently remove this person from Cognom — their portrait, every conversation, and all the memory gems you've kept. This cannot be undone.</div>
       <div class="modal-actions">
         <button class="btn-ghost" onclick="closeDelete()">Keep them</button>
@@ -1602,7 +1612,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       </div>
     </div>
     <div id="delete-step-2" style="display:none;">
-      <div class="modal-title">Are you absolutely sure?</div>
+      <div class="modal-header">
+        <div class="modal-title">Are you absolutely sure?</div>
+        <button class="modal-close-btn" onclick="closeDelete()" aria-label="Close">&times;</button>
+      </div>
       <div class="modal-sub">The memories you've saved about <span id="del-name-2"></span> will be lost forever. Once you confirm, there is no way to get them back.<br><br>Click below only if you're certain.</div>
       <div class="modal-actions">
         <button class="btn-ghost" onclick="closeDelete()">No, keep them</button>
@@ -1615,7 +1628,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <!-- YOUR ACCOUNT (self) MODAL -->
 <div class="modal-overlay" id="self-overlay" style="z-index:380;" onclick="if(event.target===this)closeSelf()">
   <div class="modal">
-    <div class="modal-title">You</div>
+    <div class="modal-header">
+      <div class="modal-title">You</div>
+      <button class="modal-close-btn" onclick="closeSelf()" aria-label="Close">&times;</button>
+    </div>
     <div class="modal-sub">This is you — the root of your tree. Your name and a few notes about yourself. (Accounts and sign-in are coming later.)</div>
     <div class="field-group" style="align-items:center;display:flex;gap:16px;margin-bottom:18px;">
       <div class="photo-preview" id="self-photo" onclick="document.getElementById('self-photo-input').click()" style="margin:0;">
@@ -1643,10 +1659,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <!-- PRIVACY MODAL -->
 <div class="modal-overlay" id="privacy-overlay" onclick="if(event.target===this)closePrivacyModal()">
   <div class="modal" style="max-width:520px;">
-    <div class="modal-title">Privacy</div>
+    <div class="modal-header">
+      <div class="modal-title">Privacy</div>
+      <button class="modal-close-btn" onclick="closePrivacyModal()" aria-label="Close">&times;</button>
+    </div>
     <div style="font-size:13px;color:var(--ink-mid);line-height:1.7;margin-top:12px;">
       <p style="margin-bottom:12px;"><b>Your data is stored securely.</b> When you're signed in, your people, conversations, and memories are saved to your Cognom account (hosted on Supabase) so they sync across devices. A local copy is also kept in your browser for speed. Only you can access your data.</p>
-      <p style="margin-bottom:12px;"><b>AI provider.</b> When you record a conversation or thought, the audio (or text) is sent directly from your browser to the AI provider you chose in Settings — Google Gemini or OpenAI. Cognom doesn't see or store it. You provide your own API key and pay (or use the free tier) directly with them.</p>
+      <p style="margin-bottom:12px;"><b>AI provider.</b> When you record a conversation or thought, the audio (or text) is sent directly from your browser to OpenAI. Cognom doesn't see or store it. You provide your own OpenAI API key and pay directly with them (~2¢ per analysis call). OpenAI doesn't train on API data.</p>
       <p style="margin-bottom:12px;"><b>What this means in practice.</b> Clear your browser's site data and your Cognom is gone. Use a different device and you start fresh there. Use the Backup button in the sidebar regularly to save a file of your data somewhere safe.</p>
       <p style="margin-bottom:0;"><b>Recordings.</b> Audio is processed in memory and discarded after analysis. Only the AI's written notes about the conversation are saved.</p>
     </div>
@@ -1657,13 +1676,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <!-- SETTINGS MODAL -->
-<div class="modal-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+<div class="modal-overlay" id="settings-overlay" onclick="if(event.target===this)saveAndCloseSettings()">
   <div class="modal">
-    <div class="modal-title">Settings</div>
+    <div class="modal-header">
+      <div class="modal-title">Settings</div>
+      <button class="modal-close-btn" onclick="saveAndCloseSettings()" aria-label="Close">&times;</button>
+    </div>
     <div class="modal-sub">Basic app settings. More will arrive as Cognom grows.</div>
 
     <div class="settings-section">
-      <div class="settings-row" onclick="closeSettings();openSelfEdit()">
+      <div class="settings-row" onclick="saveAndCloseSettings();openSelfEdit()">
         <div><div class="settings-row-title">Your account</div><div class="settings-row-sub">Your name and details</div></div>
         <i class="ti ti-chevron-right" style="color:var(--ink-light);"></i>
       </div>
@@ -1702,28 +1724,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <button class="btn-ghost" onclick="signOut()" style="width:100%;">Sign out</button>
     </div>
 
-    <!-- AI PROVIDER — single place for all of Cognom -->
-    <div class="field-label" style="margin:18px 0 8px;">AI provider</div>
-    <div class="provider-toggle" style="margin-bottom:12px;">
-      <button class="prov-btn" id="settings-prov-gemini" onclick="setProvider('gemini')">
-        <span class="prov-name">Google Gemini</span>
-        <span class="prov-tag prov-tag-free">Free</span>
-      </button>
-      <button class="prov-btn" id="settings-prov-openai" onclick="setProvider('openai')">
-        <span class="prov-name">OpenAI</span>
-        <span class="prov-tag prov-tag-paid">~2¢ / call</span>
-      </button>
-    </div>
-    <div id="settings-gemini-field" class="api-field">
-      <div class="field-label" style="margin-bottom:6px;">Gemini API key — get one free at aistudio.google.com</div>
-      <input type="password" class="api-input" id="api-key" placeholder="AIza... or AQ...." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" />
-      <div class="prov-note" style="margin-top:7px;">Free tier — no cost to get started. <b>Note:</b> Google may use your prompts to train their models. If that matters to you for the people in your tree, use OpenAI instead.</div>
-    </div>
-    <div id="settings-openai-field" class="api-field" style="display:none;">
-      <div class="field-label" style="margin-bottom:6px;">OpenAI API key</div>
-      <input type="password" class="api-input" id="api-key-openai" placeholder="sk-..." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" />
+    <!-- OPENAI API KEY -->
+    <div class="field-label" style="margin:18px 0 8px;">OpenAI API key</div>
+    <div class="api-field">
+      <input type="password" class="api-input" id="api-key-openai" placeholder="sk-..." autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" oninput="saveOpenAIKey()" />
       <div class="prov-note" style="margin-top:7px;">~2¢ per analysis call. OpenAI doesn't train on API data — your conversations stay yours.</div>
+      <div id="api-key-saved-msg" style="display:none;font-size:11px;color:var(--sage-dark);margin-top:5px;">✓ Saved</div>
     </div>
+    <!-- hidden legacy input kept so old code paths don't break -->
+    <input type="hidden" id="api-key" />
 
     <div class="settings-section" style="margin-top:18px;">
       <div class="settings-row" onclick="exportData()">
@@ -1737,15 +1746,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     </div>
 
     <div class="settings-section">
-      <div class="settings-row" onclick="closeSettings();openPrivacyModal()">
+      <div class="settings-row" onclick="saveAndCloseSettings();openPrivacyModal()">
         <div><div class="settings-row-title">Privacy</div><div class="settings-row-sub">How your data is handled</div></div>
         <i class="ti ti-chevron-right" style="color:var(--ink-light);"></i>
       </div>
-      <div class="settings-row danger" onclick="closeSettings();clearAllData()">
+      <div class="settings-row danger" onclick="saveAndCloseSettings();clearAllData()">
         <div><div class="settings-row-title">Clear all data</div><div class="settings-row-sub">Erase all your people, conversations, and memories</div></div>
         <i class="ti ti-trash"></i>
       </div>
-      <div class="settings-row danger" onclick="closeSettings();deleteAccount()">
+      <div class="settings-row danger" onclick="saveAndCloseSettings();deleteAccount()">
         <div><div class="settings-row-title">Delete my account</div><div class="settings-row-sub">Permanently remove your account and all data from Cognom</div></div>
         <i class="ti ti-user-minus"></i>
       </div>
@@ -1754,7 +1763,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div style="font-size:11px;color:var(--ink-light);text-align:center;margin-top:18px;line-height:1.6;">Cognom · Endless Stories</div>
 
     <div class="modal-actions">
-      <button class="btn-primary" onclick="closeSettings()">Done</button>
+      <button class="btn-primary" onclick="saveAndCloseSettings()">Save &amp; close</button>
     </div>
   </div>
 </div>
@@ -1832,7 +1841,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <!-- POST-CALL RETURN PROMPT — appears when user comes back from a tel: call -->
 <div class="modal-overlay" id="postcall-overlay" onclick="if(event.target===this)dismissPostCall(false)">
   <div class="modal">
-    <div class="modal-title" id="postcall-title">How was your call?</div>
+    <div class="modal-header">
+      <div class="modal-title" id="postcall-title">How was your call?</div>
+      <button class="modal-close-btn" onclick="dismissPostCall(false)" aria-label="Close">&times;</button>
+    </div>
     <div class="modal-sub" id="postcall-sub">Capture what stayed with you — the surprising thing, the small moment, the next thing to ask. A short voice memo is plenty.</div>
     <div class="modal-actions" style="flex-direction:column;gap:8px;">
       <button class="btn-primary" onclick="capturePostCall()" style="width:100%;"><i class="ti ti-microphone" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Capture what came up</button>
@@ -1928,7 +1940,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <!-- SAVE SHARED MOMENT — after auth, choose where to put it -->
 <div class="modal-overlay" id="save-shared-overlay" style="z-index:550;display:none;" onclick="if(event.target===this)closeSaveShared()">
   <div class="modal" style="max-width:400px;">
-    <div class="modal-title">Save this moment</div>
+    <div class="modal-header">
+      <div class="modal-title">Save this moment</div>
+      <button class="modal-close-btn" onclick="closeSaveShared()" aria-label="Close">&times;</button>
+    </div>
     <div style="font-size:13px;color:var(--ink-mid);margin-bottom:16px;line-height:1.5;" id="save-shared-sub"></div>
     <div id="save-shared-preview" style="background:var(--cream);border-radius:10px;padding:12px;margin-bottom:18px;"></div>
 
@@ -2266,7 +2281,7 @@ function saveSelf() {
   showNotif(SELF.name ? 'Saved.' : 'Account updated.');
 }
 function openSettings() { if(isMobile()) closeSidebar(); document.getElementById('settings-overlay').style.display = 'flex'; }
-function closeSettings() { document.getElementById('settings-overlay').style.display = 'none'; }
+function closeSettings() { saveAndCloseSettings(); }
 function openPrivacyModal() { if(isMobile()) closeSidebar(); document.getElementById('privacy-overlay').classList.add('open'); }
 function closePrivacyModal() { document.getElementById('privacy-overlay').classList.remove('open'); }
 function clearAllData() {
@@ -3845,21 +3860,14 @@ async function handleFile(event) {
   if(!file || currentIdx < 0) return;
   const p = PEOPLE[currentIdx];
   const provider = CURRENT_PROVIDER;
-  const apiKey = (provider === 'openai'
-    ? document.getElementById('api-key-openai').value.trim()
-    : document.getElementById('api-key').value.trim());
+  const apiKey = document.getElementById('api-key-openai').value.trim();
 
   const errBox = document.getElementById('upload-error');
   errBox.style.display = 'none';
 
-  if(provider === 'openai' && (!apiKey || !apiKey.startsWith('sk-'))) {
+  if(!apiKey || !apiKey.startsWith('sk-')) {
     errBox.style.display='block';
     errBox.innerHTML='To analyze audio files, add an OpenAI API key in <b>Settings</b>. Or switch to <b>Type it</b> mode — no key needed.';
-    event.target.value=''; return;
-  }
-  if(provider === 'gemini' && !apiKey) {
-    errBox.style.display='block';
-    errBox.innerHTML='To analyze audio files, add a free Gemini API key in <b>Settings</b>. Or switch to <b>Type it</b> mode — no key needed.';
     event.target.value=''; return;
   }
   if(file.size > 26214400) {
@@ -3877,11 +3885,7 @@ async function handleFile(event) {
 
   try {
     let r;
-    if(provider === 'gemini') {
-      r = await processWithGemini(file, apiKey, analysisInstructions);
-    } else {
-      r = await processWithOpenAI(file, apiKey, analysisInstructions);
-    }
+    r = await processWithOpenAI(file, apiKey, analysisInstructions);
 
     setStep(3,'done'); setStep(4,'active');
     await new Promise(res => setTimeout(res, 500));
@@ -4218,19 +4222,12 @@ async function submitRecording() {
   if(!micAudioBlob || currentIdx < 0) return;
   const p = PEOPLE[currentIdx];
   const provider = CURRENT_PROVIDER;
-  const apiKey = provider === 'openai'
-    ? document.getElementById('api-key-openai').value.trim()
-    : document.getElementById('api-key').value.trim();
+  const apiKey = document.getElementById('api-key-openai').value.trim();
 
   const errBox = document.getElementById('upload-error');
   errBox.style.display = 'none';
 
-  if(provider === 'gemini' && !apiKey) {
-    errBox.style.display = 'block';
-    errBox.innerHTML = 'To analyze audio, add a free Gemini API key in <b>Settings</b>. Or switch to <b>Type it</b> mode — no key needed to save typed conversations.';
-    return;
-  }
-  if(provider === 'openai' && (!apiKey || !apiKey.startsWith('sk-'))) {
+  if(!apiKey || !apiKey.startsWith('sk-')) {
     errBox.style.display = 'block';
     errBox.innerHTML = 'To analyze audio, add an OpenAI API key in <b>Settings</b>. Or switch to <b>Type it</b> mode — no key needed.';
     return;
@@ -4257,11 +4254,7 @@ async function submitRecording() {
 
   try {
     let r;
-    if(provider === 'gemini') {
-      r = await processWithGemini(file, apiKey, analysisInstructions);
-    } else {
-      r = await processWithOpenAI(file, apiKey, analysisInstructions);
-    }
+    r = await processWithOpenAI(file, apiKey, analysisInstructions);
     setStep(3,'done'); setStep(4,'active');
     await new Promise(res => setTimeout(res, 500));
     setStep(4,'done');
@@ -4449,14 +4442,11 @@ async function handleTextSubmit() {
     return;
   }
   const p = PEOPLE[currentIdx];
-  const provider = CURRENT_PROVIDER;
-  const apiKey = (provider === 'openai'
-    ? document.getElementById('api-key-openai').value.trim()
-    : document.getElementById('api-key').value.trim());
+  const provider = 'openai';
+  const apiKey = document.getElementById('api-key-openai').value.trim();
 
   // No API key? Save the conversation text without AI analysis.
-  const hasKey = (provider === 'openai' && apiKey && apiKey.startsWith('sk-')) ||
-                 (provider === 'gemini' && apiKey);
+  const hasKey = apiKey && apiKey.startsWith('sk-');
 
   if(!hasKey) {
     // Save as a raw conversation entry — no AI portrait update
@@ -4586,25 +4576,12 @@ Return ONLY valid JSON. No markdown. No explanation.`;
 
 async function analyzeTranscript(transcript, apiKey, provider, analysisInstructions) {
   const prompt = analysisInstructions + '\n\nConversation transcript:\n"""\n' + transcript + '\n"""';
-  if(provider === 'gemini') {
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
-    const gr = await fetch(url, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.7,maxOutputTokens:2048,responseMimeType:'application/json'} })
-    });
-    if(!gr.ok){let m='Gemini request failed';try{const e=await gr.json();m=e.error?.message||m;}catch(_){} throw new Error(m);}
-    const data = await gr.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if(!text) throw new Error('Gemini returned no analysis.');
-    return parseJSONResponse(text);
-  } else {
-    const gr = await fetch('https://api.openai.com/v1/chat/completions', {
-      method:'POST', headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'gpt-4o', messages:[{role:'user',content:prompt}], temperature:0.7, max_tokens:1800 })
-    });
-    if(!gr.ok){const e=await gr.json();throw new Error(e.error?.message||'Analysis failed');}
-    return parseJSONResponse((await gr.json()).choices[0].message.content);
-  }
+  const gr = await fetch('https://api.openai.com/v1/chat/completions', {
+    method:'POST', headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json'},
+    body: JSON.stringify({ model:'gpt-4o', messages:[{role:'user',content:prompt}], temperature:0.7, max_tokens:1800 })
+  });
+  if(!gr.ok){const e=await gr.json();throw new Error(e.error?.message||'Analysis failed');}
+  return parseJSONResponse((await gr.json()).choices[0].message.content);
 }
 
 function applyAnalysis(p, r) {
@@ -5443,24 +5420,23 @@ async function processWithGemini(file, apiKey, analysisInstructions) {
   return parseJSONResponse(text);
 }
 
-let CURRENT_PROVIDER = localStorage.getItem('cognom_provider') || 'gemini';
+let CURRENT_PROVIDER = 'openai'; // OpenAI only
 
 function setProvider(prov) {
-  CURRENT_PROVIDER = prov;
-  localStorage.setItem('cognom_provider', prov);
-  // settings modal buttons
-  const sg = document.getElementById('settings-prov-gemini');
-  const so = document.getElementById('settings-prov-openai');
-  if(sg) sg.classList.toggle('active', prov==='gemini');
-  if(so) so.classList.toggle('active', prov==='openai');
-  // settings key fields
-  const gf = document.getElementById('settings-gemini-field');
-  const of = document.getElementById('settings-openai-field');
-  if(gf) gf.style.display = prov==='gemini' ? 'block' : 'none';
-  if(of) of.style.display = prov==='openai' ? 'block' : 'none';
-  // upload tab label
-  const lbl = document.getElementById('upload-provider-label');
-  if(lbl) lbl.textContent = prov==='gemini' ? 'Using Google Gemini (free, but Google may use it for training)' : 'Using OpenAI (~2¢ / call, kept private)';
+  CURRENT_PROVIDER = 'openai';
+  localStorage.setItem('cognom_provider', 'openai');
+}
+
+function saveOpenAIKey() {
+  const val = document.getElementById('api-key-openai').value.trim();
+  localStorage.setItem('cognom_openai_key', val);
+  const msg = document.getElementById('api-key-saved-msg');
+  if(msg) { msg.style.display = 'block'; clearTimeout(msg._t); msg._t = setTimeout(() => msg.style.display = 'none', 2000); }
+}
+
+function saveAndCloseSettings() {
+  saveOpenAIKey();
+  document.getElementById('settings-overlay').style.display = 'none';
 }
 
 function friendlyError(err) {
@@ -5491,13 +5467,11 @@ function showNotif(msg) {
   setTimeout(()=>n.classList.remove('show'), 3500);
 }
 
-// persist API keys on input
-document.getElementById('api-key').value = localStorage.getItem('cognom_gemini_key') || '';
-document.getElementById('api-key').addEventListener('input', () => localStorage.setItem('cognom_gemini_key', document.getElementById('api-key').value.trim()));
+// persist API key on input
 document.getElementById('api-key-openai').value = localStorage.getItem('cognom_openai_key') || '';
-document.getElementById('api-key-openai').addEventListener('input', () => localStorage.setItem('cognom_openai_key', document.getElementById('api-key-openai').value.trim()));
+document.getElementById('api-key-openai').addEventListener('input', saveOpenAIKey);
 
-setProvider(CURRENT_PROVIDER);
+setProvider('openai');
 setInputMode('record');
 if(typeof renderIntentUI === 'function') renderIntentUI();
 document.addEventListener('click', (e) => {
@@ -5722,9 +5696,7 @@ function discardThought() {
 
 async function submitThought() {
   if(!tBlob) return;
-  const apiKey = CURRENT_PROVIDER === 'openai'
-    ? document.getElementById('api-key-openai').value.trim()
-    : document.getElementById('api-key').value.trim();
+  const apiKey = document.getElementById('api-key-openai').value.trim();
   await _runThoughtAnalysis(null, tBlob, apiKey);
 }
 
@@ -5735,26 +5707,15 @@ async function submitThoughtText() {
   if(text.length < 10) {
     errBox.style.display = 'block'; errBox.textContent = 'Write a little more — Cognom needs something to work with.'; return;
   }
-  const apiKey = CURRENT_PROVIDER === 'openai'
-    ? document.getElementById('api-key-openai').value.trim()
-    : document.getElementById('api-key').value.trim();
+  const apiKey = document.getElementById('api-key-openai').value.trim();
   await _runThoughtAnalysis(text, null, apiKey);
 }
 
 async function _runThoughtAnalysis(text, blob, apiKey) {
   const errBox = document.getElementById('thought-error');
   errBox.style.display = 'none';
-  if(CURRENT_PROVIDER === 'gemini' && !apiKey) {
-    errBox.style.display = 'block'; errBox.textContent = 'Please enter your Gemini API key in Settings first.'; return;
-  }
-  if(CURRENT_PROVIDER === 'openai' && (!apiKey || !apiKey.startsWith('sk-'))) {
+  if(!apiKey || !apiKey.startsWith('sk-')) {
     errBox.style.display = 'block'; errBox.textContent = 'Please enter a valid OpenAI API key in Settings (starts with sk-).'; return;
-  }
-  // sanity check: Gemini keys start with AIza (legacy) or AQ. (newer format from aistudio.google.com)
-  if(CURRENT_PROVIDER === 'gemini' && !apiKey.startsWith('AIza') && !apiKey.startsWith('AQ.')) {
-    errBox.style.display = 'block';
-    errBox.textContent = 'That key doesn\'t look like a Gemini API key. Get one free at aistudio.google.com/apikey — it should start with "AIza" or "AQ.".';
-    return;
   }
   // warn if running from file:// — some browsers block network requests from local files
   if(location.protocol === 'file:') {
@@ -5775,13 +5736,11 @@ async function _runThoughtAnalysis(text, blob, apiKey) {
     let result;
     if(text) {
       setThoughtStep(1, 'done'); setThoughtStep(2, 'active');
-      result = await analyzeTranscript(text, apiKey, CURRENT_PROVIDER, instructions);
+      result = await analyzeTranscript(text, apiKey, 'openai', instructions);
     } else {
       const ext = blob.type.includes('ogg') ? 'ogg' : blob.type.includes('mp4') ? 'mp4' : 'webm';
       const file = new File([blob], 'thought.' + ext, { type: blob.type });
-    result = CURRENT_PROVIDER === 'gemini'
-        ? await processWithGemini(file, apiKey, instructions)
-        : await processWithOpenAI(file, apiKey, instructions);
+    result = await processWithOpenAI(file, apiKey, instructions);
     }
     setThoughtStep(2, 'done'); setThoughtStep(3, 'active');
     await new Promise(r => setTimeout(r, 400));
