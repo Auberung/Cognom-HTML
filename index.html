@@ -6180,18 +6180,65 @@ function openEventEditor(eventId) {
   if(!ev) return;
   currentEventId = eventId;
   currentEventSlide = 0;
+  const isReceived = !!ev.receivedFrom;
+
   // load fields
   document.getElementById('event-date-input').value  = ev.date  || '';
   document.getElementById('event-title-input').value = ev.title || '';
   document.getElementById('event-where').value       = ev.where || '';
   document.getElementById('event-feeling').value     = ev.feeling || '';
   document.getElementById('event-favorite').value    = ev.favorite || '';
-  // mention chips: people tagged in this moment (excluding the host)
+
+  // mention chips
   eventTaggedPids = Array.isArray(ev.taggedPeople) ? ev.taggedPeople.slice() : [];
   renderMentionChips();
   closeMentionMenu();
   const inp = document.getElementById('event-tagged-input');
   if(inp) inp.value = '';
+
+  // Lock fields for received moments
+  const fields = ['event-date-input', 'event-title-input', 'event-where', 'event-feeling', 'event-favorite'];
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(isReceived) {
+      el.setAttribute('readonly', '');
+      el.setAttribute('disabled', '');
+      el.style.opacity = '0.7';
+    } else {
+      el.removeAttribute('readonly');
+      el.removeAttribute('disabled');
+      el.style.opacity = '';
+    }
+  });
+
+  // Hide/show edit controls
+  const tagInput = document.getElementById('event-tagged-input');
+  if(tagInput) tagInput.style.display = isReceived ? 'none' : '';
+  const mentionHint = document.querySelector('.mention-hint');
+  if(mentionHint) mentionHint.style.display = isReceived ? 'none' : '';
+
+  // Show/hide action buttons based on received status
+  const actionsBar = document.querySelector('.event-actions-bar');
+  if(actionsBar) {
+    if(isReceived) {
+      actionsBar.innerHTML = `
+        <div style="flex:1;font-size:12px;color:var(--ink-light);"><i class="ti ti-send" style="font-size:13px;vertical-align:-1px;margin-right:4px;"></i>Received from ${escapeHTML(ev.receivedFrom)}</div>
+        <div class="event-actions">
+          <button class="btn-ghost" onclick="shareCurrentEvent()"><i class="ti ti-share" style="font-size:13px;"></i> Share</button>
+        </div>`;
+    } else {
+      actionsBar.innerHTML = `
+        <div class="event-actions-left">
+          <button class="btn-ghost" onclick="deleteCurrentEvent()" style="color:#9a3b32;"><i class="ti ti-trash" style="font-size:13px;"></i> Delete moment</button>
+        </div>
+        <div class="event-actions">
+          <button class="btn-ghost" onclick="shareCurrentEvent()"><i class="ti ti-share" style="font-size:13px;"></i> Share this moment</button>
+          <button class="btn-primary" onclick="saveCurrentEvent()">Save</button>
+        </div>`;
+    }
+  }
+
   document.getElementById('photo-viewer').classList.add('open');
   renderEventEditor();
 }
@@ -6238,14 +6285,26 @@ function renderEventEditor() {
 
   // thumbnail strip + remove buttons + add button (if under max)
   const thumbsEl = document.getElementById('event-thumbs');
+  const isReceived = !!(ev.receivedFrom);
   const thumbs = photos.map((src, i) => `
     <div class="event-thumb ${i === currentEventSlide ? 'active' : ''}" style="background-image:url('${src}')" onclick="setEventSlide(${i})">
-      <button class="event-thumb-remove" onclick="event.stopPropagation();removePhotoFromEvent(${i})" title="Remove this photo">×</button>
+      ${isReceived ? '' : `<button class="event-thumb-remove" onclick="event.stopPropagation();removePhotoFromEvent(${i})" title="Remove this photo">×</button>`}
     </div>`).join('');
-  const addBtn = total < MAX_PHOTOS_PER_EVENT
-    ? `<button class="event-thumb-add" onclick="document.getElementById('photo-add-input').click()" title="Add a photo to this moment">+</button>`
-    : `<button class="event-thumb-add" disabled title="Maximum 4 photos per moment">+</button>`;
-  thumbsEl.innerHTML = thumbs + addBtn;
+  if(isReceived) {
+    thumbsEl.innerHTML = thumbs;
+  } else {
+    const addBtn = total < MAX_PHOTOS_PER_EVENT
+      ? `<button class="event-thumb-add" onclick="document.getElementById('photo-add-input').click()" title="Add a photo to this moment">+</button>`
+      : `<button class="event-thumb-add" disabled title="Maximum 4 photos per moment">+</button>`;
+    thumbsEl.innerHTML = thumbs + addBtn;
+  }
+
+  // hide the empty-state "add photos" prompt for received moments
+  if(isReceived && total === 0) {
+    stageEmpty.textContent = 'No photos were shared with this moment.';
+  } else if(total === 0) {
+    stageEmpty.textContent = 'No photos yet — add up to 4 below.';
+  }
 }
 
 function setEventSlide(i) { currentEventSlide = i; renderEventEditor(); }
