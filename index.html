@@ -924,6 +924,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
   /* Modals — full width on phones, slide up from bottom */
   .modal-overlay { align-items: flex-end; }
+  /* Delete confirmation appears at top so it's immediately visible */
+  #delete-overlay { align-items: flex-start; padding-top: 60px; }
+  #delete-overlay .modal { border-radius: 18px; }
   .modal {
     width: 100%;
     max-width: 100%;
@@ -946,10 +949,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     height: 100%;
     border-radius: 0;
   }
-  /* Hide the card's internal topbar (× close) on mobile — the floating
-     escape button is the single, viewport-anchored close. */
-  .person-card > .topbar { display: none; }
-  .person-card .content { padding: 8px 18px 80px; max-height: calc(100vh - 60px); }
+  /* Keep the card's internal topbar visible on mobile for the × close button */
+  .person-card > .topbar { display: flex; padding: 10px 14px 0; min-height: 44px; }
+  .person-card .content { padding: 8px 18px 80px; max-height: calc(100vh - 54px); }
   .info-card-head { gap: 12px; }
   .info-card-avatar { width: 60px; height: 60px; font-size: 26px; }
   .info-card-title { font-size: 22px; }
@@ -4509,9 +4511,10 @@ async function handleTextSubmit() {
 }
 
 function buildAnalysisInstructions(p) {
+  const firstName = p.name.split(' ')[0];
   const priorContext = p.convCount > 0
-    ? `Prior portrait of ${p.name}: communication style: ${p.commStyle}. What matters: ${p.matters}. Emotional texture: ${p.emotion}.`
-    : `This is the first conversation recorded with ${p.name}.`;
+    ? `Prior portrait of ${firstName}: communication style: ${p.commStyle}. What matters: ${p.matters}. Emotional texture: ${p.emotion}.`
+    : `This is the first conversation recorded with ${firstName}.`;
 
   // inject the user's own inner portrait so Cognom reads the relationship through their lens
   const selfCtx = (SELF.spValues || SELF.spNeeds || SELF.spEmotions) ? `
@@ -4529,24 +4532,24 @@ ${SELF.spDrains.length ? '- Drained by: ' + SELF.spDrains.join(', ') : ''}
     {
       "type": "letter or archive",
       "title": "Short evocative title (letter type only, else empty string)",
-      "body": "For 'letter': write as a warm, intimate letter from the user to ${p.name} — something they'd want them to find one day. For 'archive': a vivid 2-3 sentence record of a specific moment, detail, or story that surfaced — dated, grounded, specific. Only create entries for genuinely moving or important moments — not every conversation warrants one.",
+      "body": "For 'letter': write as a warm, intimate letter from the user to ${firstName} — something they'd want them to find one day. For 'archive': a vivid 2-3 sentence record of a specific moment, detail, or story that surfaced — dated, grounded, specific. Only create entries for genuinely moving or important moments — not every conversation warrants one.",
       "ctx": "1 sentence of context: why this moment is worth preserving"
     }
   ],` : '"time_capsule": [],';
 
   return `You are Cognom — a quiet, emotionally intelligent app that helps people remember what matters in their relationships.
 
-You are analyzing a conversation between the user and "${p.name}"${p.relation ? ' (their '+p.relation+')' : ''}.
+You are analyzing a conversation between the user and "${firstName}"${p.relation ? ' (their '+p.relation+')' : ''}. Always refer to this person as "${firstName}" throughout your response.
 
 ${priorContext}
 ${selfCtx}
-Return a JSON object with these exact keys — warm, human, observational in tone. Not clinical. Not bullet-point. Speak about ${p.name} as a real person:
+Return a JSON object with these exact keys — warm, human, observational in tone. Not clinical. Not bullet-point. Speak about ${firstName} as a real person:
 
 {
-  "precall_question": "One question the user should ask ${p.name} in the next call. Not a summary — a doorway into something real that surfaced. Write it as if spoken naturally, in quotes.",
+  "precall_question": "One question the user should ask ${firstName} in the next call. Not a summary — a doorway into something real that surfaced. Write it as if spoken naturally, in quotes.",
   "precall_context": "1-2 sentences: why does this question matter right now? What were they circling around?",
-  "communication_style": "How ${p.name} communicates. Patterns, habits, what they do when something is hard to say. 2-3 sentences.",
-  "what_matters": "What seems to matter most to ${p.name}. What do they keep coming back to? 2-3 sentences.",
+  "communication_style": "How ${firstName} communicates. Patterns, habits, what they do when something is hard to say. 2-3 sentences.",
+  "what_matters": "What seems to matter most to ${firstName}. What do they keep coming back to? 2-3 sentences.",
   "things_mentioned": "Concrete things — names, places, memories, events, objects they mentioned. Keep it specific.",
   "emotional_texture": "What were they feeling underneath what they said? What didn't they quite say?",
   "memory_gems": [
@@ -4554,17 +4557,17 @@ Return a JSON object with these exact keys — warm, human, observational in ton
   ],
   "about_you": [
     {
-      "text": "Something ${p.name} said about the user — how they see them, what they value in them, a memory they have of them. Only include if genuinely said or clearly implied. Skip if nothing meaningful surfaced.",
+      "text": "Something ${firstName} said about the user — how they see them, what they value in them, a memory they have of them. Only include if genuinely said or clearly implied. Skip if nothing meaningful surfaced.",
       "ctx": "Brief context of when/why they said it",
       "highlight": true or false
     }
   ],
   ${capsuleInstruction}
   "orbit_people": [
-    { "name": "First name of someone in ${p.name}'s life who came up", "family_name": "Their family name if mentioned, else empty string", "relation": "Their tie to ${p.name}", "significance": "high if family or clearly central; low if incidental" }
+    { "name": "First name of someone in ${firstName}'s life who came up", "family_name": "Their family name if mentioned, else empty string", "relation": "Their tie to ${firstName}", "significance": "high if family or clearly central; low if incidental" }
   ],
   "topics": [
-    { "topic": "A short topic on ${p.name}'s mind (3-5 words)", "weight": "high / medium / low" }
+    { "topic": "A short topic on ${firstName}'s mind (3-5 words)", "weight": "high / medium / low" }
   ],
   "questions_to_explore": ["4 short, human questions to ask in future conversations — doors, not checklists"],
   "alt_questions": [
@@ -5872,6 +5875,7 @@ function applyThoughtAnalysis(r) {
 // =========================================================
 
 function buildReflectionInstructions(p) {
+  const firstName = p.name.split(' ')[0];
   const yv = p.yourView || {};
   const prior = (yv.reflectionCount || 0) > 0 ? `
 Prior reflection on this relationship:
@@ -5893,18 +5897,18 @@ About the person reflecting (Cognom user — for context only, do not mix into t
 
   return `You are Cognom — a quiet witness to how someone feels about another person in their life.
 
-The Cognom user has just spoken or written a private reflection about ${p.name}${p.relation ? ' (' + p.relation + ')' : ''}. This is NOT a conversation between them — only the user is speaking. Read it carefully and capture how the user sees ${p.name}, what they appreciate, what frustrates them, and what tends to go unspoken between them.
+The Cognom user has just spoken or written a private reflection about ${firstName}${p.relation ? ' (' + p.relation + ')' : ''}. Always refer to this person as "${firstName}". This is NOT a conversation between them — only the user is speaking. Read it carefully and capture how the user sees ${firstName}, what they appreciate, what frustrates them, and what tends to go unspoken between them.
 ${selfCtx}
 ${prior}
 
-Return a JSON object with these keys. Be warm, honest, specific. Avoid generic phrasing. Speak about ${p.name} only through the user's eyes — never as if you know ${p.name} directly.
+Return a JSON object with these keys. Be warm, honest, specific. Avoid generic phrasing. Speak about ${firstName} only through the user's eyes — never as if you know ${firstName} directly.
 
 {
-  "feelings": "2-3 sentences about how the user currently feels toward ${p.name} — affection, ambivalence, gratitude, frustration, longing, distance. Be honest about the texture.",
+  "feelings": "2-3 sentences about how the user currently feels toward ${firstName} — affection, ambivalence, gratitude, frustration, longing, distance. Be honest about the texture.",
   "dynamic": "2-3 sentences about the dynamic between them as the user describes it — who reaches out, who holds back, where it works, where it strains.",
   "appreciate": ["short phrase", "short phrase", "short phrase"],
   "frustrate": ["short phrase", "short phrase"],
-  "unsaid": "1-2 sentences about what the user wishes they could say to ${p.name} but doesn't. Empty string if nothing emerges.",
+  "unsaid": "1-2 sentences about what the user wishes they could say to ${firstName} but doesn't. Empty string if nothing emerges.",
   "reflection_entry": "2-3 sentences capturing the essence of this reflection, written warmly as if for the user's own private journal."
 }
 
