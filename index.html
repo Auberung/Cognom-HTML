@@ -2548,19 +2548,45 @@ async function enterApp() {
   if(app)  app.style.display  = '';
   if(loader) loader.style.display = 'flex';
 
-  // Always start clean — the database is the single source of truth.
-  PEOPLE = [];
-  SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[] };
-
-  // Load this user's data from Supabase
+  // Try loading from Supabase first
   const loaded = await loadFromSupabase();
-  const isNewUser = !loaded || (!SELF.name && PEOPLE.length === 0);
 
   if(!loaded) {
-    await _forceSyncToSupabase();
+    // Supabase load failed or returned nothing — fall back to localStorage
+    // NEVER push empty state up; only sync if localStorage actually has data
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) {
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed.people) && parsed.people.length > 0) {
+          PEOPLE = parsed.people.map(p => ({
+            altQuestions: [], altQIdx: 0, chips: [], timeline: [], gems: [],
+            relatedTo: '', familyName: '',
+            orbit: [], topics: [], forget: [], links: [], echoes: [],
+            aboutYou: [], capsule: [],
+            yourView: { feelings:'', dynamic:'', appreciate:[], frustrate:[], unsaid:'', reflections:[], reflectionCount:0 },
+            cadence: '', cadenceSetAt: '', lastConvDate: '', snoozedUntil: '',
+            phone: '', channel: 'phone',
+            photos: [], events: [],
+            ...p
+          }));
+        }
+      }
+      const rawSelf = localStorage.getItem(SELF_KEY);
+      if(rawSelf) {
+        const parsedSelf = JSON.parse(rawSelf);
+        SELF = { name:'', about:'', photo:'', spValues:'', spNeeds:'', spEmotions:'', spEnergizes:[], spDrains:[], spTensions:'', spGrowing:'', spThoughtCount:0, spJournal:[], events:[], ...parsedSelf };
+      }
+    } catch(e) {
+      console.warn('localStorage fallback failed:', e.message);
+    }
+    // Only push to Supabase if we have real data to push
+    if(PEOPLE.length > 0 || SELF.name) {
+      await _forceSyncToSupabase();
+    }
   }
 
-  // Cache to localStorage
+  // Cache current state to localStorage
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ people: PEOPLE, savedAt: Date.now() })); } catch(_) {}
   try { localStorage.setItem(SELF_KEY, JSON.stringify(SELF)); } catch(_) {}
 
