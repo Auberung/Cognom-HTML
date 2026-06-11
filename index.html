@@ -686,9 +686,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .ev-view-block:empty { display: none; }
 .ev-view-block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); margin-bottom: 6px; }
 .ev-view-block-text { font-size: 14px; color: var(--ink); line-height: 1.6; font-style: italic; }
-.ev-view-received { font-size: 12px; color: var(--ink-light); margin-top: 14px; display: flex; align-items: center; gap: 5px; }
-.ev-view-received:empty { display: none; }
-.ev-view-received i { font-size: 13px; }
+.ev-view-received { font-size: 13px; color: var(--ink-mid); margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+.ev-view-received:empty { display: none; border: none; padding: 0; margin: 0; }
+.ev-view-received i { font-size: 14px; }
 .event-actions-bar { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px; }
 
 /* ===== ONBOARDING — first-visit orientation, 3 slides, skippable ===== */
@@ -6504,11 +6504,13 @@ function populateEventView(ev, isReceived) {
     favoriteEl.innerHTML = '';
   }
 
-  // Received badge
+  // Received badge — warm and personal
   if(isReceived) {
-    receivedEl.innerHTML = '<i class="ti ti-send"></i> Received from ' + escapeHTML(ev.receivedFrom);
+    receivedEl.innerHTML = '<i class="ti ti-heart" style="color:var(--gold);"></i> With love from ' + escapeHTML(ev.receivedFrom);
+    receivedEl.style.fontStyle = 'italic';
   } else {
     receivedEl.innerHTML = '';
+    receivedEl.style.fontStyle = '';
   }
 
   // Action buttons
@@ -6613,21 +6615,29 @@ function renderEventEditor() {
   document.getElementById('event-nav-prev').toggleAttribute('disabled', total <= 1 || currentEventSlide === 0);
   document.getElementById('event-nav-next').toggleAttribute('disabled', total <= 1 || currentEventSlide >= total - 1);
 
-  // thumbnail strip + remove buttons + add button (if under max)
+  // thumbnail strip — hidden in view mode (arrows handle navigation)
   const thumbsEl = document.getElementById('event-thumbs');
   const isReceived = !!(ev.receivedFrom);
   const hideControls = isReceived || eventInViewMode;
-  const thumbs = photos.map((src, i) => `
-    <div class="event-thumb ${i === currentEventSlide ? 'active' : ''}" style="background-image:url('${src}')" onclick="setEventSlide(${i})">
-      ${hideControls ? '' : `<button class="event-thumb-remove" onclick="event.stopPropagation();removePhotoFromEvent(${i})" title="Remove this photo">×</button>`}
-    </div>`).join('');
-  if(hideControls) {
-    thumbsEl.innerHTML = thumbs;
+
+  if(eventInViewMode) {
+    // View mode: hide thumbs entirely for a clean presentation
+    thumbsEl.innerHTML = '';
+    thumbsEl.style.display = 'none';
   } else {
-    const addBtn = total < MAX_PHOTOS_PER_EVENT
-      ? `<button class="event-thumb-add" onclick="document.getElementById('photo-add-input').click()" title="Add a photo to this moment">+</button>`
-      : `<button class="event-thumb-add" disabled title="Maximum 4 photos per moment">+</button>`;
-    thumbsEl.innerHTML = thumbs + addBtn;
+    thumbsEl.style.display = '';
+    const thumbs = photos.map((src, i) => `
+      <div class="event-thumb ${i === currentEventSlide ? 'active' : ''}" style="background-image:url('${src}')" onclick="setEventSlide(${i})">
+        ${hideControls ? '' : `<button class="event-thumb-remove" onclick="event.stopPropagation();removePhotoFromEvent(${i})" title="Remove this photo">×</button>`}
+      </div>`).join('');
+    if(hideControls) {
+      thumbsEl.innerHTML = thumbs;
+    } else {
+      const addBtn = total < MAX_PHOTOS_PER_EVENT
+        ? `<button class="event-thumb-add" onclick="document.getElementById('photo-add-input').click()" title="Add a photo to this moment">+</button>`
+        : `<button class="event-thumb-add" disabled title="Maximum 4 photos per moment">+</button>`;
+      thumbsEl.innerHTML = thumbs + addBtn;
+    }
   }
 
   // hide the empty-state "add photos" prompt for view/received modes
