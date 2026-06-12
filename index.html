@@ -296,38 +296,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .person-overlay { position: absolute; inset: 0; z-index: 50; background: rgba(28,28,26,0.45); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 28px; }
 .person-card { width: min(560px, 94%); max-height: 92%; background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 24px 70px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; }
 
-/* Dedicated, always-visible escape hatch — pinned to the viewport so it
-   doesn't matter where the user has scrolled, what iOS Safari's URL bar is
-   doing, or whether the card's internal topbar happens to be visible. */
-.person-card-escape {
-  display: none;
-  position: fixed;
-  top: max(14px, env(safe-area-inset-top));
-  right: 14px;
-  z-index: 60;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: rgba(28,28,26,0.7);
-  color: var(--cream);
-  border: none;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  transition: background 0.15s, transform 0.15s;
-}
-.person-card-escape:hover { background: rgba(28,28,26,0.85); transform: scale(1.05); }
-/* Only show the floating escape hatch on mobile — on desktop the card's
-   own × button is reliably visible, and the floating one would just duplicate it. */
-@media (max-width: 760px) {
-  .person-card-escape.visible { display: flex; }
-}
-
 /* Floating mobile menu button — viewport-anchored safety net so the user can
    always reach the sidebar even if iOS Safari scroll state has hidden the
    tree-view's regular topbar. Hidden on desktop. */
@@ -418,14 +386,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .api-field { margin-bottom: 14px; }
 .api-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink); outline: none; transition: border 0.15s; }
 .api-input:focus { border-color: var(--sage); }
-.provider-toggle { display: flex; gap: 10px; }
-.prov-btn { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--border-strong); background: var(--warm-white); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-.prov-btn:hover { border-color: var(--sage-light); }
-.prov-btn.active { border-color: var(--sage); background: rgba(122,140,114,0.06); }
-.prov-name { font-size: 13px; color: var(--ink); font-weight: 400; }
-.prov-tag { font-size: 10px; padding: 2px 8px; border-radius: 5px; }
-.prov-tag-free { background: #E1F5EE; color: #0F6E56; }
-.prov-tag-paid { background: #EDE6D6; color: #6B5B3E; }
 .prov-note { font-size: 11px; color: var(--ink-light); line-height: 1.55; margin-top: 8px; }
 
 /* PROCESSING STEPS */
@@ -445,7 +405,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .section-sub { font-size: 12px; color: var(--ink-light); margin-bottom: 20px; line-height: 1.6; }
 
 /* NOTIF */
-.notif { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--cream); padding: 12px 20px; border-radius: 10px; font-size: 12px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 300; max-width: 320px; line-height: 1.5; }
+.notif { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: 12px 22px; border-radius: 24px; font-size: 12px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 300; max-width: min(340px, calc(100vw - 100px)); white-space: nowrap; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
 .notif.show { opacity: 1; }
 
 /* EMPTY PERSON STATE */
@@ -553,7 +513,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* INNER SELF MODAL */
 .self-modal-overlay { display: none; position: fixed; inset: 0; z-index: 350; background: rgba(28,28,26,0.6); backdrop-filter: blur(3px); align-items: flex-end; justify-content: center; padding: 0; }
 .self-modal-overlay.open { display: flex; }
-.self-modal { width: 100%; max-width: 600px; background: var(--warm-white); border-radius: 20px 20px 0 0; padding: 0 0 32px; box-shadow: 0 -12px 60px rgba(0,0,0,0.25); max-height: 92vh; display: flex; flex-direction: column; }
+.self-modal { width: 100%; max-width: 600px; background: var(--warm-white); border-radius: 20px 20px 0 0; padding: 0 0 32px; box-shadow: 0 -12px 60px rgba(0,0,0,0.25); max-height: 92vh; max-height: 92dvh; display: flex; flex-direction: column; }
 .self-modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border-strong); margin: 12px auto 0; flex-shrink: 0; }
 .self-modal-header { padding: 18px 28px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .self-modal-close { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent; color: var(--ink-light); font-size: 26px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.15s; }
@@ -566,7 +526,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .self-identity-about { font-size: 12px; color: var(--ink-light); line-height: 1.5; }
 .self-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: var(--ink); }
 .self-modal-sub { font-size: 12px; color: var(--ink-light); margin-top: 3px; line-height: 1.5; }
-.self-modal-body { flex: 1; overflow-y: auto; padding: 20px 28px 0; }
+.self-modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 20px 28px 60px; }
 .self-modal-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
 .self-modal-tab { padding: 9px 16px; font-size: 12px; color: var(--ink-light); border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
 .self-modal-tab.active { color: var(--ink); border-bottom-color: var(--gold); }
@@ -593,9 +553,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .sp-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
 .sp-tag { padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border-strong); font-size: 12px; color: var(--ink-mid); background: var(--cream); }
 .sp-tag.high { border-color: var(--gold); color: var(--ink); background: rgba(184,154,90,0.1); }
-.sp-entry { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--ink-mid); line-height: 1.55; }
+.sp-entry { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--ink-mid); line-height: 1.55; }
 .sp-entry:last-child { border-bottom: none; }
 .sp-entry-date { font-size: 10.5px; color: var(--ink-light); flex-shrink: 0; padding-top: 2px; min-width: 44px; }
+.sp-entry-text { flex: 1; }
+.sp-entry-del { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: none; background: transparent; color: var(--ink-light); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s, background 0.15s; padding: 0; line-height: 1; }
+.sp-entry:hover .sp-entry-del { opacity: 1; }
+.sp-entry-del:hover { background: rgba(163,54,54,0.1); color: #A33636; }
 .sp-empty { text-align: center; padding: 40px 20px; font-size: 13px; color: var(--ink-light); line-height: 1.7; }
 .thought-playback { width: 100%; background: var(--cream-dark); border-radius: 10px; padding: 12px 14px; margin-top: 6px; display: none; }
 .thought-playback.visible { display: block; }
@@ -624,7 +588,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* EVENTS GALLERY (replaces single-photos) */
 .photos-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .photo-upload-input { display: none; }
-.photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 24px; }
 .photo-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
 .photo-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 .photo-thumb { width: 100%; aspect-ratio: 4/3; background-size: cover; background-position: center; background-color: var(--cream-dark); position: relative; }
@@ -956,8 +920,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   }
   /* Keep the card's internal topbar visible on mobile for the × close button */
   .person-card > .topbar { display: flex; padding: 10px 14px 0; min-height: 44px; }
-  .person-card .content { padding: 8px 18px 80px; max-height: calc(100vh - 54px); }
+  .person-card .content { padding: 8px 18px 100px; max-height: calc(100dvh - 54px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .info-card-head { gap: 12px; }
+  .sp-entry-del { opacity: 0.5; }
   .info-card-avatar { width: 60px; height: 60px; font-size: 26px; }
   .info-card-title { font-size: 22px; }
 
@@ -1012,8 +977,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   #tree-view .topbar-name { font-size: 16px; }
   #tree-view .topbar-sub { font-size: 10.5px; }
 
-  /* Modals: provider toggle stacks */
-  .provider-toggle { flex-direction: column; }
 }
 
 @media (max-width: 420px) {
@@ -1557,7 +1520,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <!-- ADD / EDIT PERSON MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+<div class="modal-overlay" id="modal-overlay" style="z-index:400;" onclick="handleOverlayClick(event)">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">Add a person</div>
@@ -1629,7 +1592,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <!-- DELETE CONFIRMATION MODAL (two steps) -->
-<div class="modal-overlay" id="delete-overlay" onclick="if(event.target===this)closeDelete()">
+<div class="modal-overlay" id="delete-overlay" style="z-index:400;" onclick="if(event.target===this)closeDelete()">
   <div class="modal">
     <div id="delete-step-1">
       <div class="modal-header">
@@ -1688,7 +1651,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <!-- PRIVACY MODAL -->
-<div class="modal-overlay" id="privacy-overlay" onclick="if(event.target===this)closePrivacyModal()">
+<div class="modal-overlay" id="privacy-overlay" style="z-index:400;" onclick="if(event.target===this)closePrivacyModal()">
   <div class="modal" style="max-width:520px;">
     <div class="modal-header">
       <div class="modal-title">Privacy</div>
@@ -1707,7 +1670,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <!-- SETTINGS MODAL -->
-<div class="modal-overlay" id="settings-overlay" onclick="if(event.target===this)saveAndCloseSettings()">
+<div class="modal-overlay" id="settings-overlay" style="z-index:400;" onclick="if(event.target===this)saveAndCloseSettings()">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Settings</div>
@@ -1870,7 +1833,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <div class="notif" id="notif"></div>
 
 <!-- POST-CALL RETURN PROMPT — appears when user comes back from a tel: call -->
-<div class="modal-overlay" id="postcall-overlay" onclick="if(event.target===this)dismissPostCall(false)">
+<div class="modal-overlay" id="postcall-overlay" style="z-index:400;" onclick="if(event.target===this)dismissPostCall(false)">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="postcall-title">How was your call?</div>
@@ -2041,7 +2004,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <!-- Slide 3: Begin -->
     <div class="onboard-slide" data-slide="3">
       <div class="onboard-title">Your tree, yours alone</div>
-      <div class="onboard-sub">Everything stays on this device. Nothing is sent to a Cognom server.</div>
+      <div class="onboard-sub">Your memories are private and encrypted in your account. Cognom never reads them — only your AI provider does, when you ask it to.</div>
       <div class="onboard-privacy">When you're ready, you'll start by recording a short note about yourself — that's how Cognom learns your voice, so it can tell you apart from the people you talk with.</div>
       <button class="onboard-cta" onclick="finishOnboarding()">Start with someone you love</button>
     </div>
@@ -2340,7 +2303,7 @@ function clearAllData() {
   renderAccountRow(); renderSearchResults();
   document.getElementById('tree-view').style.display = 'none';
   document.getElementById('person-overlay').style.display = 'none';
-  document.getElementById('person-card-escape')?.classList.remove('visible');
+
   document.getElementById('welcome-state').style.display = 'flex'; document.getElementById('floating-menu-btn')?.classList.remove('visible');
   showNotif('All data cleared.');
 }
@@ -2947,7 +2910,7 @@ function showTree() {
 
 function closePersonCard() {
   document.getElementById('person-overlay').style.display = 'none';
-  document.getElementById('person-card-escape')?.classList.remove('visible');
+
   currentIdx = -1;
 }
 
@@ -2980,6 +2943,7 @@ function openAddPerson() {
 
 function openEditPerson(idx, ev) {
   if(ev) ev.stopPropagation();
+  if(idx < 0 || !PEOPLE[idx]) return;
   editingIdx = idx;
   const p = PEOPLE[idx];
   document.getElementById('modal-title').textContent = 'Edit ' + p.name;
@@ -3214,8 +3178,9 @@ function checkPostCallReturn() {
 }
 
 function showPostCallPrompt(idx, name) {
-  if(postCallShownThisSession) return;       // don't re-prompt on every focus
+  if(postCallShownThisSession) return;
   postCallShownThisSession = true;
+  if(isMobile()) closeSidebar();
   const titleEl = document.getElementById('postcall-title');
   if(titleEl) titleEl.textContent = name ? ('How was your call with ' + name.split(' ')[0] + '?') : 'How was your call?';
   // stash the idx on the overlay so the actions know who to capture for
@@ -3467,6 +3432,8 @@ let pendingDeleteIdx = -1;
 
 function deletePerson(idx, ev) {
   if(ev) ev.stopPropagation();
+  if(idx < 0 || !PEOPLE[idx]) return;
+  if(isMobile()) closeSidebar();
   pendingDeleteIdx = idx;
   const p = PEOPLE[idx];
   document.getElementById('del-name-1').textContent = p.name;
@@ -3488,7 +3455,7 @@ function deleteStep2() {
 
 function deleteConfirmed() {
   const idx = pendingDeleteIdx;
-  if(idx < 0) { closeDelete(); return; }
+  if(idx < 0 || !PEOPLE[idx]) { closeDelete(); return; }
   const p = PEOPLE[idx];
   PEOPLE.splice(idx, 1);
   saveData();
@@ -3602,13 +3569,13 @@ function renderSearchResults() {
 function renderSidebar() { renderSearchResults(); renderOnYourMind(); }
 
 function selectPerson(idx) {
+  if(idx < 0 || !PEOPLE[idx]) return;
   if(isMobile()) closeSidebar();
   currentIdx = idx;
   const p = PEOPLE[idx];
 
   // open the card as an overlay on top of the tree (tree stays mounted underneath)
   document.getElementById('person-overlay').style.display = 'flex';
-  document.getElementById('person-card-escape')?.classList.add('visible');
   // reset the conversation turn builder for this person
   if(typeof resetTurnBuilder === 'function') resetTurnBuilder();
   if(typeof syncSpeakerPillName === 'function') syncSpeakerPillName();
@@ -3936,6 +3903,8 @@ function setStep(n, state) {
 async function handleFile(event) {
   const file = event.target.files[0];
   if(!file || currentIdx < 0) return;
+  if(analysisInFlight) { event.target.value = ''; return; }
+  analysisInFlight = true;
   const p = PEOPLE[currentIdx];
   const provider = CURRENT_PROVIDER;
   const apiKey = document.getElementById('api-key-openai').value.trim();
@@ -3985,8 +3954,10 @@ async function handleFile(event) {
     proc.classList.remove('visible');
     errBox.style.display='block';
     errBox.textContent = friendlyError(err);
+  } finally {
+    analysisInFlight = false;
+    event.target.value = '';
   }
-  event.target.value='';
 }
 
 function fileToBase64(file) {
@@ -4100,6 +4071,7 @@ let micChunks = [];
 let micRecording = false;
 let micStartTime = 0;
 let micTimerInterval = null;
+let analysisInFlight = false;  // prevents double-submit on Analyze/Save buttons
 let micAudioBlob = null;
 let micAudioUrl = null;
 let audioElement = null;
@@ -4293,11 +4265,14 @@ function discardRecording() {
   if(micAudioUrl)  { URL.revokeObjectURL(micAudioUrl); micAudioUrl = null; }
   micAudioBlob = null;
   micChunks = [];
+  analysisInFlight = false;
   resetMicUI();
 }
 
 async function submitRecording() {
   if(!micAudioBlob || currentIdx < 0) return;
+  if(analysisInFlight) return;
+  analysisInFlight = true;
   const p = PEOPLE[currentIdx];
   const provider = CURRENT_PROVIDER;
   const apiKey = document.getElementById('api-key-openai').value.trim();
@@ -4356,6 +4331,8 @@ async function submitRecording() {
     proc.classList.remove('visible');
     errBox.style.display = 'block';
     errBox.textContent = friendlyError(err);
+  } finally {
+    analysisInFlight = false;
   }
 }
 
@@ -4494,6 +4471,8 @@ function syncSpeakerPillName() {
 
 async function handleTextSubmit() {
   if(currentIdx < 0) return;
+  if(analysisInFlight) return;
+  analysisInFlight = true;
   const isRefl = CONV_INTENT === 'reflection';
   // gather text: prefer the turn builder; if user pasted plain text or in reflection mode, use that
   const builder = document.getElementById('turn-builder');
@@ -4575,18 +4554,21 @@ async function handleTextSubmit() {
     proc.classList.remove('visible');
     errBox.style.display='block';
     errBox.textContent = friendlyError(err);
+  } finally {
+    analysisInFlight = false;
   }
 }
 
 function buildAnalysisInstructions(p) {
   const firstName = p.name.split(' ')[0];
+  const myName = (SELF.name || '').split(' ')[0] || 'the user';
   const priorContext = p.convCount > 0
     ? `Prior portrait of ${firstName}: communication style: ${p.commStyle}. What matters: ${p.matters}. Emotional texture: ${p.emotion}.`
     : `This is the first conversation recorded with ${firstName}.`;
 
   // inject the user's own inner portrait so Cognom reads the relationship through their lens
   const selfCtx = (SELF.spValues || SELF.spNeeds || SELF.spEmotions) ? `
-About the person using Cognom (their inner portrait — use this to notice tensions, unmet needs, or resonances in the conversation):
+About ${myName} (the person using Cognom — use this to notice tensions, unmet needs, or resonances in the conversation):
 - Core values: ${SELF.spValues || 'not yet known'}
 - What they need: ${SELF.spNeeds || 'not yet known'}
 - Emotional patterns: ${SELF.spEmotions || 'not yet known'}
@@ -4600,21 +4582,21 @@ ${SELF.spDrains.length ? '- Drained by: ' + SELF.spDrains.join(', ') : ''}
     {
       "type": "letter or archive",
       "title": "Short evocative title (letter type only, else empty string)",
-      "body": "For 'letter': write as a warm, intimate letter from the user to ${firstName} — something they'd want them to find one day. For 'archive': a vivid 2-3 sentence record of a specific moment, detail, or story that surfaced — dated, grounded, specific. Only create entries for genuinely moving or important moments — not every conversation warrants one.",
+      "body": "For 'letter': write as a warm, intimate letter from ${myName} to ${firstName} — something they'd want them to find one day. For 'archive': a vivid 2-3 sentence record of a specific moment, detail, or story that surfaced — dated, grounded, specific. Only create entries for genuinely moving or important moments — not every conversation warrants one.",
       "ctx": "1 sentence of context: why this moment is worth preserving"
     }
   ],` : '"time_capsule": [],';
 
   return `You are Cognom — a quiet, emotionally intelligent app that helps people remember what matters in their relationships.
 
-You are analyzing a conversation between the user and "${firstName}"${p.relation ? ' (their '+p.relation+')' : ''}. Always refer to this person as "${firstName}" throughout your response.
+You are analyzing a conversation between ${myName} and "${firstName}"${p.relation ? ' (their '+p.relation+')' : ''}. Always refer to this person as "${firstName}" throughout your response. The person using Cognom is "${myName}" — always use that exact name when referring to them, never invent a different name.
 
 ${priorContext}
 ${selfCtx}
 Return a JSON object with these exact keys — warm, human, observational in tone. Not clinical. Not bullet-point. Speak about ${firstName} as a real person:
 
 {
-  "precall_question": "One question the user should ask ${firstName} in the next call. Not a summary — a doorway into something real that surfaced. Write it as if spoken naturally, in quotes.",
+  "precall_question": "One question ${myName} should ask ${firstName} in the next call. Not a summary — a doorway into something real that surfaced. Write it as if spoken naturally, in quotes.",
   "precall_context": "1-2 sentences: why does this question matter right now? What were they circling around?",
   "communication_style": "How ${firstName} communicates. Patterns, habits, what they do when something is hard to say. 2-3 sentences.",
   "what_matters": "What seems to matter most to ${firstName}. What do they keep coming back to? 2-3 sentences.",
@@ -4625,7 +4607,7 @@ Return a JSON object with these exact keys — warm, human, observational in ton
   ],
   "about_you": [
     {
-      "text": "Something ${firstName} said about the user — how they see them, what they value in them, a memory they have of them. Only include if genuinely said or clearly implied. Skip if nothing meaningful surfaced.",
+      "text": "Something ${firstName} said about ${myName} — how they see them, what they value in them, a memory they have of them. Only include if genuinely said or clearly implied. Skip if nothing meaningful surfaced.",
       "ctx": "Brief context of when/why they said it",
       "highlight": true or false
     }
@@ -5465,49 +5447,12 @@ async function processWithOpenAI(file, apiKey, analysisInstructions) {
   return parseJSONResponse((await gr.json()).choices[0].message.content);
 }
 
-async function processWithGemini(file, apiKey, analysisInstructions) {
-  const base64 = await fileToBase64(file);
-  const mimeType = file.type || 'audio/mpeg';
-  setStep(1,'done'); setStep(2,'active');
 
-  const prompt = analysisInstructions + '\n\nThe attached audio is the conversation. Listen to it, understand what was said, and analyze it according to the instructions above.';
-
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
-  const gr = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: mimeType, data: base64 } }
-        ]
-      }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 2048, responseMimeType: 'application/json' }
-    })
-  });
-  if(!gr.ok) {
-    let msg = 'Gemini request failed';
-    try { const e = await gr.json(); msg = e.error?.message || msg; } catch(_) {}
-    throw new Error(msg);
-  }
-  setStep(2,'done'); setStep(3,'active');
-  const data = await gr.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if(!text) throw new Error('Gemini returned no analysis. The recording may be too long or unclear.');
-  return parseJSONResponse(text);
-}
-
-let CURRENT_PROVIDER = 'openai'; // OpenAI only
-
-function setProvider(prov) {
-  CURRENT_PROVIDER = 'openai';
-  localStorage.setItem('cognom_provider', 'openai');
-}
+const CURRENT_PROVIDER = 'openai'; // OpenAI only
 
 function saveOpenAIKey() {
   const val = document.getElementById('api-key-openai').value.trim();
-  localStorage.setItem('cognom_openai_key', val);
+  try { localStorage.setItem('cognom_openai_key', val); } catch(_) {}
   const msg = document.getElementById('api-key-saved-msg');
   if(msg) { msg.style.display = 'block'; clearTimeout(msg._t); msg._t = setTimeout(() => msg.style.display = 'none', 2000); }
 }
@@ -5549,7 +5494,6 @@ function showNotif(msg) {
 document.getElementById('api-key-openai').value = localStorage.getItem('cognom_openai_key') || '';
 document.getElementById('api-key-openai').addEventListener('input', saveOpenAIKey);
 
-setProvider('openai');
 setInputMode('record');
 if(typeof renderIntentUI === 'function') renderIntentUI();
 document.addEventListener('click', (e) => {
@@ -5849,8 +5793,9 @@ function setThoughtStep(n, state) {
 }
 
 function buildThoughtInstructions() {
+  const userName = (SELF.name || '').split(' ')[0] || 'this person';
   const prior = SELF.spThoughtCount > 0 ? `
-Prior portrait of this person:
+Prior portrait of ${userName}:
 - Values: ${SELF.spValues}
 - Needs: ${SELF.spNeeds}
 - Emotional patterns: ${SELF.spEmotions}
@@ -5860,25 +5805,25 @@ Prior portrait of this person:
 - Growing edges: ${SELF.spGrowing}
 
 This is thought #${SELF.spThoughtCount + 1}. Build on the prior portrait — deepen, correct, or enrich it.
-` : 'This is their first recorded thought. Start building their inner portrait from scratch.';
+` : `This is ${userName}'s first recorded thought. Start building their inner portrait from scratch.`;
 
   return `You are Cognom — a deeply empathetic inner mirror.
 
-Someone has just spoken or written a personal thought. Your job is to listen beneath the words and understand who this person is — their values, what they need, how they feel, what moves them, what they avoid.
+${userName} has just spoken or written a personal thought. Always refer to this person as "${userName}" throughout your entire response — never invent or substitute a different name. Your job is to listen beneath the words and understand who this person is — their values, what they need, how they feel, what moves them, what they avoid.
 
 ${prior}
 
-Return a JSON object with these keys. Be warm, specific, honest. Avoid generic therapy-speak. Speak about this person the way a wise friend who has known them for years would:
+Return a JSON object with these keys. Be warm, specific, honest. Avoid generic therapy-speak. Speak about ${userName} the way a wise friend who has known them for years would:
 
 {
-  "values": "2-3 sentences about their core values — what principles seem to guide them, even when they don't say so explicitly.",
-  "needs": "2-3 sentences about what they genuinely need — for connection, meaning, safety, recognition, autonomy, or something else entirely.",
-  "emotional_patterns": "2-3 sentences about their emotional life — how they tend to feel, what they avoid, patterns in how they process difficulty.",
+  "values": "2-3 sentences about ${userName}'s core values — what principles seem to guide them, even when they don't say so explicitly.",
+  "needs": "2-3 sentences about what ${userName} genuinely needs — for connection, meaning, safety, recognition, autonomy, or something else entirely.",
+  "emotional_patterns": "2-3 sentences about ${userName}'s emotional life — how they tend to feel, what they avoid, patterns in how they process difficulty.",
   "energizes": ["short phrase", "short phrase", "short phrase"],
   "drains": ["short phrase", "short phrase"],
-  "tensions": "A tension or contradiction they carry — two wants in conflict, or something they want and also fear. Empty string if nothing clear.",
-  "growing_edge": "Something they seem to be working toward or growing into. Empty string if nothing clear.",
-  "journal_entry": "2-3 sentences capturing the essence of this thought — what was really on their mind, written warmly as if for their own journal."
+  "tensions": "A tension or contradiction ${userName} carries — two wants in conflict, or something they want and also fear. Empty string if nothing clear.",
+  "growing_edge": "Something ${userName} seems to be working toward or growing into. Empty string if nothing clear.",
+  "journal_entry": "2-3 sentences capturing the essence of this thought — what was really on ${userName}'s mind, written warmly as if for their own journal."
 }
 
 Return ONLY valid JSON. No markdown. No explanation.`;
@@ -5913,10 +5858,11 @@ function applyThoughtAnalysis(r) {
 
 function buildReflectionInstructions(p) {
   const firstName = p.name.split(' ')[0];
+  const myName = (SELF.name || '').split(' ')[0] || 'the user';
   const yv = p.yourView || {};
   const prior = (yv.reflectionCount || 0) > 0 ? `
 Prior reflection on this relationship:
-- How they feel about them: ${yv.feelings || '—'}
+- How ${myName} feels about them: ${yv.feelings || '—'}
 - The dynamic between them: ${yv.dynamic || '—'}
 - Appreciates: ${(yv.appreciate || []).join(', ') || '—'}
 - Frustrates: ${(yv.frustrate || []).join(', ') || '—'}
@@ -5926,7 +5872,7 @@ This is reflection #${(yv.reflectionCount || 0) + 1}. Build on what's known — 
 ` : 'This is the first reflection on this relationship. Start building the picture from scratch.';
 
   const selfCtx = (SELF.spValues || SELF.spNeeds) ? `
-About the person reflecting (Cognom user — for context only, do not mix into the picture of the relationship):
+About ${myName} (for context only — do not mix into the picture of the relationship):
 - Their values: ${SELF.spValues || '—'}
 - Their needs: ${SELF.spNeeds || '—'}
 - Their emotional patterns: ${SELF.spEmotions || '—'}
@@ -5934,19 +5880,19 @@ About the person reflecting (Cognom user — for context only, do not mix into t
 
   return `You are Cognom — a quiet witness to how someone feels about another person in their life.
 
-The Cognom user has just spoken or written a private reflection about ${firstName}${p.relation ? ' (' + p.relation + ')' : ''}. Always refer to this person as "${firstName}". This is NOT a conversation between them — only the user is speaking. Read it carefully and capture how the user sees ${firstName}, what they appreciate, what frustrates them, and what tends to go unspoken between them.
+${myName} has just spoken or written a private reflection about ${firstName}${p.relation ? ' (' + p.relation + ')' : ''}. Always refer to the person reflecting as "${myName}" and always refer to the other person as "${firstName}". Never invent or substitute different names. This is NOT a conversation between them — only ${myName} is speaking. Read it carefully and capture how ${myName} sees ${firstName}, what they appreciate, what frustrates them, and what tends to go unspoken between them.
 ${selfCtx}
 ${prior}
 
-Return a JSON object with these keys. Be warm, honest, specific. Avoid generic phrasing. Speak about ${firstName} only through the user's eyes — never as if you know ${firstName} directly.
+Return a JSON object with these keys. Be warm, honest, specific. Avoid generic phrasing. Speak about ${firstName} only through ${myName}'s eyes — never as if you know ${firstName} directly.
 
 {
-  "feelings": "2-3 sentences about how the user currently feels toward ${firstName} — affection, ambivalence, gratitude, frustration, longing, distance. Be honest about the texture.",
-  "dynamic": "2-3 sentences about the dynamic between them as the user describes it — who reaches out, who holds back, where it works, where it strains.",
+  "feelings": "2-3 sentences about how ${myName} currently feels toward ${firstName} — affection, ambivalence, gratitude, frustration, longing, distance. Be honest about the texture.",
+  "dynamic": "2-3 sentences about the dynamic between them as ${myName} describes it — who reaches out, who holds back, where it works, where it strains.",
   "appreciate": ["short phrase", "short phrase", "short phrase"],
   "frustrate": ["short phrase", "short phrase"],
-  "unsaid": "1-2 sentences about what the user wishes they could say to ${firstName} but doesn't. Empty string if nothing emerges.",
-  "reflection_entry": "2-3 sentences capturing the essence of this reflection, written warmly as if for the user's own private journal."
+  "unsaid": "1-2 sentences about what ${myName} wishes they could say to ${firstName} but doesn't. Empty string if nothing emerges.",
+  "reflection_entry": "2-3 sentences capturing the essence of this reflection, written warmly as if for ${myName}'s own private journal."
 }
 
 Return ONLY valid JSON. No markdown. No explanation.`;
@@ -6057,12 +6003,23 @@ function renderSelfPortrait() {
     </div>`).join('');
 }
 
+function deleteJournalEntry(idx) {
+  if(!SELF.spJournal || !SELF.spJournal[idx]) return;
+  SELF.spJournal.splice(idx, 1);
+  saveSelfData();
+  renderSelfJournal();
+}
+
 function renderSelfJournal() {
   const journal = SELF.spJournal || [];
   document.getElementById('self-journal-empty').style.display = journal.length ? 'none'  : 'block';
   document.getElementById('self-journal-list').style.display  = journal.length ? 'block' : 'none';
-  document.getElementById('self-journal-list').innerHTML = journal.map(e =>
-    `<div class="sp-entry"><div class="sp-entry-date">${escapeHTML(e.date||'')}</div><div>${escapeHTML(e.text||'')}</div></div>`
+  document.getElementById('self-journal-list').innerHTML = journal.map((e, i) =>
+    `<div class="sp-entry">
+      <div class="sp-entry-date">${escapeHTML(e.date||'')}</div>
+      <div class="sp-entry-text">${escapeHTML(e.text||'')}</div>
+      <button class="sp-entry-del" onclick="deleteJournalEntry(${i})" title="Delete entry" aria-label="Delete entry">&times;</button>
+    </div>`
   ).join('');
 }
 
