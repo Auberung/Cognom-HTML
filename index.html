@@ -5301,7 +5301,6 @@ function applyTreeTransform() {
   const pan = document.getElementById('tree-pan');
   const vp  = document.getElementById('tree-viewport');
   if(!pan || !vp) return;
-  const svg = pan.querySelector('.tree-svg');
 
   if(treeView.scale < treeView.minScale) treeView.scale = treeView.minScale;
   if(treeView.scale > 5) treeView.scale = 5;
@@ -5317,26 +5316,10 @@ function applyTreeTransform() {
     if(treeView.y < minY) treeView.y = minY;
   }
 
-  // ViewBox-based zoom: re-renders the SVG as crisp vector at every scale.
-  if(svg && svg.dataset.vbw) {
-    const vpW = vp.clientWidth  || 700;
-    const vpH = vp.clientHeight || 600;
-    const oX = parseFloat(svg.dataset.vbx);
-    const oY = parseFloat(svg.dataset.vby);
-    const oW = parseFloat(svg.dataset.vbw);
-    const oH = parseFloat(svg.dataset.vbh);
-    const s  = treeView.scale;
-    const vw = oW / s;
-    const vh = oH / s;
-    const cx = oX + (oW - vw) / 2;
-    const cy = oY + (oH - vh) / 2;
-    const px = -treeView.x * (oW / s) / vpW;
-    const py = -treeView.y * (oH / s) / vpH;
-    svg.setAttribute('viewBox', cx + px + ' ' + (cy + py) + ' ' + vw + ' ' + vh);
-    pan.style.transform = '';
-  } else {
-    pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
-  }
+  // CSS transform only — SVG is vector so it stays crisp at any scale.
+  // The viewBox approach was removed because it broke the focal-point math.
+  pan.style.transform = `translate(${treeView.x}px, ${treeView.y}px) scale(${treeView.scale})`;
+  pan.style.transformOrigin = '0 0';
 }
 
 function fitTreeToViewport() {
