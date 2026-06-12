@@ -1025,9 +1025,25 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* AUTH GATE — full-screen login before the app */
 .person-received-badge { display:inline-flex; align-items:center; gap:3px; font-size:10px; color:var(--sage-dark); background:rgba(138,154,126,0.12); padding:2px 6px; border-radius:10px; white-space:nowrap; }
 .person-received-badge i { font-size:11px; }
-.app-loader { display:flex; position:fixed; inset:0; z-index:450; background:var(--cream); align-items:center; justify-content:center; }
-.app-loader-inner { text-align:center; }
-.app-loader-spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--sage); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto; }
+.app-loader { display:flex; position:fixed; inset:0; z-index:450; background:var(--cream); align-items:center; justify-content:center; flex-direction:column; }
+.app-loader-inner { text-align:center; display:flex; flex-direction:column; align-items:center; gap:0; }
+.app-loader-tree { animation: loader-breathe 2s ease-in-out infinite; transform-origin: bottom center; }
+@keyframes loader-breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.04); }
+}
+.app-loader-logo { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; letter-spacing: 3px; color: var(--ink); margin-top: 20px; }
+.app-loader-logo span { color: var(--gold); }
+.app-loader-sub { font-size: 10px; letter-spacing: 4px; color: var(--ink-light); text-transform: uppercase; margin-top: 6px; }
+.app-loader-dots { display:inline-flex; gap: 5px; margin-top: 32px; }
+.app-loader-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); opacity: 0; animation: loader-dot 1.4s ease-in-out infinite; }
+.app-loader-dots span:nth-child(1) { animation-delay: 0s; }
+.app-loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+.app-loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes loader-dot {
+  0%, 80%, 100% { opacity: 0; transform: scale(0.7); }
+  40%           { opacity: 1; transform: scale(1); }
+}
 @keyframes spin { to { transform:rotate(360deg); } }
 .auth-gate { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:var(--cream); padding:24px; position:relative; z-index:500; }
 .auth-gate-card { background:var(--warm-white); border:1px solid var(--border); border-radius:16px; padding:36px 28px 28px; max-width:400px; width:100%; }
@@ -1120,8 +1136,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <!-- Loading overlay while Supabase data loads -->
 <div id="app-loader" class="app-loader" style="display:none;">
   <div class="app-loader-inner">
-    <div class="app-loader-spinner"></div>
-    <div style="font-size:14px;color:var(--ink-mid);margin-top:14px;">Loading your tree…</div>
+    <svg class="app-loader-tree" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:72px;height:72px;">
+      <circle cx="24" cy="13" r="6.5" fill="#8A9A7E"/>
+      <circle cx="15" cy="17" r="5.5" fill="#A8B89F"/>
+      <circle cx="33" cy="17" r="5.5" fill="#BBA071"/>
+      <circle cx="11" cy="23" r="4.5" fill="#C9AE78"/>
+      <circle cx="37" cy="23" r="4.5" fill="#8A9A7E"/>
+      <circle cx="19" cy="22" r="5"   fill="#9CB389"/>
+      <circle cx="29" cy="22" r="5"   fill="#A8B89F"/>
+      <circle cx="24" cy="20" r="5.5" fill="#7E9576"/>
+      <rect x="22.6" y="24" width="2.8" height="15" rx="1.2" fill="#6E5238"/>
+      <path d="M24 30 L18 27 M24 33 L30 29 M24 27 L28 24" stroke="#6E5238" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="app-loader-logo">COG<span>NOM</span></div>
+    <div class="app-loader-sub">Endless Stories</div>
+    <div class="app-loader-dots">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 </div>
   <!-- Mobile sidebar backdrop -->
