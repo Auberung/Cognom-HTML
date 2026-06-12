@@ -1181,6 +1181,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div class="empty-title">Start with someone you love</div>
       <div class="empty-sub">Add a person and drop in a conversation. Cognom will quietly learn who they are — so you can show up better every time you call.</div>
       <button class="btn-primary" style="padding:12px 28px;font-size:13px;" onclick="openAddPerson()">Add your first person</button>
+      <button class="btn-ghost" style="margin-top:12px;font-size:12px;" onclick="openSettings()"><i class="ti ti-settings" style="font-size:13px;vertical-align:-2px;margin-right:5px;"></i>Settings</button>
     </div>
 
     <!-- CONNECTIONS / TREE VIEW -->
@@ -2304,7 +2305,7 @@ function clearAllData() {
   document.getElementById('tree-view').style.display = 'none';
   document.getElementById('person-overlay').style.display = 'none';
 
-  document.getElementById('welcome-state').style.display = 'flex'; document.getElementById('floating-menu-btn')?.classList.remove('visible');
+  document.getElementById('welcome-state').style.display = 'flex';
   showNotif('All data cleared.');
 }
 
@@ -2390,9 +2391,11 @@ function initAppUI() {
   renderAccountRow();
   renderSearchResults();
   renderOnYourMind();
+  // Always show the floating menu button when the app is active —
+  // user needs sidebar access (Settings, sign out) even with no people yet
+  document.getElementById('floating-menu-btn')?.classList.add('visible');
   if(PEOPLE.length === 0) {
     document.getElementById('welcome-state').style.display = 'flex';
-    document.getElementById('floating-menu-btn')?.classList.remove('visible');
     document.getElementById('tree-view').style.display = 'none';
   } else {
     document.getElementById('welcome-state').style.display = 'none';
@@ -3466,7 +3469,7 @@ function deleteConfirmed() {
   if(PEOPLE.length === 0) {
     currentIdx = -1;
     document.getElementById('tree-view').style.display = 'none';
-    document.getElementById('welcome-state').style.display = 'flex'; document.getElementById('floating-menu-btn')?.classList.remove('visible');
+    document.getElementById('welcome-state').style.display = 'flex';
   } else {
     renderTree();
   }
